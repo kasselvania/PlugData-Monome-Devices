@@ -105,6 +105,21 @@ test("menu index is a projection rather than identity", function()
     equal(registry:selection().serial, "m200")
 end)
 
+test("menu projection emits documented popmenu protocol values", function()
+    local registry = Registry.new()
+    registry:upsert("m200", "monome 256", 12002)
+    registry:upsert("m100", "monome 128", 12001)
+
+    local unselected = registry:menu_projection()
+    equal(unselected.items[1], "m100__monome-128")
+    equal(unselected.items[2], "m200__monome-256")
+    equal(unselected.selected_index, -1)
+
+    assert(registry:select("m200"))
+    local selected = registry:menu_projection()
+    equal(selected.selected_index, 1)
+end)
+
 test("invalid records fail closed", function()
     local registry = Registry.new()
     local change, err = registry:upsert("m100", "monome 128", 0)

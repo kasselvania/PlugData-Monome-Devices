@@ -188,6 +188,26 @@ function Registry:snapshot()
     return devices
 end
 
+function Registry:menu_projection()
+    local projection = {
+        items = {},
+        selected_index = -1,
+    }
+
+    for index, device in ipairs(self:snapshot()) do
+        local display_model = device.model:gsub("%s+", "-")
+        table.insert(
+            projection.items,
+            device.serial .. "__" .. display_model
+        )
+        if device.serial == self.selected_serial then
+            projection.selected_index = index - 1
+        end
+    end
+
+    return projection
+end
+
 function Registry:clear()
     local previous_selection = self.selected_serial
     self.devices = {}

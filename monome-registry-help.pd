@@ -13,12 +13,14 @@
 #X msg 31 468 bang;
 #X obj 390 270 monome-registry;
 #X obj 390 325 print registry-event;
-#X obj 612 325 print registry-menu;
+#X obj 612 325 else/popmenu 260 26 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
 #X text 387 378 Left outlet: state and selection events.;
-#X text 387 403 Right outlet: clear/append/select menu projection.;
+#X text 387 403 Right outlet emits the documented popmenu clear/add/set protocol.;
 #X text 387 449 A real discovery adapter brackets list replies with;
 #X text 387 474 scan_begin and scan_end because SerialOSC has no;
 #X text 387 499 end-of-list reply.;
+#X obj 612 370 list prepend select_index;
+#X obj 612 405 list trim;
 #X connect 2 0 12 0;
 #X connect 3 0 12 0;
 #X connect 4 0 12 0;
@@ -31,3 +33,6 @@
 #X connect 11 0 12 0;
 #X connect 12 0 13 0;
 #X connect 12 1 14 0;
+#X connect 14 0 20 0;
+#X connect 20 0 21 0;
+#X connect 21 0 12 0;

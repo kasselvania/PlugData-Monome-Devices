@@ -133,6 +133,13 @@ Acceptance: simulated two-device discovery, reordering, duplicate replies,
 unrelated removal, selected removal, and callback collision all have explicit
 deterministic results.
 
+Status on 2026-08-25: discovery transport, notification re-arm, registry
+behavior, selected removal, hot-add, and callback collision pass. The stable
+PlugData `else/popmenu` remains empty under both registry-driven and direct
+`clear`/`add`/`set` probes, so Step 1 is not complete. A direct-selection
+fallback exists only to continue testing discovery state without hiding this
+gap. See `docs/DISCOVERY-WORKBENCH.md`.
+
 ### Step 2 — Explicit session lifecycle
 
 - Probe with `/sys/info` without claiming.
@@ -178,8 +185,11 @@ The older 1.4.1 Intel launch job is preserved but disabled for rollback. No
 Monome was connected during the service migration, so physical-device
 acceptance is still pending.
 
-The installed PlugData standalone and CLAP plugin are 0.9.3. The installed
-VST3 is 0.9.2 and is not an equivalent acceptance lane until it is upgraded.
+The installed PlugData standalone and CLAP plugin are 0.9.3 from the official
+`v0.9.3-2` package. The installed VST3 is 0.9.2 and is not an equivalent
+acceptance lane until it is upgraded. The current 0.9.4 nightly was tested from
+a temporary copy and crashed during font initialization, so it is not an
+accepted replacement. See `docs/PLUGDATA-MACOS.md`.
 
 ## Deferred decisions
 

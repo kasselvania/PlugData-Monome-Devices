@@ -18,25 +18,14 @@ function MonomeRegistry:_error(code)
 end
 
 function MonomeRegistry:_emit_menu()
+    local projection = self.registry:menu_projection()
     self:outlet(2, "clear", {})
 
-    local selected = self.registry:selection()
-    for index, device in ipairs(self.registry:snapshot()) do
-        self:outlet(2, "append", {
-            index - 1,
-            device.serial,
-            device.model,
-            device.port,
-        })
-
-        if selected and selected.serial == device.serial then
-            self:outlet(2, "select", { index - 1 })
-        end
+    for _, item in ipairs(projection.items) do
+        self:outlet(2, "add", { item })
     end
 
-    if not selected then
-        self:outlet(2, "select", { -1 })
-    end
+    self:outlet(2, "set", { projection.selected_index })
 end
 
 function MonomeRegistry:in_1_scan_begin(_)
