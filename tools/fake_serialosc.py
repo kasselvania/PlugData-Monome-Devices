@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Small, dependency-free SerialOSC discovery simulator for development.
+"""Small, dependency-free SerialOSC workbench for development.
 
-The simulator speaks only the discovery messages used by this project. It
-never opens a serial device and refuses to bind SerialOSC's live port 12002.
+The simulator speaks the discovery and per-device system messages used by this
+project. It never opens a serial device and refuses SerialOSC's live port 12002.
 """
 
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import select
 import shlex
 import socket
@@ -34,11 +34,13 @@ class Device:
     serial: str
     model: str
     port: int
+    width: int | None = None
+    height: int | None = None
 
 
 DEFAULT_DEVICES = (
-    Device("m100", "monome 128", 17001),
-    Device("m200", "monome 256", 17002),
+    Device("m100", "monome 128", 17001, 16, 8),
+    Device("m200", "monome 256", 17002, 16, 16),
 )
 
 
@@ -129,12 +131,144 @@ def bind_callback(host: str, port: int) -> socket.socket:
     return callback
 
 
+class FakeDeviceServer:
+    """A fake per-device SerialOSC server with mutable application settings."""
+
+    def __init__(self, device: Device, host: str = "127.0.0.1") -> None:
+        if device.port < 0 or device.port > 65535:
+            raise ValueError("invalid_device_port")
+        if (device.width is None) != (device.height is None):
+            raise ValueError("incomplete_device_size")
+        if device.width is not None and (
+            device.width < 1 or device.height is None or device.height < 1
+        ):
+            raise ValueError("invalid_device_size")
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.bind((host, device.port))
+        self.host, actual_port = self.socket.getsockname()
+        self.device = replace(device, port=actual_port)
+        self.destination_host = "127.0.0.1"
+        self.destination_port = 0
+        self.prefix = "/monome"
+        self.rotation = 0
+
+    def close(self) -> None:
+        self.socket.close()
+
+    def __enter__(self) -> FakeDeviceServer:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
+    @staticmethod
+    def _port(arguments: tuple[object, ...], allow_zero: bool) -> int:
+        minimum = 0 if allow_zero else 1
+        if (
+            len(arguments) != 1
+            or not isinstance(arguments[0], int)
+            or arguments[0] < minimum
+            or arguments[0] > 65535
+        ):
+            raise OSCError("invalid_sys_port")
+        return arguments[0]
+
+    @staticmethod
+    def _string(arguments: tuple[object, ...], error: str) -> str:
+        if len(arguments) != 1 or not isinstance(arguments[0], str):
+            raise OSCError(error)
+        return arguments[0]
+
+    @staticmethod
+    def _info_target(
+        arguments: tuple[object, ...],
+        default_host: str,
+        default_port: int,
+    ) -> tuple[str, int] | None:
+        if len(arguments) == 0:
+            if default_port == 0:
+                return None
+            return socket.gethostbyname(default_host), default_port
+        if len(arguments) == 1:
+            port = FakeDeviceServer._port(arguments, allow_zero=False)
+            return "127.0.0.1", port
+        if (
+            len(arguments) == 2
+            and isinstance(arguments[0], str)
+            and isinstance(arguments[1], int)
+            and 1 <= arguments[1] <= 65535
+        ):
+            return socket.gethostbyname(arguments[0]), arguments[1]
+        raise OSCError("invalid_sys_info_target")
+
+    def _send_info(self, target: tuple[str, int]) -> None:
+        messages: list[tuple[str, tuple[object, ...]]] = [
+            ("/sys/id", (self.device.serial,)),
+        ]
+        if self.device.width is not None and self.device.height is not None:
+            messages.append(
+                ("/sys/size", (self.device.width, self.device.height))
+            )
+        messages.extend(
+            (
+                ("/sys/host", (self.destination_host,)),
+                ("/sys/port", (self.destination_port,)),
+                ("/sys/prefix", (self.prefix,)),
+                ("/sys/rotation", (self.rotation,)),
+            )
+        )
+        for address, arguments in messages:
+            self.socket.sendto(encode_message(address, *arguments), target)
+
+    def handle_packet(self, packet: bytes) -> None:
+        address, arguments = decode_message(packet)
+        if address == "/sys/info":
+            target = self._info_target(
+                arguments, self.destination_host, self.destination_port
+            )
+            if target is not None:
+                self._send_info(target)
+        elif address == "/sys/host":
+            self.destination_host = self._string(arguments, "invalid_sys_host")
+        elif address == "/sys/port":
+            self.destination_port = self._port(arguments, allow_zero=True)
+        elif address == "/sys/prefix":
+            prefix = self._string(arguments, "invalid_sys_prefix")
+            if not prefix.startswith("/"):
+                raise OSCError("invalid_sys_prefix")
+            self.prefix = prefix
+        elif address == "/sys/rotation":
+            rotation = self._port(arguments, allow_zero=True)
+            if rotation not in (0, 90, 180, 270):
+                raise OSCError("invalid_sys_rotation")
+            self.rotation = rotation
+        else:
+            raise OSCError("unsupported_device_message")
+
+    def serve_once(self, timeout: float = 0.1) -> bool:
+        readable, _, _ = select.select([self.socket], [], [], timeout)
+        if not readable:
+            return False
+        packet, _ = self.socket.recvfrom(65535)
+        self.handle_packet(packet)
+        return True
+
+    def set_destination(self, host: str, port: int, prefix: str) -> None:
+        if not host or port < 0 or port > 65535 or not prefix.startswith("/"):
+            raise ValueError("invalid_destination")
+        self.destination_host = host
+        self.destination_port = port
+        self.prefix = prefix
+
+
 class FakeSerialOSC:
     def __init__(
         self,
         host: str = "127.0.0.1",
         port: int = DEFAULT_FAKE_PORT,
         devices: Iterable[Device] = DEFAULT_DEVICES,
+        spawn_device_servers: bool = False,
     ) -> None:
         if port == LIVE_SERIALOSC_PORT:
             raise ValueError("refusing_live_serialosc_port")
@@ -146,13 +280,15 @@ class FakeSerialOSC:
         self.order: list[str] = []
         self.reply_counts: dict[str, int] = {}
         self.notify_target: tuple[str, int] | None = None
+        self.spawn_device_servers = spawn_device_servers
+        self.device_servers: dict[str, FakeDeviceServer] = {}
 
-        for device in devices:
-            self._validate_device(device)
-            if device.serial in self.devices:
-                raise ValueError("duplicate_device_serial")
-            self.devices[device.serial] = device
-            self.order.append(device.serial)
+        try:
+            for device in devices:
+                self._add_device(device)
+        except (ValueError, OSError):
+            self.close()
+            raise
 
     @staticmethod
     def _validate_device(device: Device) -> None:
@@ -160,6 +296,25 @@ class FakeSerialOSC:
             raise ValueError("invalid_device")
         if device.port < 1 or device.port > 65535:
             raise ValueError("invalid_device_port")
+        if (device.width is None) != (device.height is None):
+            raise ValueError("incomplete_device_size")
+        if device.width is not None and (
+            device.width < 1 or device.height is None or device.height < 1
+        ):
+            raise ValueError("invalid_device_size")
+
+    def _add_device(self, device: Device) -> Device:
+        self._validate_device(device)
+        if device.serial in self.devices:
+            raise ValueError("duplicate_device_serial")
+        resolved = device
+        if self.spawn_device_servers:
+            endpoint = FakeDeviceServer(device, self.host)
+            resolved = endpoint.device
+            self.device_servers[resolved.serial] = endpoint
+        self.devices[resolved.serial] = resolved
+        self.order.append(resolved.serial)
+        return resolved
 
     @staticmethod
     def _target(arguments: tuple[object, ...]) -> tuple[str, int]:
@@ -174,6 +329,9 @@ class FakeSerialOSC:
         return socket.gethostbyname(arguments[0]), arguments[1]
 
     def close(self) -> None:
+        for endpoint in self.device_servers.values():
+            endpoint.close()
+        self.device_servers = {}
         self.socket.close()
 
     def __enter__(self) -> FakeSerialOSC:
@@ -205,12 +363,28 @@ class FakeSerialOSC:
             raise OSCError("unsupported_discovery_message")
 
     def serve_once(self, timeout: float = 0.1) -> bool:
-        readable, _, _ = select.select([self.socket], [], [], timeout)
+        readable, _, _ = select.select(self.sockets, [], [], timeout)
         if not readable:
             return False
-        packet, _ = self.socket.recvfrom(65535)
-        self.handle_packet(packet)
+        self.serve_socket(readable[0])
         return True
+
+    @property
+    def sockets(self) -> list[socket.socket]:
+        return [self.socket] + [
+            endpoint.socket for endpoint in self.device_servers.values()
+        ]
+
+    def serve_socket(self, readable: socket.socket) -> None:
+        packet, _ = readable.recvfrom(65535)
+        if readable is self.socket:
+            self.handle_packet(packet)
+            return
+        for endpoint in self.device_servers.values():
+            if readable is endpoint.socket:
+                endpoint.handle_packet(packet)
+                return
+        raise OSError("unknown_server_socket")
 
     def _notify_once(self, address: str, serial: str) -> None:
         if self.notify_target is None:
@@ -220,12 +394,8 @@ class FakeSerialOSC:
         self._send(target, address, serial)
 
     def add(self, device: Device) -> None:
-        self._validate_device(device)
-        if device.serial in self.devices:
-            raise ValueError("duplicate_device_serial")
-        self.devices[device.serial] = device
-        self.order.append(device.serial)
-        self._notify_once("/serialosc/add", device.serial)
+        resolved = self._add_device(device)
+        self._notify_once("/serialosc/add", resolved.serial)
 
     def remove(self, serial: str) -> None:
         if serial not in self.devices:
@@ -233,6 +403,9 @@ class FakeSerialOSC:
         del self.devices[serial]
         self.order.remove(serial)
         self.reply_counts.pop(serial, None)
+        endpoint = self.device_servers.pop(serial, None)
+        if endpoint:
+            endpoint.close()
         self._notify_once("/serialosc/remove", serial)
 
     def reorder(self, serials: list[str]) -> None:
@@ -248,15 +421,50 @@ class FakeSerialOSC:
         self.reply_counts[serial] = count
 
     def reset(self) -> None:
-        self.devices = {device.serial: device for device in DEFAULT_DEVICES}
-        self.order = [device.serial for device in DEFAULT_DEVICES]
+        for endpoint in self.device_servers.values():
+            endpoint.close()
+        self.device_servers = {}
+        self.devices = {}
+        self.order = []
         self.reply_counts = {}
+        for device in DEFAULT_DEVICES:
+            self._add_device(device)
+
+    def displace(self, serial: str, host: str, port: int, prefix: str) -> None:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        endpoint.set_destination(host, port, prefix)
+
+    def device_state(self, serial: str) -> tuple[str, int, str]:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        return (
+            endpoint.destination_host,
+            endpoint.destination_port,
+            endpoint.prefix,
+        )
 
 
 def _print_devices(server: FakeSerialOSC) -> None:
     for serial in server.order:
         device = server.devices[serial]
         print(f'DEVICE {device.serial} "{device.model}" {device.port}', flush=True)
+
+
+def _print_state(server: FakeSerialOSC, serials: Iterable[str]) -> None:
+    for serial in serials:
+        host, port, prefix = server.device_state(serial)
+        print(f'STATE {serial} "{host}" {port} "{prefix}"', flush=True)
+
+
+def _device_with_inferred_size(serial: str, model: str, port: int) -> Device:
+    if "256" in model:
+        return Device(serial, model, port, 16, 16)
+    if "128" in model:
+        return Device(serial, model, port, 16, 8)
+    return Device(serial, model, port)
 
 
 def _command(server: FakeSerialOSC, line: str) -> bool:
@@ -268,13 +476,18 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
     if command == "help":
         print(
             'COMMANDS: devices | add SERIAL "MODEL" PORT | remove SERIAL | '
-            "order SERIAL... | duplicate SERIAL COUNT | reset | quit",
+            "order SERIAL... | duplicate SERIAL COUNT | "
+            "state [SERIAL] | displace SERIAL HOST PORT PREFIX | reset | quit",
             flush=True,
         )
     elif command == "devices" and not arguments:
         _print_devices(server)
     elif command == "add" and len(arguments) == 3:
-        server.add(Device(arguments[0], arguments[1], int(arguments[2])))
+        server.add(
+            _device_with_inferred_size(
+                arguments[0], arguments[1], int(arguments[2])
+            )
+        )
         print(f"OK added {arguments[0]}", flush=True)
     elif command == "remove" and len(arguments) == 1:
         server.remove(arguments[0])
@@ -285,6 +498,14 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
     elif command == "duplicate" and len(arguments) == 2:
         server.set_reply_count(arguments[0], int(arguments[1]))
         print(f"OK duplicate {arguments[0]} {arguments[1]}", flush=True)
+    elif command == "state" and len(arguments) <= 1:
+        serials = arguments if arguments else server.order
+        _print_state(server, serials)
+    elif command == "displace" and len(arguments) == 4:
+        server.displace(
+            arguments[0], arguments[1], int(arguments[2]), arguments[3]
+        )
+        print(f"OK displaced {arguments[0]}", flush=True)
     elif command == "reset" and not arguments:
         server.reset()
         print("OK reset", flush=True)
@@ -304,16 +525,24 @@ def main() -> int:
 
     devices: Iterable[Device] = () if arguments.empty else DEFAULT_DEVICES
     try:
-        with FakeSerialOSC(arguments.host, arguments.port, devices) as server:
+        with FakeSerialOSC(
+            arguments.host,
+            arguments.port,
+            devices,
+            spawn_device_servers=True,
+        ) as server:
             print(f"READY {server.host} {server.port}", flush=True)
             _print_devices(server)
             running = True
             while running:
-                readable, _, _ = select.select([server.socket, sys.stdin], [], [])
-                if server.socket in readable:
+                readable, _, _ = select.select(
+                    [*server.sockets, sys.stdin], [], []
+                )
+                for ready in readable:
+                    if ready is sys.stdin:
+                        continue
                     try:
-                        packet, _ = server.socket.recvfrom(65535)
-                        server.handle_packet(packet)
+                        server.serve_socket(ready)
                     except (OSCError, OSError) as error:
                         print(f"ERROR {error}", flush=True)
                 if sys.stdin in readable:

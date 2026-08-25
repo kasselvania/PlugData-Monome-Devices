@@ -65,18 +65,23 @@ ports, infer ownership, or communicate with hardware.
 Implements one selected device lifecycle:
 
 ```text
-absent -> available -> probing -> claiming -> connected
-                                      |          |
-                                      |          v
-                                      +------ displaced
-                                                 |
-                                             releasing
+absent -> available -> probing -> available
+             |
+             +------> claiming -> connected
+                                   |       |
+                    check mismatch|       |verified release
+                                   v       v
+                              displaced  available
+                                   |
+                          release intent -> available
 ```
 
 It probes `/sys/info` before claiming, changes host/port/prefix only during an
 explicit claim, verifies readback, detects displacement, and releases only if
-it is still the current destination. Release darkens the valid surface and
-sends `/sys/port 0`; it does not delete SerialOSC preferences.
+it is still the current destination. A verified release sends `/sys/port 0`;
+it does not delete SerialOSC preferences. Grid and Arc capability owners must
+darken their valid surfaces before requesting release rather than making the
+generic session layer guess an LED protocol.
 
 ### `monome.grid`
 
@@ -96,7 +101,10 @@ The final `monome-device` abstraction will accept:
 ```text
 rescan
 select <serial-id>
+deselect
+probe
 claim
+check
 release
 prefix <osc-prefix>
 rotation <0|90|180|270>
@@ -149,6 +157,13 @@ gap. See `docs/DISCOVERY-WORKBENCH.md`.
 Acceptance: a second app can displace the first, and the first reports
 `displaced` rather than claiming it remains connected.
 
+Status on 2026-08-25: complete against isolated fake device servers and the
+stable PlugData standalone. Non-mutating probe, verified claim, periodic
+readback, simulated external displacement, release refusal after displacement,
+verified `/sys/port 0` release, callback collision, and process-local duplicate
+claim refusal pass. This is not physical Grid/Arc or Bitwig acceptance. See
+`docs/SESSION-WORKBENCH.md`.
+
 ### Step 3 — Grid capability
 
 - Normalize key input and dynamic dimensions.
@@ -190,6 +205,11 @@ The installed PlugData standalone and CLAP plugin are 0.9.3 from the official
 acceptance lane until it is upgraded. The current 0.9.4 nightly was tested from
 a temporary copy and crashed during font initialization, so it is not an
 accepted replacement. See `docs/PLUGDATA-MACOS.md`.
+
+Step 2 session acceptance currently uses only fake per-device servers on
+loopback. The fake server exposes the same `/sys/info`, `/sys/host`,
+`/sys/port`, `/sys/prefix`, and `/sys/rotation` surface needed for the lifecycle
+without opening USB hardware or touching live SerialOSC port `12002`.
 
 ## Deferred decisions
 

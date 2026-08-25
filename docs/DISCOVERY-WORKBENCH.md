@@ -11,7 +11,9 @@ messages. A discovered device is not a claimed device.
 
 - `12002` — live SerialOSC discovery; the simulator refuses this port.
 - `12012` — fake discovery server used by the help and smoke patches.
+- `17001` and `17002` — fake per-device servers for Step 2 session work.
 - `17779` — local PlugData callback used by the examples.
+- `17780` and `17781` — session callbacks used by the Step 2 workbench.
 
 The fake server binds only to `127.0.0.1` by default. It cannot see or modify a
 USB device.
@@ -55,6 +57,8 @@ order m200 m100
 duplicate m100 2
 remove m100
 add m100 "monome 128" 17001
+state m100
+displace m100 127.0.0.1 19999 /rival
 reset
 quit
 ```
@@ -91,6 +95,10 @@ error callback_unavailable 17779
 
 It does not claim readiness or send a discovery request. The Python test suite
 also verifies the same collision rule at the socket boundary.
+
+The simulator also implements fake per-device `/sys/*` settings for the
+session lifecycle workbench. See `docs/SESSION-WORKBENCH.md`. Those endpoints
+remain loopback-only and do not change discovery's passive contract.
 
 ## Command-line tests
 
