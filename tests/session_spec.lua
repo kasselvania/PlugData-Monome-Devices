@@ -176,6 +176,32 @@ test("periodic check detects another application displacement", function()
     equal(claims:owner("m100"), nil)
 end)
 
+test("capability OSC requires a verified session and exact prefix", function()
+    local target = session("one")
+    ready_and_select(target)
+
+    local ok, err = target:device_osc(
+        "/monome/grid/led/level/map", { 0, 0 }
+    )
+    equal(ok, nil)
+    equal(err, "capability_requires_connected")
+    equal(osc_addresses(target:drain()), "")
+
+    complete_probe(target)
+    complete_claim(target)
+    ok, err = target:device_osc("/other/grid/led/level/map", { 0, 0 })
+    equal(ok, nil)
+    equal(err, "capability_prefix_mismatch")
+    equal(osc_addresses(target:drain()), "")
+
+    assert(target:device_osc(
+        "/monome/grid/led/level/map", { 0, 0, 15 }
+    ))
+    local output = find(target:drain(), "osc", "/monome/grid/led/level/map")
+    assert(output)
+    equal(table.concat(output.atoms, ","), "0,0,15")
+end)
+
 test("verified release sends port zero and clears local ownership", function()
     local claims = Core.ClaimRegistry.new()
     local target = session("one", claims)

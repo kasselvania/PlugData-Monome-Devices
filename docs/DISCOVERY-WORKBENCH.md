@@ -14,6 +14,8 @@ messages. A discovered device is not a claimed device.
 - `17001` and `17002` — fake per-device servers for Step 2 session work.
 - `17779` — local PlugData callback used by the examples.
 - `17780` and `17781` — session callbacks used by the Step 2 workbench.
+- `17850` — read-only live discovery monitor.
+- `17900` — loopback-only control inlet for the live Grid workbench.
 
 The fake server binds only to `127.0.0.1` by default. It cannot see or modify a
 USB device.
@@ -45,9 +47,9 @@ device added m200 monome 256 17002
 scan end
 ```
 
-Discovery does not select either record. The two numbered controls provide a
-temporary direct-selection fallback while the stable PlugData `popmenu` issue
-described below remains open.
+Discovery does not select either record. Choose a device explicitly from the
+registry-backed menu. Numbered `select_index` messages remain useful for
+automated smoke patches, but they are not the user-facing selection path.
 
 The simulator accepts these commands on standard input:
 
@@ -78,10 +80,22 @@ The successful transport/state portion ends with two snapshot records and:
 selected m100 monome 128 17001
 ```
 
-The separate `smoke-popmenu` trace is intentionally retained as an acceptance
-gate. On the stable macOS build tested on 2026-08-25, the widget stayed on its
-empty label and emitted no value even though the documented `clear`, `add`,
-and `set` messages were visible in `smoke-menu`.
+The separate `smoke-popmenu` trace is retained as an acceptance gate. It fails
+on stable 0.9.3 but passes on the accepted official 0.9.4 nightly at commit
+`6bb2b60c8`: two items populate, selection changes the label, and index `0` is
+emitted.
+
+Real SerialOSC sends full add/remove tuples:
+
+```text
+/serialosc/add SERIAL MODEL PORT
+/serialosc/remove SERIAL MODEL PORT
+```
+
+`monome-discovery` preserves the full tuple in its status stream but reduces a
+remove to `remove SERIAL` before it reaches the registry. The fake server uses
+the same real wire shape so this normalization cannot regress behind a
+serial-only simulator.
 
 ## Callback collision
 
@@ -120,10 +134,14 @@ Passed:
 - stable-ID registry ordering and selection preservation;
 - selected-device removal and `selection_lost` reporting;
 - real PlugData callback bind, self-probe, scan, hot-remove, and hot-add;
-- explicit callback-collision failure in PlugData.
+- explicit callback-collision failure in PlugData;
+- dynamic `else/popmenu` population and output in the accepted nightly;
+- full real add/remove tuple normalization; and
+- live SerialOSC discovery of a physical legacy 128.
 
 Still open:
 
-- dynamic `else/popmenu` population/output in the tested stable PlugData build;
-- real SerialOSC and physical Grid/Arc acceptance;
-- session claim, readback, displacement, and release.
+- physical 256 and Arc discovery;
+- a repeated dock reconnect where macOS kept the serial device nodes but
+  SerialOSC's per-device process exited; and
+- standalone-versus-Bitwig discovery contention.

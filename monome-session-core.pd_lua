@@ -105,6 +105,19 @@ function MonomeSessionCore:in_1_check()
     self:_call("check")
 end
 
+function MonomeSessionCore:in_1_device_osc(atoms)
+    if #atoms < 1 or type(atoms[1]) ~= "string" then
+        self.session:_error("device_osc_requires_address")
+        self:_dispatch()
+        return
+    end
+    local arguments = {}
+    for index = 2, #atoms do
+        table.insert(arguments, atoms[index])
+    end
+    self:_call("device_osc", atoms[1], arguments)
+end
+
 function MonomeSessionCore:in_1_release()
     self:_call("release")
 end

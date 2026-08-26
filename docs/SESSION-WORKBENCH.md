@@ -37,6 +37,12 @@ stop
 bang
 ```
 
+The abstraction's second inlet accepts prefixed capability OSC from the Grid
+or Arc owner. It is emitted only while the session is verified `connected` and
+only when the address begins with the session's exact prefix plus `/`. Direct
+capability output while available, probing, displaced, or released fails
+closed.
+
 The required nominal order is:
 
 ```text
@@ -59,9 +65,9 @@ only when the readback still matches. If another application has displaced the
 session, release reports `release_skipped` and does not overwrite the other
 destination.
 
-Step 2 owns destination lifecycle only. The Grid and Arc capability layers
-will darken their valid LED surfaces before requesting release in Steps 3 and
-4. The session layer does not guess a device's LED protocol.
+Step 2 owns destination lifecycle only. The Grid capability layer now darkens
+its valid surface before requesting release. The session layer still does not
+guess a device's LED protocol; Arc will own the equivalent ring cleanup.
 
 ## Nominal PlugData run
 
@@ -159,7 +165,7 @@ behavior of the fake device server.
 
 ## Acceptance boundary
 
-Passed in PlugData stable `0.9.3` on 2026-08-25:
+Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
 
 - real callback bind and self-probe;
 - non-mutating `/sys/info` probe;
@@ -169,12 +175,15 @@ Passed in PlugData stable `0.9.3` on 2026-08-25:
 - release refusal after displacement with rival state preserved;
 - verified release to port `0`;
 - same-process duplicate-claim refusal;
-- callback collision refusal before device traffic.
+- callback collision refusal before device traffic;
+- capability OSC refusal before a verified claim or outside the exact prefix;
+- physical legacy-128 non-mutating probe and exact claim readback; and
+- physical legacy-128 orderly release with verified destination port `0`.
 
 Still open:
 
-- physical Grid and Arc session acceptance;
-- Grid key/LED capability;
+- physical modern-256 and Arc session acceptance;
+- claimed-device hot-unplug teardown readback;
 - Arc encoder/ring capability;
 - standalone-versus-Bitwig contention;
-- native dynamic device-menu behavior in stable PlugData.
+- repeated dock reconnect after the observed SerialOSC per-device exit.

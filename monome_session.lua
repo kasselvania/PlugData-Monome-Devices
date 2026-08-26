@@ -380,6 +380,27 @@ function Session:check()
     return true
 end
 
+function Session:device_osc(address, atoms)
+    if self.state ~= "connected" then
+        return self:_error("capability_requires_connected", { self.state })
+    end
+    if not valid_string(address)
+        or address:sub(1, #self.prefix + 1) ~= self.prefix .. "/" then
+        return self:_error("capability_prefix_mismatch", {
+            address or "invalid", self.prefix,
+        })
+    end
+
+    atoms = atoms or {}
+    for _, atom in ipairs(atoms) do
+        if type(atom) ~= "string" and type(atom) ~= "number" then
+            return self:_error("unsupported_capability_atom")
+        end
+    end
+    self:_emit("osc", address, atoms)
+    return true
+end
+
 function Session:release()
     if not self.selected then
         return self:_error("no_device_selected")

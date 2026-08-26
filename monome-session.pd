@@ -55,6 +55,9 @@
 #X obj 650 650 delay \$2;
 #X msg 650 685 info_end;
 #X msg 760 650 stop;
+#X obj 300 30 inlet;
+#X obj 300 65 list prepend device_osc;
+#X obj 300 95 list trim;
 #X text 28 15 Commands: start / select SERIAL MODEL PORT / probe / claim / check / release / stop.;
 #X text 28 775 Left outlet: lifecycle/status. Right outlet: non-system device OSC for later Grid/Arc layers.;
 #X text 298 245 Device-server OSC leaves only after explicit session commands.;
@@ -134,3 +137,6 @@
 #X connect 53 0 54 0;
 #X connect 54 0 1 0;
 #X connect 55 0 53 0;
+#X connect 56 0 57 0;
+#X connect 57 0 58 0;
+#X connect 58 0 1 0;

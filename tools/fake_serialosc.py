@@ -152,6 +152,9 @@ class FakeDeviceServer:
         self.destination_port = 0
         self.prefix = "/monome"
         self.rotation = 0
+        surface = (device.width or 0) * (device.height or 0)
+        self.levels = [0] * surface
+        self.grid_messages: list[tuple[str, tuple[object, ...]]] = []
 
     def close(self) -> None:
         self.socket.close()
@@ -221,6 +224,43 @@ class FakeDeviceServer:
         for address, arguments in messages:
             self.socket.sendto(encode_message(address, *arguments), target)
 
+    def _grid_size(self) -> tuple[int, int]:
+        if self.device.width is None or self.device.height is None:
+            raise OSCError("device_has_no_grid")
+        return self.device.width, self.device.height
+
+    def _handle_level_map(
+        self, address: str, arguments: tuple[object, ...]
+    ) -> None:
+        width, height = self._grid_size()
+        if len(arguments) != 66:
+            raise OSCError("level_map_requires_offsets_and_64_levels")
+        x_offset, y_offset = arguments[:2]
+        if (
+            not isinstance(x_offset, int)
+            or not isinstance(y_offset, int)
+            or x_offset < 0
+            or y_offset < 0
+            or x_offset % 8 != 0
+            or y_offset % 8 != 0
+            or x_offset + 8 > width
+            or y_offset + 8 > height
+        ):
+            raise OSCError("invalid_level_map_offset")
+        levels = arguments[2:]
+        if any(
+            not isinstance(level, int) or level < 0 or level > 15
+            for level in levels
+        ):
+            raise OSCError("invalid_grid_level")
+
+        source = 0
+        for y in range(y_offset, y_offset + 8):
+            for x in range(x_offset, x_offset + 8):
+                self.levels[(y * width) + x] = levels[source]
+                source += 1
+        self.grid_messages.append((address, arguments))
+
     def handle_packet(self, packet: bytes) -> None:
         address, arguments = decode_message(packet)
         if address == "/sys/info":
@@ -243,6 +283,8 @@ class FakeDeviceServer:
             if rotation not in (0, 90, 180, 270):
                 raise OSCError("invalid_sys_rotation")
             self.rotation = rotation
+        elif address == self.prefix + "/grid/led/level/map":
+            self._handle_level_map(address, arguments)
         else:
             raise OSCError("unsupported_device_message")
 
@@ -260,6 +302,32 @@ class FakeDeviceServer:
         self.destination_host = host
         self.destination_port = port
         self.prefix = prefix
+
+    def level(self, x: int, y: int) -> int:
+        width, height = self._grid_size()
+        if x < 0 or y < 0 or x >= width or y >= height:
+            raise ValueError("coordinate_out_of_bounds")
+        return self.levels[(y * width) + x]
+
+    def all_dark(self) -> bool:
+        self._grid_size()
+        return all(level == 0 for level in self.levels)
+
+    def emit_key(self, x: int, y: int, state: int) -> None:
+        width, height = self._grid_size()
+        if x < 0 or y < 0 or x >= width or y >= height:
+            raise ValueError("coordinate_out_of_bounds")
+        if state not in (0, 1):
+            raise ValueError("invalid_key_state")
+        if self.destination_port == 0:
+            raise ValueError("device_has_no_destination")
+        target = (
+            socket.gethostbyname(self.destination_host),
+            self.destination_port,
+        )
+        self.socket.sendto(
+            encode_message(self.prefix + "/grid/key", x, y, state), target
+        )
 
 
 class FakeSerialOSC:
@@ -386,27 +454,34 @@ class FakeSerialOSC:
                 return
         raise OSError("unknown_server_socket")
 
-    def _notify_once(self, address: str, serial: str) -> None:
+    def _notify_once(self, address: str, device: Device) -> None:
         if self.notify_target is None:
             return
         target = self.notify_target
         self.notify_target = None
-        self._send(target, address, serial)
+        self._send(
+            target,
+            address,
+            device.serial,
+            device.model,
+            device.port,
+        )
 
     def add(self, device: Device) -> None:
         resolved = self._add_device(device)
-        self._notify_once("/serialosc/add", resolved.serial)
+        self._notify_once("/serialosc/add", resolved)
 
     def remove(self, serial: str) -> None:
         if serial not in self.devices:
             raise ValueError("unknown_device")
+        device = self.devices[serial]
         del self.devices[serial]
         self.order.remove(serial)
         self.reply_counts.pop(serial, None)
         endpoint = self.device_servers.pop(serial, None)
         if endpoint:
             endpoint.close()
-        self._notify_once("/serialosc/remove", serial)
+        self._notify_once("/serialosc/remove", device)
 
     def reorder(self, serials: list[str]) -> None:
         if len(serials) != len(set(serials)) or set(serials) != set(self.devices):
@@ -446,6 +521,21 @@ class FakeSerialOSC:
             endpoint.prefix,
         )
 
+    def emit_key(self, serial: str, x: int, y: int, state: int) -> None:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        endpoint.emit_key(x, y, state)
+
+    def grid_rows(self, serial: str) -> list[list[int]]:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        width, height = endpoint._grid_size()
+        return [
+            [endpoint.level(x, y) for x in range(width)] for y in range(height)
+        ]
+
 
 def _print_devices(server: FakeSerialOSC) -> None:
     for serial in server.order:
@@ -457,6 +547,12 @@ def _print_state(server: FakeSerialOSC, serials: Iterable[str]) -> None:
     for serial in serials:
         host, port, prefix = server.device_state(serial)
         print(f'STATE {serial} "{host}" {port} "{prefix}"', flush=True)
+
+
+def _print_grid(server: FakeSerialOSC, serial: str) -> None:
+    print(f"GRID {serial}", flush=True)
+    for row in server.grid_rows(serial):
+        print("".join(format(level, "x") for level in row), flush=True)
 
 
 def _device_with_inferred_size(serial: str, model: str, port: int) -> Device:
@@ -477,7 +573,8 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
         print(
             'COMMANDS: devices | add SERIAL "MODEL" PORT | remove SERIAL | '
             "order SERIAL... | duplicate SERIAL COUNT | "
-            "state [SERIAL] | displace SERIAL HOST PORT PREFIX | reset | quit",
+            "state [SERIAL] | displace SERIAL HOST PORT PREFIX | "
+            "key SERIAL X Y STATE | grid SERIAL | reset | quit",
             flush=True,
         )
     elif command == "devices" and not arguments:
@@ -506,6 +603,17 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
             arguments[0], arguments[1], int(arguments[2]), arguments[3]
         )
         print(f"OK displaced {arguments[0]}", flush=True)
+    elif command == "key" and len(arguments) == 4:
+        server.emit_key(
+            arguments[0], int(arguments[1]), int(arguments[2]), int(arguments[3])
+        )
+        print(
+            f"OK key {arguments[0]} {arguments[1]} {arguments[2]} "
+            f"{arguments[3]}",
+            flush=True,
+        )
+    elif command == "grid" and len(arguments) == 1:
+        _print_grid(server, arguments[0])
     elif command == "reset" and not arguments:
         server.reset()
         print("OK reset", flush=True)

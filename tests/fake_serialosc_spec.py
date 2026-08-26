@@ -136,7 +136,10 @@ class FakeSerialOSCTests(unittest.TestCase):
             )
             wait_until(lambda: server.notify_target == target)
             server.add(Device("m100", "monome 128", 17001))
-            self.assertEqual(receive(callback), ("/serialosc/add", ("m100",)))
+            self.assertEqual(
+                receive(callback),
+                ("/serialosc/add", ("m100", "monome 128", 17001)),
+            )
 
             server.add(Device("m200", "monome 256", 17002))
             with self.assertRaises(socket.timeout):
@@ -149,7 +152,8 @@ class FakeSerialOSCTests(unittest.TestCase):
             wait_until(lambda: server.notify_target == target)
             server.remove("m100")
             self.assertEqual(
-                receive(callback), ("/serialosc/remove", ("m100",))
+                receive(callback),
+                ("/serialosc/remove", ("m100", "monome 128", 17001)),
             )
 
     def test_reorder_changes_replies_without_changing_identity(self) -> None:
@@ -254,6 +258,96 @@ class FakeSerialOSCTests(unittest.TestCase):
             )
             replies = dict(receive(callback) for _ in range(6))
             self.assertEqual(replies["/sys/port"], (0,))
+
+    def test_grid_level_map_updates_one_8_by_8_quad_row_major(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server:
+            levels = tuple(index % 16 for index in range(64))
+            server.handle_packet(
+                encode_message(
+                    "/monome/grid/led/level/map", 8, 0, *levels
+                )
+            )
+
+            self.assertEqual(server.level(8, 0), 0)
+            self.assertEqual(server.level(15, 0), 7)
+            self.assertEqual(server.level(8, 1), 8)
+            self.assertEqual(server.level(15, 7), 15)
+            self.assertEqual(server.level(0, 0), 0)
+            self.assertEqual(len(server.grid_messages), 1)
+
+    def test_grid_level_map_fails_closed_on_shape_offset_and_level(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server:
+            with self.assertRaisesRegex(
+                OSCError, "level_map_requires_offsets_and_64_levels"
+            ):
+                server.handle_packet(
+                    encode_message(
+                        "/monome/grid/led/level/map", 0, 0, *([0] * 63)
+                    )
+                )
+            with self.assertRaisesRegex(OSCError, "invalid_level_map_offset"):
+                server.handle_packet(
+                    encode_message(
+                        "/monome/grid/led/level/map", 8, 8, *([0] * 64)
+                    )
+                )
+            with self.assertRaisesRegex(OSCError, "invalid_grid_level"):
+                server.handle_packet(
+                    encode_message(
+                        "/monome/grid/led/level/map", 0, 0, *([16] * 64)
+                    )
+                )
+            self.assertTrue(server.all_dark())
+            self.assertEqual(server.grid_messages, [])
+
+    def test_grid_key_uses_current_prefix_and_claimed_destination(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.set_destination(host, port, "/plugdata")
+            server.emit_key(15, 7, 1)
+            self.assertEqual(
+                receive(callback),
+                ("/plugdata/grid/key", (15, 7, 1)),
+            )
+
+    def test_grid_key_requires_destination_and_valid_coordinates(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server:
+            with self.assertRaisesRegex(ValueError, "device_has_no_destination"):
+                server.emit_key(0, 0, 1)
+            with self.assertRaisesRegex(ValueError, "coordinate_out_of_bounds"):
+                server.emit_key(16, 0, 1)
+            with self.assertRaisesRegex(ValueError, "invalid_key_state"):
+                server.emit_key(0, 0, 2)
+
+    def test_session_release_does_not_fake_grid_cleanup(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server:
+            server.handle_packet(
+                encode_message(
+                    "/monome/grid/led/level/map", 0, 0, *([15] * 64)
+                )
+            )
+            server.handle_packet(encode_message("/sys/port", 0))
+            self.assertFalse(server.all_dark())
+
+            server.handle_packet(
+                encode_message(
+                    "/monome/grid/led/level/map", 0, 0, *([0] * 64)
+                )
+            )
+            server.handle_packet(
+                encode_message(
+                    "/monome/grid/led/level/map", 8, 0, *([0] * 64)
+                )
+            )
+            self.assertTrue(server.all_dark())
 
 
 if __name__ == "__main__":

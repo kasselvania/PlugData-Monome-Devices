@@ -91,6 +91,7 @@
 #X msg 855 530 scan end;
 #X obj 690 620 r \$0-status;
 #X obj 855 655 outlet;
+#X obj 1095 140 list split 1;
 #X text 28 16 Commands: start \, rescan \, stop;
 #X text 28 605 Arguments: callback-port \, discovery-port \, scan-window-ms.;
 #X text 687 685 Left outlet is registry protocol. Right outlet is status.;
@@ -158,7 +159,7 @@
 #X connect 48 0 7 0;
 #X connect 49 0 3 0;
 #X connect 49 1 52 0;
-#X connect 49 2 50 0;
+#X connect 49 2 92 0;
 #X connect 50 0 51 0;
 #X connect 51 0 45 0;
 #X connect 52 0 53 0;
@@ -212,3 +213,4 @@
 #X connect 88 0 45 0;
 #X connect 89 0 7 0;
 #X connect 90 0 91 0;
+#X connect 92 0 50 0;

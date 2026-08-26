@@ -75,3 +75,44 @@ Service acceptance proves the daemon is running, native, and owns discovery
 port 12002. It does not prove that a Grid or Arc has been detected. Physical
 acceptance additionally requires discovery, `/sys/info` readback, input,
 LED/ring output, disconnect, reconnect, and destination release.
+
+## Dock and reconnect diagnosis
+
+A Grid lighting briefly at plug-in proves bus power, not SerialOSC attachment.
+Check the layers separately:
+
+```sh
+ioreg -p IOUSB -l -w 0
+find /dev -maxdepth 1 \( -name 'cu.usbserial*' -o -name 'tty.usbserial*' \) -print
+pgrep -fl 'serialosc|serialosc-device'
+lsof /dev/tty.usbserial-mXXXX /dev/cu.usbserial-mXXXX
+tail -n 50 /opt/homebrew/var/log/serialoscd.log
+```
+
+On the 2026-08-25 CalDigit-dock run, macOS still exposed the legacy Grid's
+serial nodes while no process held the port and SerialOSC's per-device process
+had exited. Restarting the existing user service with the Grid still connected
+temporarily recovered it:
+
+```sh
+brew services restart serialosc
+```
+
+SerialOSC's macOS detector reports devices during its initial scan and when
+IOKit reports a newly matched serial device. The supervisor reports a
+per-device child exit but does not respawn that child while the existing device
+node remains matched. Do not launch `serialosc-device` by hand: its standard
+input/output are private supervisor IPC pipes, so a standalone child can open
+the serial port without becoming a discoverable SerialOSC server.
+
+In the observed dock run, repeated service restarts created a valid device
+server only briefly before it exited again. That is a USB/dock-to-SerialOSC
+continuity failure, not proof that the PlugData Grid layer failed. Do not loop
+restarts and call the hardware accepted. Re-seat the cable or use a direct Mac
+port when an operator is present, then repeat discovery, claim, input, output,
+and release readback.
+
+Implementation reference:
+
+- <https://github.com/monome/serialosc/blob/main/src/serialosc-detector/iokitlib.c>
+- <https://github.com/monome/serialosc/blob/main/src/serialoscd/uv.c>

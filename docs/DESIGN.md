@@ -141,12 +141,13 @@ Acceptance: simulated two-device discovery, reordering, duplicate replies,
 unrelated removal, selected removal, and callback collision all have explicit
 deterministic results.
 
-Status on 2026-08-25: discovery transport, notification re-arm, registry
-behavior, selected removal, hot-add, and callback collision pass. The stable
-PlugData `else/popmenu` remains empty under both registry-driven and direct
-`clear`/`add`/`set` probes, so Step 1 is not complete. A direct-selection
-fallback exists only to continue testing discovery state without hiding this
-gap. See `docs/DISCOVERY-WORKBENCH.md`.
+Status on 2026-08-25: complete on the accepted official PlugData 0.9.4 nightly
+at commit `6bb2b60c8`. Discovery transport, notification re-arm, registry
+behavior, selected removal, hot-add, callback collision, and dynamic
+`else/popmenu` population/output pass. Stable 0.9.3 retains a known menu
+failure and is not the current workbench basis. Real SerialOSC's full
+add/remove tuples are represented by the fake server and normalized before
+registry mutation. See `docs/DISCOVERY-WORKBENCH.md`.
 
 ### Step 2 — Explicit session lifecycle
 
@@ -158,17 +159,35 @@ Acceptance: a second app can displace the first, and the first reports
 `displaced` rather than claiming it remains connected.
 
 Status on 2026-08-25: complete against isolated fake device servers and the
-stable PlugData standalone. Non-mutating probe, verified claim, periodic
-readback, simulated external displacement, release refusal after displacement,
-verified `/sys/port 0` release, callback collision, and process-local duplicate
-claim refusal pass. This is not physical Grid/Arc or Bitwig acceptance. See
-`docs/SESSION-WORKBENCH.md`.
+accepted PlugData nightly standalone. Non-mutating probe, verified claim,
+periodic readback, simulated external displacement, release refusal after
+displacement, verified `/sys/port 0` release, callback collision, and
+process-local duplicate claim refusal pass. The same probe, exact claim
+readback, and verified release
+also pass on a physical legacy 128. Modern 256, Arc, and Bitwig session
+acceptance remain open. See `docs/SESSION-WORKBENCH.md`.
 
 ### Step 3 — Grid capability
 
 - Normalize key input and dynamic dimensions.
 - Add a level framebuffer and bounded map flushing.
 - Validate legacy 128 and modern 256 hardware.
+
+Status on 2026-08-25: the Grid core, Pd-Lua bridge, session composition, fake
+device framebuffer, and 128/256/dual smoke patches are implemented. Unit and
+loopback acceptance cover dynamic 16-by-8 and 16-by-16 surfaces, 0-15 levels,
+dirty 8-by-8 map batching, duplicate-key suppression, synthetic held-key
+release, capability routing only through a verified session, and
+dark-before-release ordering.
+
+The physical legacy 128 passed discovery, explicit selection, 16-by-8
+`/sys/info`, verified claim, full-surface and corner brightness, corner key
+press/release, all-dark cleanup, verified `/sys/port 0` release, hot-remove,
+and one hot-add. A later reconnect through a CalDigit dock left the macOS
+serial nodes present after SerialOSC's per-device process exited. The
+claimed-unplug teardown could not be completed after the operator left, so
+Step 3 remains open. Physical modern 256 acceptance is also pending. See
+`docs/GRID-WORKBENCH.md`.
 
 ### Step 4 — Arc capability
 
@@ -197,19 +216,19 @@ Packaging starts only after standalone and Bitwig physical acceptance pass.
 
 As of 2026-08-25, this Mac runs Homebrew SerialOSC 1.4.7 from arm64 binaries.
 The older 1.4.1 Intel launch job is preserved but disabled for rollback. No
-Monome was connected during the service migration, so physical-device
-acceptance is still pending.
+service-level migration claim is used as physical evidence; the physical Grid
+results are recorded separately above.
 
-The installed PlugData standalone and CLAP plugin are 0.9.3 from the official
-`v0.9.3-2` package. The installed VST3 is 0.9.2 and is not an equivalent
-acceptance lane until it is upgraded. The current 0.9.4 nightly was tested from
-a temporary copy and crashed during font initialization, so it is not an
-accepted replacement. See `docs/PLUGDATA-MACOS.md`.
+The installed PlugData standalone is the official 0.9.4 nightly from successful
+run `32892289806`, commit `6bb2b60c8`. It launches, loads the workbench, and
+passes the dynamic-menu gate. The installed VST3 remains a separate stale
+compatibility lane and no Bitwig plugin claim is made. See
+`docs/PLUGDATA-MACOS.md`.
 
-Step 2 session acceptance currently uses only fake per-device servers on
-loopback. The fake server exposes the same `/sys/info`, `/sys/host`,
-`/sys/port`, `/sys/prefix`, and `/sys/rotation` surface needed for the lifecycle
-without opening USB hardware or touching live SerialOSC port `12002`.
+Fake-server acceptance remains the deterministic regression layer. It exposes
+the same `/sys/info`, `/sys/host`, `/sys/port`, `/sys/prefix`,
+`/sys/rotation`, Grid key, and Grid level-map surfaces without opening USB
+hardware or touching live SerialOSC port `12002`.
 
 ## Deferred decisions
 
