@@ -44,11 +44,12 @@ failure and is not the current workbench target.
 The Grid core passes deterministic 128, 256, and dual-device fake-server
 acceptance. A physical legacy 128 has passed discovery, explicit selection,
 non-mutating probe, verified claim, 16-by-8 sizing, full-surface and corner LED
-output, corner key input, orderly darkening, verified release, and one
-remove/add cycle. A later reconnect through a CalDigit dock left macOS device
-nodes present after SerialOSC's per-device process exited, so claimed-unplug
-acceptance remains open rather than being inferred from the earlier tests.
-Physical 256, Arc, and Bitwig acceptance are also still pending.
+output, corner key input, orderly darkening, verified release, remove/add, and
+claimed hot-unplug cleanup. The apparent CalDigit reconnect failure was traced
+to a reproducible SerialOSC 1.4.7 null-port crash after a valid `/sys/port 0`
+release followed by `/sys/info`; it was not a USB continuity failure. The
+project now carries the narrow source patch and a pinned Apple-silicon service
+installer. Physical 256, Arc, and Bitwig acceptance are still pending.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -63,9 +64,11 @@ smoke patches, live controls, and the physical acceptance boundary.
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 
-On macOS, use the current Homebrew service rather than the retired Intel-only
-installer. See [`docs/MACOS-SERIALOSC.md`](docs/MACOS-SERIALOSC.md). Launch
-PlugData as an application, not by executing its inner Mach-O binary; see
+On Apple-silicon macOS, use the project installer for the pinned null-port-safe
+SerialOSC build. It uses Homebrew libraries but runs one user-owned service;
+the stock Homebrew service stays stopped to prevent port contention. See
+[`docs/MACOS-SERIALOSC.md`](docs/MACOS-SERIALOSC.md). Launch PlugData as an
+application, not by executing its inner Mach-O binary; see
 [`docs/PLUGDATA-MACOS.md`](docs/PLUGDATA-MACOS.md).
 
 ## Run the current tests
@@ -79,6 +82,7 @@ lua tests/session_spec.lua
 lua tests/grid_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
+python3 -m unittest -v tests/macos_serialosc_spec.py
 luac -p monome_registry.lua monome-registry.pd_lua \
   monome_session.lua monome-session-core.pd_lua \
   monome_grid.lua monome-grid-core.pd_lua

@@ -178,12 +178,14 @@ Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
 - callback collision refusal before device traffic;
 - capability OSC refusal before a verified claim or outside the exact prefix;
 - physical legacy-128 non-mutating probe and exact claim readback; and
-- physical legacy-128 orderly release with verified destination port `0`.
+- physical legacy-128 orderly release with verified destination port `0`;
+- released-state `/sys/info` readback of port `0` without a worker crash using
+  the project SerialOSC patch; and
+- claimed-device hot-unplug with local session and registry teardown.
 
 Still open:
 
 - physical modern-256 and Arc session acceptance;
-- claimed-device hot-unplug teardown readback;
 - Arc encoder/ring capability;
 - standalone-versus-Bitwig contention;
-- repeated dock reconnect after the observed SerialOSC per-device exit.
+- physical held-key synthesis during disconnect.

@@ -1,0 +1,22 @@
+diff --git a/src/serialosc-device/config.c b/src/serialosc-device/config.c
+index b6fda47..a0a87fe 100644
+--- a/src/serialosc-device/config.c
++++ b/src/serialosc-device/config.c
+@@ -152 +152 @@ sosc_config_write(const char *config_dir, const char *serial, sosc_state_t *stat
+-	cfg_setint(sec, "port", strtol(p , NULL, 10));
++	cfg_setint(sec, "port", p ? strtol(p, NULL, 10) : 0);
+diff --git a/src/serialosc-device/osc/sys_methods.c b/src/serialosc-device/osc/sys_methods.c
+index a626d5c..efafbe1 100644
+--- a/src/serialosc-device/osc/sys_methods.c
++++ b/src/serialosc-device/osc/sys_methods.c
+@@ -35,0 +36,7 @@ portstr(char *dest, int src)
++static int
++address_port(lo_address address)
++{
++	const char *port = lo_address_get_port(address);
++	return port ? atoi(port) : 0;
++}
++
+@@ -98 +105 @@ DECLARE_INFO_PROP(host, "s", lo_address_get_hostname(state->outgoing))
+-DECLARE_INFO_PROP(port, "i", atoi(lo_address_get_port(state->outgoing)))
++DECLARE_INFO_PROP(port, "i", address_port(state->outgoing))

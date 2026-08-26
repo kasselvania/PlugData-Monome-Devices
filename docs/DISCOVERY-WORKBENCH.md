@@ -137,11 +137,10 @@ Passed:
 - explicit callback-collision failure in PlugData;
 - dynamic `else/popmenu` population and output in the accepted nightly;
 - full real add/remove tuple normalization; and
-- live SerialOSC discovery of a physical legacy 128.
+- live SerialOSC discovery of a physical legacy 128; and
+- remove notification and menu cleanup after a claimed legacy-128 unplug.
 
 Still open:
 
 - physical 256 and Arc discovery;
-- a repeated dock reconnect where macOS kept the serial device nodes but
-  SerialOSC's per-device process exited; and
 - standalone-versus-Bitwig discovery contention.

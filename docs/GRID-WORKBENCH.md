@@ -111,26 +111,28 @@ the accepted PlugData nightly at commit `6bb2b60c8`:
 - all-dark map cleanup before release;
 - verified destination port `0` after release;
 - registry/session cleanup on hot-remove; and
-- one real hot-add with the same stable identity restored.
+- one real hot-add with the same stable identity restored;
+- `/sys/info` readback of released port `0` without a daemon crash using the
+  project SerialOSC patch; and
+- claimed hot-unplug with clean device, registry, selection, and process
+  teardown.
 
 The real `/serialosc/remove` arrived as `SERIAL MODEL PORT`, exposing and then
 closing a simulator mismatch: discovery now preserves the full status tuple
 while sending only `remove SERIAL` to the registry.
 
-## Incomplete physical gates
+## Remaining physical gates
 
-The final claimed-unplug test did not run. During the attempted setup through
-a CalDigit dock, the Grid remained visible in macOS USB and `/dev`, but
-SerialOSC's per-device process exited. Restarting the existing user service
-recovered the device briefly; it then disconnected again while the nodes
-remained. Official source confirms that the supervisor reports this child exit
-but does not respawn it until the detector receives a new match or restarts.
-With no operator present to re-seat the cable, that is a stopped physical gate,
-not a pass.
+The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
+crash rather than a USB/dock failure. A valid `/sys/port 0` release left liblo
+without a printable port string; the next `/sys/info` passed that null pointer
+to `atoi()`. The project patch makes both info readback and configuration write
+null-safe. With that build, released-state probe, re-claim, full-grid output,
+and claimed hot-unplug all passed on 2026-08-26.
 
 Still required:
 
-- legacy 128 unplug while claimed, including local detach and held-key release;
+- physical held-key synthesis during a legacy-128 unplug;
 - modern 256 Grid probe, 16-by-16 maps, keys, release, and hot swap;
 - Grid pair tests in both removal directions;
 - Grid plus Arc, then all three devices;

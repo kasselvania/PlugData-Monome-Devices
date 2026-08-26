@@ -183,11 +183,11 @@ dark-before-release ordering.
 The physical legacy 128 passed discovery, explicit selection, 16-by-8
 `/sys/info`, verified claim, full-surface and corner brightness, corner key
 press/release, all-dark cleanup, verified `/sys/port 0` release, hot-remove,
-and one hot-add. A later reconnect through a CalDigit dock left the macOS
-serial nodes present after SerialOSC's per-device process exited. The
-claimed-unplug teardown could not be completed after the operator left, so
-Step 3 remains open. Physical modern 256 acceptance is also pending. See
-`docs/GRID-WORKBENCH.md`.
+hot-add, released-state probe, re-claim, and claimed hot-unplug cleanup. The
+apparent CalDigit continuity failure was a reproducible upstream SerialOSC
+null-port crash after release; the project now carries a narrow source patch
+and pinned Apple-silicon service installer. Step 3 remains open for physical
+held-key disconnect and modern 256 acceptance. See `docs/GRID-WORKBENCH.md`.
 
 ### Step 4 — Arc capability
 
@@ -214,10 +214,12 @@ Packaging starts only after standalone and Bitwig physical acceptance pass.
 
 ## Current workbench boundary
 
-As of 2026-08-25, this Mac runs Homebrew SerialOSC 1.4.7 from arm64 binaries.
-The older 1.4.1 Intel launch job is preserved but disabled for rollback. No
-service-level migration claim is used as physical evidence; the physical Grid
-results are recorded separately above.
+As of 2026-08-26, this Mac uses the pinned official SerialOSC source at
+`ff53885` with the project's two null-port guards, built as native arm64 and
+run as a user LaunchAgent. Homebrew supplies the native libraries but its stock
+SerialOSC job remains stopped. The older 1.4.1 Intel launch job is preserved
+but disabled. Service verification and physical Grid results remain separate
+acceptance layers.
 
 The installed PlugData standalone is the official 0.9.4 nightly from successful
 run `32892289806`, commit `6bb2b60c8`. It launches, loads the workbench, and
