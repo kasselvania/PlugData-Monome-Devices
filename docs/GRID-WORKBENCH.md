@@ -122,6 +122,28 @@ The real `/serialosc/remove` arrived as `SERIAL MODEL PORT`, exposing and then
 closing a simulator mismatch: discovery now preserves the full status tuple
 while sending only `remove SERIAL` to the registry.
 
+## Physical modern-256 record
+
+Passed on 2026-08-26 in PlugData standalone with the accepted nightly and the
+installed patched production LaunchAgent. SerialOSC identified the device as
+`monome zero`, stable ID `m23215901`, in OSC/SerialOSC mode:
+
+- live discovery, explicit selection, and non-mutating probe;
+- 16-by-16 dimension readback and verified claim on callback port `17780`;
+- all 256 LEDs at low brightness and distinct top-left/bottom-right levels;
+- top-left key press and release at coordinate `0 0`;
+- all-dark map cleanup and verified destination port `0` after release;
+- released-state `/sys/info` readback without a worker crash;
+- claimed hot-unplug while top-left was physically held, producing
+  `key 0 0 0 synthetic device_removed` before detach;
+- clean device-worker exit while the main SerialOSC service remained alive;
+- same-ID rediscovery and registry restoration after reconnect; and
+- successful re-probe, re-claim, bottom-right LED output, final darkening, and
+  orderly release.
+
+No bottom-right key-input claim is made by this record; that coordinate was
+used only for LED-output verification.
+
 ## Remaining physical gates
 
 The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
@@ -135,10 +157,9 @@ instrumented build.
 
 Still required:
 
-- modern 256 Grid probe, 16-by-16 maps, keys, release, and hot swap;
 - Grid pair tests in both removal directions;
 - Grid plus Arc, then all three devices;
 - standalone-versus-Bitwig CLAP contention and lifecycle tests.
 
 Do not infer any of those results from the fake server or the completed
-legacy-128 nominal run.
+single-Grid runs.

@@ -164,8 +164,9 @@ periodic readback, simulated external displacement, release refusal after
 displacement, verified `/sys/port 0` release, callback collision, and
 process-local duplicate claim refusal pass. The same probe, exact claim
 readback, and verified release
-also pass on a physical legacy 128. Modern 256, Arc, and Bitwig session
-acceptance remain open. See `docs/SESSION-WORKBENCH.md`.
+also pass on a physical legacy 128 and modern 16-by-16 zero Grid. Arc,
+multi-device, and Bitwig session acceptance remain open. See
+`docs/SESSION-WORKBENCH.md`.
 
 ### Step 3 — Grid capability
 
@@ -188,8 +189,15 @@ apparent CalDigit continuity failure was a reproducible upstream SerialOSC
 null-port crash after release; the project now carries a narrow source patch
 and pinned Apple-silicon service installer. The installed production service
 also passed claimed unplug with a physically held key and emitted the required
-synthetic release before detach. Step 3 remains open for physical modern 256
-acceptance. See `docs/GRID-WORKBENCH.md`.
+synthetic release before detach.
+
+The physical modern zero Grid then passed discovery, explicit selection,
+16-by-16 `/sys/info`, verified claim, full-surface and opposite-corner
+brightness, top-left key press/release, all-dark cleanup, verified release,
+released-port readback, held-key claimed unplug with synthetic release,
+same-ID hot-add, re-probe, re-claim, bottom-right output, and final orderly
+release. This completes Step 3's single-Grid physical acceptance. Grid-pair
+removal tests remain part of Step 5. See `docs/GRID-WORKBENCH.md`.
 
 ### Step 4 — Arc capability
 

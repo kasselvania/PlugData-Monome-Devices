@@ -183,10 +183,16 @@ Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
   the project SerialOSC patch;
 - claimed-device hot-unplug with local session and registry teardown;
 - physical held-key synthesis (`key 0 0 0 synthetic`) during disconnect; and
-- the same legacy-128 lifecycle on the installed production LaunchAgent.
+- the same legacy-128 lifecycle on the installed production LaunchAgent;
+- physical zero-Grid non-mutating probe, exact 16-by-16 claim readback, orderly
+  release, and released destination port `0` readback;
+- physical zero-Grid claimed hot-unplug with held-key synthesis and worker
+  teardown while the production LaunchAgent remained alive; and
+- same-ID zero-Grid rediscovery, re-probe, re-claim, output, and final release.
 
 Still open:
 
-- physical modern-256 and Arc session acceptance;
+- physical two-Grid session/removal acceptance;
+- physical Arc session acceptance;
 - Arc encoder/ring capability;
 - standalone-versus-Bitwig contention.

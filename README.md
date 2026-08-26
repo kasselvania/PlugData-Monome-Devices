@@ -50,8 +50,11 @@ held key. The apparent CalDigit reconnect failure was traced to a reproducible
 SerialOSC 1.4.7 null-port crash after a valid `/sys/port 0` release followed by
 `/sys/info`; it was not a USB continuity failure. The project now carries the
 narrow source patch and a pinned Apple-silicon service installer, both verified
-with the legacy 128. Physical 256, Arc, and Bitwig acceptance are still
-pending.
+with the legacy 128. A physical 16-by-16 zero Grid has now passed the same
+single-device lifecycle on that installed service: discovery, probe, claim,
+full-surface and corner output, key input, dark/release, released-port readback,
+held-key hot-unplug, same-ID rediscovery, reclaim, and final release. Two-Grid,
+Arc, and Bitwig acceptance are still pending.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
