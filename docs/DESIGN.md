@@ -213,6 +213,13 @@ removal tests remain part of Step 5. See `docs/GRID-WORKBENCH.md`.
 - Test one device, pairs, all three devices, removal in each direction, and
   contention between standalone and Bitwig.
 
+Status on 2026-08-26: the physical legacy 128 and zero Grid passed the Grid-pair
+slice in PlugData standalone. Both devices held simultaneous verified claims
+on separate callback ports, routed distinct LED and key traffic, survived
+removal of the other device, restored the removed stable identity in both
+directions, and released independently to port `0`. Grid-plus-Arc, all-three,
+and all Bitwig lifecycle/contention gates remain open.
+
 ### Step 6 — Demos and package
 
 - Grid demo: dynamic 128/256 layout with momentary and latch modes.

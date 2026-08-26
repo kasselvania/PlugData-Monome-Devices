@@ -136,11 +136,14 @@ Passed:
 - real PlugData callback bind, self-probe, scan, hot-remove, and hot-add;
 - explicit callback-collision failure in PlugData;
 - dynamic `else/popmenu` population and output in the accepted nightly;
-- full real add/remove tuple normalization; and
-- live SerialOSC discovery of a physical legacy 128; and
-- remove notification and menu cleanup after a claimed legacy-128 unplug.
+- full real add/remove tuple normalization;
+- live SerialOSC discovery of a physical legacy 128 and modern zero Grid;
+- concurrent stable-ID registry population for both physical Grids;
+- selection preservation when the second device reorders the menu; and
+- remove/add notification and isolated menu cleanup in both removal
+  directions.
 
 Still open:
 
-- physical 256 and Arc discovery;
+- physical Arc discovery;
 - standalone-versus-Bitwig discovery contention.

@@ -165,7 +165,8 @@ behavior of the fake device server.
 
 ## Acceptance boundary
 
-Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
+Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
+2026-08-26:
 
 - real callback bind and self-probe;
 - non-mutating `/sys/info` probe;
@@ -188,11 +189,17 @@ Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
   release, and released destination port `0` readback;
 - physical zero-Grid claimed hot-unplug with held-key synthesis and worker
   teardown while the production LaunchAgent remained alive; and
-- same-ID zero-Grid rediscovery, re-probe, re-claim, output, and final release.
+- same-ID zero-Grid rediscovery, re-probe, re-claim, output, and final release;
+- simultaneous zero and legacy claims on callback ports `17780` and `17781`,
+  with distinct 16-by-16 and 16-by-8 readback;
+- surviving-session verification and live output after removing either Grid;
+- same-ID rediscovery, re-probe, and re-claim in both pair-removal directions;
+  and
+- isolated orderly release of each Grid to port `0` while the other session
+  remained verified.
 
 Still open:
 
-- physical two-Grid session/removal acceptance;
 - physical Arc session acceptance;
 - Arc encoder/ring capability;
 - standalone-versus-Bitwig contention.

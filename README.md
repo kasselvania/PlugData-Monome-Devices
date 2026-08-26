@@ -53,8 +53,10 @@ narrow source patch and a pinned Apple-silicon service installer, both verified
 with the legacy 128. A physical 16-by-16 zero Grid has now passed the same
 single-device lifecycle on that installed service: discovery, probe, claim,
 full-surface and corner output, key input, dark/release, released-port readback,
-held-key hot-unplug, same-ID rediscovery, reclaim, and final release. Two-Grid,
-Arc, and Bitwig acceptance are still pending.
+held-key hot-unplug, same-ID rediscovery, reclaim, and final release. The two
+Grids have also passed simultaneous independent claims, output and input
+routing, removal and recovery in both directions, surviving-session checks,
+and isolated port-`0` release. Arc and Bitwig acceptance are still pending.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)

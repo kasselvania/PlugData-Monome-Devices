@@ -144,6 +144,35 @@ installed patched production LaunchAgent. SerialOSC identified the device as
 No bottom-right key-input claim is made by this record; that coordinate was
 used only for LED-output verification.
 
+## Physical two-Grid record
+
+Passed on 2026-08-26 with the legacy 128 and zero Grid connected concurrently
+to the installed production LaunchAgent:
+
+- stable-ID ordering preserved the zero selection when the legacy device was
+  added ahead of it in the menu;
+- the zero held slot A at `127.0.0.1:17780` with a 16-by-16 surface while the
+  legacy held slot B at `127.0.0.1:17781` with a 16-by-8 surface;
+- a restored legacy destination on `17780` was observed non-mutatingly, then
+  moved to and verified on slot B's `17781` before slot A was claimed;
+- the zero displayed a full low-level surface while only the legacy
+  bottom-right LED was bright;
+- input routed independently as zero slot-A `key 0 0 1/0` and legacy slot-B
+  `key 15 7 1/0`;
+- unplugging the zero removed only slot A; the legacy retained its LED state,
+  passed a fresh ownership check, and accepted another LED update;
+- the zero returned with the same stable ID, re-probed and re-claimed on slot A
+  without disturbing the legacy;
+- unplugging the legacy removed only slot B; the zero retained its framebuffer,
+  passed a fresh ownership check, and accepted another LED update;
+- the legacy returned with the same stable ID, re-probed and re-claimed on slot
+  B without disturbing the zero; and
+- each Grid darkened and released independently to port `0`, with the other
+  session remaining verified until its own orderly release.
+
+The pair-removal runs did not hold a physical key during unplug; held-key
+synthesis was already accepted separately on each single-Grid run.
+
 ## Remaining physical gates
 
 The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
@@ -157,9 +186,8 @@ instrumented build.
 
 Still required:
 
-- Grid pair tests in both removal directions;
 - Grid plus Arc, then all three devices;
 - standalone-versus-Bitwig CLAP contention and lifecycle tests.
 
 Do not infer any of those results from the fake server or the completed
-single-Grid runs.
+Grid-only runs.
