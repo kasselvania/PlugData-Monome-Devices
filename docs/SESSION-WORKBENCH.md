@@ -177,15 +177,16 @@ Passed in the accepted PlugData nightly `0.9.4` on 2026-08-25:
 - same-process duplicate-claim refusal;
 - callback collision refusal before device traffic;
 - capability OSC refusal before a verified claim or outside the exact prefix;
-- physical legacy-128 non-mutating probe and exact claim readback; and
+- physical legacy-128 non-mutating probe and exact claim readback;
 - physical legacy-128 orderly release with verified destination port `0`;
 - released-state `/sys/info` readback of port `0` without a worker crash using
-  the project SerialOSC patch; and
-- claimed-device hot-unplug with local session and registry teardown.
+  the project SerialOSC patch;
+- claimed-device hot-unplug with local session and registry teardown;
+- physical held-key synthesis (`key 0 0 0 synthetic`) during disconnect; and
+- the same legacy-128 lifecycle on the installed production LaunchAgent.
 
 Still open:
 
 - physical modern-256 and Arc session acceptance;
 - Arc encoder/ring capability;
-- standalone-versus-Bitwig contention;
-- physical held-key synthesis during disconnect.
+- standalone-versus-Bitwig contention.

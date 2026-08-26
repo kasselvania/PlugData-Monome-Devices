@@ -45,11 +45,13 @@ The Grid core passes deterministic 128, 256, and dual-device fake-server
 acceptance. A physical legacy 128 has passed discovery, explicit selection,
 non-mutating probe, verified claim, 16-by-8 sizing, full-surface and corner LED
 output, corner key input, orderly darkening, verified release, remove/add, and
-claimed hot-unplug cleanup. The apparent CalDigit reconnect failure was traced
-to a reproducible SerialOSC 1.4.7 null-port crash after a valid `/sys/port 0`
-release followed by `/sys/info`; it was not a USB continuity failure. The
-project now carries the narrow source patch and a pinned Apple-silicon service
-installer. Physical 256, Arc, and Bitwig acceptance are still pending.
+claimed hot-unplug cleanup, including a synthetic release for a physically
+held key. The apparent CalDigit reconnect failure was traced to a reproducible
+SerialOSC 1.4.7 null-port crash after a valid `/sys/port 0` release followed by
+`/sys/info`; it was not a USB continuity failure. The project now carries the
+narrow source patch and a pinned Apple-silicon service installer, both verified
+with the legacy 128. Physical 256, Arc, and Bitwig acceptance are still
+pending.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)

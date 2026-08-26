@@ -186,8 +186,10 @@ press/release, all-dark cleanup, verified `/sys/port 0` release, hot-remove,
 hot-add, released-state probe, re-claim, and claimed hot-unplug cleanup. The
 apparent CalDigit continuity failure was a reproducible upstream SerialOSC
 null-port crash after release; the project now carries a narrow source patch
-and pinned Apple-silicon service installer. Step 3 remains open for physical
-held-key disconnect and modern 256 acceptance. See `docs/GRID-WORKBENCH.md`.
+and pinned Apple-silicon service installer. The installed production service
+also passed claimed unplug with a physically held key and emitted the required
+synthetic release before detach. Step 3 remains open for physical modern 256
+acceptance. See `docs/GRID-WORKBENCH.md`.
 
 ### Step 4 — Arc capability
 

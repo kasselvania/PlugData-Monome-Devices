@@ -115,7 +115,8 @@ the accepted PlugData nightly at commit `6bb2b60c8`:
 - `/sys/info` readback of released port `0` without a daemon crash using the
   project SerialOSC patch; and
 - claimed hot-unplug with clean device, registry, selection, and process
-  teardown.
+  teardown, including `key 0 0 0 synthetic` for a physically held top-left
+  key.
 
 The real `/serialosc/remove` arrived as `SERIAL MODEL PORT`, exposing and then
 closing a simulator mismatch: discovery now preserves the full status tuple
@@ -128,11 +129,12 @@ crash rather than a USB/dock failure. A valid `/sys/port 0` release left liblo
 without a printable port string; the next `/sys/info` passed that null pointer
 to `atoi()`. The project patch makes both info readback and configuration write
 null-safe. With that build, released-state probe, re-claim, full-grid output,
-and claimed hot-unplug all passed on 2026-08-26.
+claimed hot-unplug, and physical held-key synthesis all passed on 2026-08-26.
+The held-key run used the installed production LaunchAgent, not the earlier
+instrumented build.
 
 Still required:
 
-- physical held-key synthesis during a legacy-128 unplug;
 - modern 256 Grid probe, 16-by-16 maps, keys, release, and hot swap;
 - Grid pair tests in both removal directions;
 - Grid plus Arc, then all three devices;

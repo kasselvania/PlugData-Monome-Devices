@@ -76,6 +76,12 @@ Physical readback after the patch proved this sequence:
 4. unplug while claimed; and
 5. observe clean device, registry, and selection teardown with no new crash.
 
+After installing the clean production LaunchAgent, the same legacy 128 passed
+discovery, released-state probe, verified claim, full-surface output, and
+unplug while the top-left key was physically held. PlugData emitted
+`key 0 0 0 synthetic` before detach, the per-device worker exited normally,
+and no new crash report appeared.
+
 ## Migrating an older Monome installer
 
 Do not start both launch jobs. Preserve device preferences before changing the
