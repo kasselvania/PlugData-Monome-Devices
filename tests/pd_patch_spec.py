@@ -21,6 +21,11 @@ PATCHES = (
     "monome-grid-dual-smoke.pd",
     "monome-grid-live-slot.pd",
     "monome-grid-live.pd",
+    "monome-arc.pd",
+    "monome-arc-session.pd",
+    "monome-arc-smoke.pd",
+    "monome-arc-live-slot.pd",
+    "monome-arc-live.pd",
 )
 NODE = re.compile(r"^#X (?:obj|msg|text|floatatom|symbolatom|listbox) ")
 CONNECT = re.compile(r"^#X connect (\d+) \d+ (\d+) \d+;$")
@@ -63,6 +68,33 @@ class PdPatchTests(unittest.TestCase):
         self.assertIn("route release", session_patch)
         self.assertIn("prepare_release", session_patch)
         self.assertIn("monome-session \\$1 \\$2", session_patch)
+
+    def test_arc_redraw_is_bounded_explicit_and_release_is_intercepted(self) -> None:
+        arc_patch = (PROJECT_ROOT / "monome-arc.pd").read_text()
+        self.assertIn("monome-arc-core \\$1", arc_patch)
+        self.assertIn("metro 16", arc_patch)
+
+        session_patch = (PROJECT_ROOT / "monome-arc-session.pd").read_text()
+        self.assertIn("route release", session_patch)
+        self.assertIn("prepare_release", session_patch)
+        self.assertIn("monome-session \\$1 \\$2", session_patch)
+        self.assertIn("monome-arc \\$3", session_patch)
+
+    def test_arc_smoke_uses_an_explicit_four_ring_fake_device(self) -> None:
+        smoke = (PROJECT_ROOT / "monome-arc-smoke.pd").read_text()
+        self.assertIn("select a400 monome\\ arc\\ 4 17003", smoke)
+        self.assertIn("monome-arc-session 17782 120 4", smoke)
+        self.assertIn("led 3 63 10", smoke)
+
+    def test_arc_live_workbench_is_explicit_and_separately_routed(self) -> None:
+        live = (PROJECT_ROOT / "monome-arc-live.pd").read_text()
+        slot = (PROJECT_ROOT / "monome-arc-live-slot.pd").read_text()
+        self.assertEqual(live.count("else/popmenu"), 1)
+        self.assertIn("monome-arc-live-slot 17782 4", live)
+        self.assertIn("netreceive -u 17901", live)
+        self.assertIn("route select session arc discovery", live)
+        self.assertIn("monome-arc-session \\$1 120 \\$2", slot)
+        self.assertIn("never auto-selects or auto-claims", slot)
 
     def test_capability_osc_enters_only_through_session_core(self) -> None:
         session_patch = (PROJECT_ROOT / "monome-session.pd").read_text()

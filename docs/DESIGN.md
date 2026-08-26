@@ -205,6 +205,17 @@ removal tests remain part of Step 5. See `docs/GRID-WORKBENCH.md`.
 - Add bounded ring-map flushing and reliable all-dark cleanup.
 - Validate the four-ring Arc.
 
+Status on 2026-08-26: the Arc core, Pd-Lua bridge, verified-session
+composition, fake device server, automated smoke patch, and dedicated live
+workbench are implemented. Unit and loopback acceptance cover explicit two- or
+four-ring attachment, 64-position level maps, dirty-ring batching, bounds
+validation, delta and optional key normalization, duplicate-key suppression,
+synthetic held-key release, stale-buffer clearing, and four all-dark maps
+before verified `/sys/port 0` release. The accepted PlugData nightly completed
+the fake four-ring lifecycle and input-routing pass with independent all-dark
+and port-`0` simulator readback. Physical four-ring Arc acceptance remains
+open and is not inferred from the simulator.
+
 ### Step 5 — Host and hot-swap acceptance
 
 - Run the same patch in PlugData standalone and Bitwig CLAP.

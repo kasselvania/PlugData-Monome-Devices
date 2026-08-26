@@ -19,6 +19,7 @@ from typing import Iterable
 
 LIVE_SERIALOSC_PORT = 12002
 DEFAULT_FAKE_PORT = 12012
+DEFAULT_ARC_PORT = 17003
 
 
 class OSCError(ValueError):
@@ -36,12 +37,24 @@ class Device:
     port: int
     width: int | None = None
     height: int | None = None
+    rings: int | None = None
 
 
 DEFAULT_DEVICES = (
     Device("m100", "monome 128", 17001, 16, 8),
     Device("m200", "monome 256", 17002, 16, 16),
 )
+
+
+def default_arc(rings: int) -> Device:
+    if rings not in (2, 4):
+        raise ValueError("unsupported_ring_count")
+    return Device(
+        f"a{rings}00",
+        f"monome arc {rings}",
+        DEFAULT_ARC_PORT,
+        rings=rings,
+    )
 
 
 def _encode_string(value: str) -> bytes:
@@ -143,6 +156,10 @@ class FakeDeviceServer:
             device.width < 1 or device.height is None or device.height < 1
         ):
             raise ValueError("invalid_device_size")
+        if device.rings is not None and device.rings not in (2, 4):
+            raise ValueError("unsupported_ring_count")
+        if device.rings is not None and device.width is not None:
+            raise ValueError("ambiguous_device_surface")
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((host, device.port))
@@ -155,6 +172,10 @@ class FakeDeviceServer:
         surface = (device.width or 0) * (device.height or 0)
         self.levels = [0] * surface
         self.grid_messages: list[tuple[str, tuple[object, ...]]] = []
+        self.ring_levels = [
+            [0] * 64 for _ in range(device.rings or 0)
+        ]
+        self.arc_messages: list[tuple[str, tuple[object, ...]]] = []
 
     def close(self) -> None:
         self.socket.close()
@@ -261,6 +282,29 @@ class FakeDeviceServer:
                 source += 1
         self.grid_messages.append((address, arguments))
 
+    def _arc_ring_count(self) -> int:
+        if self.device.rings is None:
+            raise OSCError("device_has_no_arc")
+        return self.device.rings
+
+    def _handle_ring_map(
+        self, address: str, arguments: tuple[object, ...]
+    ) -> None:
+        rings = self._arc_ring_count()
+        if len(arguments) != 65:
+            raise OSCError("ring_map_requires_ring_and_64_levels")
+        ring = arguments[0]
+        if not isinstance(ring, int) or ring < 0 or ring >= rings:
+            raise OSCError("invalid_arc_ring")
+        levels = arguments[1:]
+        if any(
+            not isinstance(level, int) or level < 0 or level > 15
+            for level in levels
+        ):
+            raise OSCError("invalid_arc_level")
+        self.ring_levels[ring] = list(levels)
+        self.arc_messages.append((address, arguments))
+
     def handle_packet(self, packet: bytes) -> None:
         address, arguments = decode_message(packet)
         if address == "/sys/info":
@@ -285,6 +329,8 @@ class FakeDeviceServer:
             self.rotation = rotation
         elif address == self.prefix + "/grid/led/level/map":
             self._handle_level_map(address, arguments)
+        elif address == self.prefix + "/ring/map":
+            self._handle_ring_map(address, arguments)
         else:
             raise OSCError("unsupported_device_message")
 
@@ -313,6 +359,20 @@ class FakeDeviceServer:
         self._grid_size()
         return all(level == 0 for level in self.levels)
 
+    def ring_level(self, ring: int, position: int) -> int:
+        rings = self._arc_ring_count()
+        if ring < 0 or ring >= rings or position < 0 or position >= 64:
+            raise ValueError("arc_coordinate_out_of_bounds")
+        return self.ring_levels[ring][position]
+
+    def arc_all_dark(self) -> bool:
+        self._arc_ring_count()
+        return all(
+            level == 0
+            for ring in self.ring_levels
+            for level in ring
+        )
+
     def emit_key(self, x: int, y: int, state: int) -> None:
         width, height = self._grid_size()
         if x < 0 or y < 0 or x >= width or y >= height:
@@ -327,6 +387,38 @@ class FakeDeviceServer:
         )
         self.socket.sendto(
             encode_message(self.prefix + "/grid/key", x, y, state), target
+        )
+
+    def emit_delta(self, ring: int, delta: int) -> None:
+        rings = self._arc_ring_count()
+        if type(ring) is not int or ring < 0 or ring >= rings:
+            raise ValueError("arc_ring_out_of_bounds")
+        if type(delta) is not int:
+            raise ValueError("invalid_arc_delta")
+        if self.destination_port == 0:
+            raise ValueError("device_has_no_destination")
+        target = (
+            socket.gethostbyname(self.destination_host),
+            self.destination_port,
+        )
+        self.socket.sendto(
+            encode_message(self.prefix + "/enc/delta", ring, delta), target
+        )
+
+    def emit_arc_key(self, ring: int, state: int) -> None:
+        rings = self._arc_ring_count()
+        if type(ring) is not int or ring < 0 or ring >= rings:
+            raise ValueError("arc_ring_out_of_bounds")
+        if state not in (0, 1):
+            raise ValueError("invalid_key_state")
+        if self.destination_port == 0:
+            raise ValueError("device_has_no_destination")
+        target = (
+            socket.gethostbyname(self.destination_host),
+            self.destination_port,
+        )
+        self.socket.sendto(
+            encode_message(self.prefix + "/enc/key", ring, state), target
         )
 
 
@@ -350,9 +442,10 @@ class FakeSerialOSC:
         self.notify_target: tuple[str, int] | None = None
         self.spawn_device_servers = spawn_device_servers
         self.device_servers: dict[str, FakeDeviceServer] = {}
+        self.initial_devices = tuple(devices)
 
         try:
-            for device in devices:
+            for device in self.initial_devices:
                 self._add_device(device)
         except (ValueError, OSError):
             self.close()
@@ -370,6 +463,10 @@ class FakeSerialOSC:
             device.width < 1 or device.height is None or device.height < 1
         ):
             raise ValueError("invalid_device_size")
+        if device.rings is not None and device.rings not in (2, 4):
+            raise ValueError("unsupported_ring_count")
+        if device.rings is not None and device.width is not None:
+            raise ValueError("ambiguous_device_surface")
 
     def _add_device(self, device: Device) -> Device:
         self._validate_device(device)
@@ -502,7 +599,7 @@ class FakeSerialOSC:
         self.devices = {}
         self.order = []
         self.reply_counts = {}
-        for device in DEFAULT_DEVICES:
+        for device in self.initial_devices:
             self._add_device(device)
 
     def displace(self, serial: str, host: str, port: int, prefix: str) -> None:
@@ -527,6 +624,18 @@ class FakeSerialOSC:
             raise ValueError("device_servers_disabled")
         endpoint.emit_key(x, y, state)
 
+    def emit_delta(self, serial: str, ring: int, delta: int) -> None:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        endpoint.emit_delta(ring, delta)
+
+    def emit_arc_key(self, serial: str, ring: int, state: int) -> None:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        endpoint.emit_arc_key(ring, state)
+
     def grid_rows(self, serial: str) -> list[list[int]]:
         endpoint = self.device_servers.get(serial)
         if endpoint is None:
@@ -535,6 +644,13 @@ class FakeSerialOSC:
         return [
             [endpoint.level(x, y) for x in range(width)] for y in range(height)
         ]
+
+    def arc_rings(self, serial: str) -> list[list[int]]:
+        endpoint = self.device_servers.get(serial)
+        if endpoint is None:
+            raise ValueError("device_servers_disabled")
+        endpoint._arc_ring_count()
+        return [list(levels) for levels in endpoint.ring_levels]
 
 
 def _print_devices(server: FakeSerialOSC) -> None:
@@ -553,6 +669,12 @@ def _print_grid(server: FakeSerialOSC, serial: str) -> None:
     print(f"GRID {serial}", flush=True)
     for row in server.grid_rows(serial):
         print("".join(format(level, "x") for level in row), flush=True)
+
+
+def _print_arc(server: FakeSerialOSC, serial: str) -> None:
+    print(f"ARC {serial}", flush=True)
+    for ring, levels in enumerate(server.arc_rings(serial)):
+        print(f"{ring} " + "".join(format(level, "x") for level in levels), flush=True)
 
 
 def _device_with_inferred_size(serial: str, model: str, port: int) -> Device:
@@ -574,7 +696,9 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
             'COMMANDS: devices | add SERIAL "MODEL" PORT | remove SERIAL | '
             "order SERIAL... | duplicate SERIAL COUNT | "
             "state [SERIAL] | displace SERIAL HOST PORT PREFIX | "
-            "key SERIAL X Y STATE | grid SERIAL | reset | quit",
+            "key SERIAL X Y STATE | grid SERIAL | "
+            "delta SERIAL RING AMOUNT | arc_key SERIAL RING STATE | "
+            "arc SERIAL | reset | quit",
             flush=True,
         )
     elif command == "devices" and not arguments:
@@ -614,6 +738,24 @@ def _command(server: FakeSerialOSC, line: str) -> bool:
         )
     elif command == "grid" and len(arguments) == 1:
         _print_grid(server, arguments[0])
+    elif command == "delta" and len(arguments) == 3:
+        server.emit_delta(
+            arguments[0], int(arguments[1]), int(arguments[2])
+        )
+        print(
+            f"OK delta {arguments[0]} {arguments[1]} {arguments[2]}",
+            flush=True,
+        )
+    elif command == "arc_key" and len(arguments) == 3:
+        server.emit_arc_key(
+            arguments[0], int(arguments[1]), int(arguments[2])
+        )
+        print(
+            f"OK arc_key {arguments[0]} {arguments[1]} {arguments[2]}",
+            flush=True,
+        )
+    elif command == "arc" and len(arguments) == 1:
+        _print_arc(server, arguments[0])
     elif command == "reset" and not arguments:
         server.reset()
         print("OK reset", flush=True)
@@ -629,9 +771,12 @@ def main() -> int:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=DEFAULT_FAKE_PORT)
     parser.add_argument("--empty", action="store_true")
+    parser.add_argument("--with-arc", type=int, choices=(2, 4))
     arguments = parser.parse_args()
 
-    devices: Iterable[Device] = () if arguments.empty else DEFAULT_DEVICES
+    devices: tuple[Device, ...] = () if arguments.empty else DEFAULT_DEVICES
+    if arguments.with_arc:
+        devices = (*devices, default_arc(arguments.with_arc))
     try:
         with FakeSerialOSC(
             arguments.host,

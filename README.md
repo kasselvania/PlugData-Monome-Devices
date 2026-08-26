@@ -14,7 +14,7 @@ The original proof-of-concept patches are preserved under [`legacy/`](legacy/)
 for reference, but they are not the architecture of the rebuilt object.
 
 The workbench now contains `monome-discovery`, `monome-registry`,
-`monome-session`, and `monome-grid`. Together they:
+`monome-session`, `monome-grid`, and `monome-arc`. Together they:
 
 - include an isolated fake discovery server on loopback port `12012`;
 - bind and self-test a real callback before declaring it ready;
@@ -34,7 +34,11 @@ The workbench now contains `monome-discovery`, `monome-registry`,
 - normalize 128 and 256 Grid key events through one capability API;
 - coalesce 0-15 LED state into dirty 8-by-8 level maps;
 - synthesize releases for held keys when a Grid disappears; and
-- darken every valid Grid quadrant before an orderly release.
+- darken every valid Grid quadrant before an orderly release;
+- require an explicit two- or four-ring Arc surface rather than guessing;
+- normalize Arc encoder delta and optional key events;
+- coalesce Arc LED state into bounded dirty-ring maps; and
+- darken every declared Arc ring before an orderly release.
 
 Discovery, registry selection, hot-remove/hot-add, and callback collision have
 been exercised in PlugData. Dynamic `popmenu` population and output pass in the
@@ -56,7 +60,14 @@ full-surface and corner output, key input, dark/release, released-port readback,
 held-key hot-unplug, same-ID rediscovery, reclaim, and final release. The two
 Grids have also passed simultaneous independent claims, output and input
 routing, removal and recovery in both directions, surviving-session checks,
-and isolated port-`0` release. Arc and Bitwig acceptance are still pending.
+and isolated port-`0` release.
+
+The Arc core, Pd-Lua bridge, session composition, fake device server, smoke
+patch, and four-ring live workbench are now implemented. The installed
+PlugData nightly passed the deterministic fake lifecycle with normalized
+encoder delta and optional key input, four-ring LED maps, all-dark cleanup,
+verified destination port `0`, and independent all-dark simulator readback.
+Physical Arc and Bitwig acceptance are still pending.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -64,6 +75,8 @@ for discovery. [`docs/SESSION-WORKBENCH.md`](docs/SESSION-WORKBENCH.md) covers
 probe, claim, readback, displacement, contention, and safe release.
 [`docs/GRID-WORKBENCH.md`](docs/GRID-WORKBENCH.md) covers the Grid API, fake
 smoke patches, live controls, and the physical acceptance boundary.
+[`docs/ARC-WORKBENCH.md`](docs/ARC-WORKBENCH.md) covers the explicit Arc API,
+fake smoke run, live controls, and remaining physical gate.
 
 ## Requirements
 
@@ -87,12 +100,14 @@ dependencies:
 lua tests/registry_spec.lua
 lua tests/session_spec.lua
 lua tests/grid_spec.lua
+lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 python3 -m unittest -v tests/macos_serialosc_spec.py
 luac -p monome_registry.lua monome-registry.pd_lua \
   monome_session.lua monome-session-core.pd_lua \
-  monome_grid.lua monome-grid-core.pd_lua
+  monome_grid.lua monome-grid-core.pd_lua \
+  monome_arc.lua monome-arc-core.pd_lua
 ```
 
 The Python tests bind only ephemeral loopback UDP ports. The simulator itself
@@ -114,3 +129,9 @@ For Step 3, the 128, 256, and dual-device fake runs are
 [`monome-grid-dual-smoke.pd`](monome-grid-dual-smoke.pd). Use
 [`monome-grid-live.pd`](monome-grid-live.pd) only for explicit physical-device
 acceptance against live SerialOSC.
+
+For Step 4, start the simulator with `--with-arc 4` and open
+[`monome-arc-smoke.pd`](monome-arc-smoke.pd). Use
+[`monome-arc-live.pd`](monome-arc-live.pd) only for explicit four-ring Arc
+physical acceptance. It uses separate loopback ports so it can later run beside
+the two-Grid workbench.

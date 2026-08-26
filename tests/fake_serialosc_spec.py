@@ -326,6 +326,68 @@ class FakeSerialOSCTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "invalid_key_state"):
                 server.emit_key(0, 0, 2)
 
+    def test_arc_ring_map_updates_one_ring_in_position_order(self) -> None:
+        device = Device("a400", "monome arc 4", 0, rings=4)
+        with FakeDeviceServer(device) as server:
+            levels = tuple(index % 16 for index in range(64))
+            server.handle_packet(
+                encode_message("/monome/ring/map", 2, *levels)
+            )
+
+            self.assertEqual(server.ring_level(2, 0), 0)
+            self.assertEqual(server.ring_level(2, 15), 15)
+            self.assertEqual(server.ring_level(2, 63), 15)
+            self.assertEqual(server.ring_level(0, 15), 0)
+            self.assertEqual(len(server.arc_messages), 1)
+
+    def test_arc_ring_map_fails_closed_on_shape_ring_and_level(self) -> None:
+        device = Device("a400", "monome arc 4", 0, rings=4)
+        with FakeDeviceServer(device) as server:
+            with self.assertRaisesRegex(
+                OSCError, "ring_map_requires_ring_and_64_levels"
+            ):
+                server.handle_packet(
+                    encode_message("/monome/ring/map", 0, *([0] * 63))
+                )
+            with self.assertRaisesRegex(OSCError, "invalid_arc_ring"):
+                server.handle_packet(
+                    encode_message("/monome/ring/map", 4, *([0] * 64))
+                )
+            with self.assertRaisesRegex(OSCError, "invalid_arc_level"):
+                server.handle_packet(
+                    encode_message("/monome/ring/map", 0, *([16] * 64))
+                )
+            self.assertTrue(server.arc_all_dark())
+            self.assertEqual(server.arc_messages, [])
+
+    def test_arc_delta_uses_current_prefix_and_claimed_destination(self) -> None:
+        device = Device("a400", "monome arc 4", 0, rings=4)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.set_destination(host, port, "/plugdata")
+            server.emit_delta(3, -12)
+            self.assertEqual(
+                receive(callback),
+                ("/plugdata/enc/delta", (3, -12)),
+            )
+
+    def test_arc_key_uses_current_prefix_when_hardware_provides_it(self) -> None:
+        device = Device("a400", "monome arc 4", 0, rings=4)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.set_destination(host, port, "/plugdata")
+            server.emit_arc_key(1, 1)
+            self.assertEqual(
+                receive(callback),
+                ("/plugdata/enc/key", (1, 1)),
+            )
+
     def test_session_release_does_not_fake_grid_cleanup(self) -> None:
         device = Device("m100", "monome 128", 0, 16, 8)
         with FakeDeviceServer(device) as server:

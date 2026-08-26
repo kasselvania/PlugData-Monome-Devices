@@ -44,6 +44,7 @@ end
 
 local function valid_prefix(value)
     return valid_string(value) and value:sub(1, 1) == "/"
+        and value:sub(-1) ~= "/"
 end
 
 local function copy_info(info)
