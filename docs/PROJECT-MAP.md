@@ -49,7 +49,8 @@ protocol behavior.
 
 ## 3. SerialOSC lease fork
 
-Repository: a fork of `monome/serialosc` under `kasselvania`.
+Repository: [`kasselvania/serialosc`](https://github.com/kasselvania/serialosc),
+forked from `monome/serialosc`.
 
 This repository will own the smallest upstream-oriented change required for
 crash-safe application destinations. Legacy `/sys/port`, `/sys/host`, and
@@ -69,6 +70,10 @@ The first design must specify, before production code:
 
 The source fork owns that behavior. Platform installers consume a pinned fork
 commit only after its acceptance gates pass.
+
+The version 1 proposal is recorded on the fork's
+[`feature/leased-destinations`](https://github.com/kasselvania/serialosc/blob/feature/leased-destinations/docs/leased-destinations.md)
+branch. It is a design proposal, not an upstream release claim.
 
 ## Delivery order
 
