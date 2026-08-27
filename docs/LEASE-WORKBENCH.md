@@ -50,6 +50,12 @@ free-state verification. `monome-session` remains legacy by default; the live
 Grid and Arc workbench slots explicitly send `protocol lease` at load so the
 A/B boundary stays visible.
 
+`tools/live_serialosc_lease.py` carries the same fail-closed boundary into
+physical acceptance. Its default `probe` is read-only. The separately named
+`expiry-test` refuses anything except a verified free device, sends a bounded
+map only after a grant and owner readback, omits renewal/release on purpose,
+and then requires free port-`0` readback after the deadline.
+
 ## Remaining boundary
 
 The fork worker and PlugData session are implemented. A separately rooted,

@@ -93,14 +93,27 @@ Candidate service verification proves only process identity and discovery-port
 ownership. Hardware acceptance remains separate:
 
 1. read-only discovery and lease-capability readback;
-2. standalone PlugData claim, renewal, output/input, orderly release, and
+2. one direct daemon expiry run that lights a free device, deliberately omits
+   renew/release, and verifies free port `0` afterward;
+3. standalone PlugData claim, renewal, output/input, orderly release, and
    expiry after forced client termination;
-3. one Grid, the other Grid, the Arc, and then all three together;
-4. hot-unplug and reconnect in each direction while surviving leases remain;
-5. Bitwig CLAP editor close/reopen and ordinary bypass;
-6. full PlugData plug-in-host termination, followed by daemon expiry, hardware
+4. one Grid, the other Grid, the Arc, and then all three together;
+5. hot-unplug and reconnect in each direction while surviving leases remain;
+6. Bitwig CLAP editor close/reopen and ordinary bypass;
+7. full PlugData plug-in-host termination, followed by daemon expiry, hardware
    darkening, and free port-`0` readback; and
-7. restoration of the accepted stable service if any gate fails.
+8. restoration of the accepted stable service if any gate fails.
+
+The direct read-only and expiry commands are:
+
+```sh
+python3 tools/live_serialosc_lease.py probe
+python3 tools/live_serialosc_lease.py expiry-test --serial SERIAL
+python3 tools/live_serialosc_lease.py expiry-test --serial ARC_SERIAL --arc-rings 4
+```
+
+The expiry harness never takes over a legacy or rival leased destination. It
+will act only after exact readback says `free` with port `0`.
 
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.
