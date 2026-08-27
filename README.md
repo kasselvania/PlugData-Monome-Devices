@@ -26,6 +26,10 @@ The workbench now contains `monome-discovery`, `monome-registry`,
 - emit the documented `clear`/`add`/`set` protocol for PlugData's
   `else/popmenu` object;
 - probe selected devices with non-mutating `/sys/info`;
+- optionally probe and claim the versioned SerialOSC lease extension without
+  silently falling back when it is unsupported;
+- renew leased destinations every two seconds under a six-second daemon TTL;
+- require an explicit `takeover` command for a legacy destination;
 - claim only after explicit selection and a successful probe;
 - verify host, port, prefix, and serial ID before reporting `connected`;
 - detect another application's destination as `displaced`;
@@ -84,10 +88,12 @@ device, both Grids, all three devices, active hot-swap in every direction,
 survivor preservation, deliberate standalone displacement, safe refusal by the
 displaced Bitwig session, fresh reclaim, and final all-dark port-`0` cleanup.
 
-One Bitwig lifecycle gate fails and remains explicit: fully deactivating the
+The accepted pre-lease Bitwig lifecycle has one explicit failure: fully deactivating the
 device terminates the isolated PlugData host before it can darken or release,
 leaving a stale SerialOSC callback and lit hardware. Guarded manual recovery
-passes; plug-in-process restart safety does not.
+passes; plug-in-process restart safety does not. The lease-enabled daemon and
+PlugData session are now implemented and deterministically tested, but this
+failure is not closed until the physical Bitwig process-death run passes.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -96,9 +102,10 @@ see [`docs/WORKBENCH-BUNDLE.md`](docs/WORKBENCH-BUNDLE.md). The division between
 this device layer, the SerialOSC lease fork, the Steam Deck installer, and the
 later musical patches is recorded in [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md).
 
-The feature lease workbench now executes the proposed version 1 contract in
-the fake SerialOSC server without changing the installed daemon or the legacy
-PlugData session path. See
+The feature lease workbench now executes the version 1 contract in the fake
+server and the opt-in PlugData session path. The live Grid and Arc slots select
+lease policy at load; the older smoke patches remain the legacy A/B lane. The
+installed macOS and Steam Deck services are still unchanged. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md).
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
@@ -136,6 +143,7 @@ dependencies:
 ```sh
 lua tests/registry_spec.lua
 lua tests/session_spec.lua
+lua tests/lease_session_spec.lua
 lua tests/grid_spec.lua
 lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
@@ -164,15 +172,19 @@ runs the same discovery automatically and exposes the current native-menu gate.
 
 For Step 2, open [`monome-session-help.pd`](monome-session-help.pd) for manual
 control or [`monome-session-smoke.pd`](monome-session-smoke.pd) for the nominal
-automated lifecycle. The contention and displacement smoke patches preserve
-the failure-path acceptance cases.
+legacy automated lifecycle. Use
+[`monome-session-lease-smoke.pd`](monome-session-lease-smoke.pd) for the
+lease-capable fake-server lifecycle. The contention and displacement smoke
+patches preserve the legacy failure-path acceptance cases.
 
 For Step 3, the 128, 256, and dual-device fake runs are
 [`monome-grid-smoke.pd`](monome-grid-smoke.pd),
 [`monome-grid-256-smoke.pd`](monome-grid-256-smoke.pd), and
 [`monome-grid-dual-smoke.pd`](monome-grid-dual-smoke.pd). Use
 [`monome-grid-live.pd`](monome-grid-live.pd) only for explicit physical-device
-acceptance against live SerialOSC. Use
+acceptance against the lease-enabled SerialOSC candidate. Its slots fail closed
+if lease capability is absent and expose `takeover` separately from `claim`.
+Use
 [`monome-grid-contender-live.pd`](monome-grid-contender-live.pd) only for a
 deliberate second-application displacement test; its isolated control port is
 selected with `tools/live_grid_control.py --port 18900`.
@@ -180,5 +192,5 @@ selected with `tools/live_grid_control.py --port 18900`.
 For Step 4, start the simulator with `--with-arc 4` and open
 [`monome-arc-smoke.pd`](monome-arc-smoke.pd). Use
 [`monome-arc-live.pd`](monome-arc-live.pd) only for explicit four-ring Arc
-physical acceptance. It uses separate loopback ports so it can later run beside
-the two-Grid workbench.
+physical acceptance against the lease candidate. It uses separate loopback
+ports so it can later run beside the two-Grid workbench.

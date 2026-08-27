@@ -12,6 +12,7 @@ PATCHES = (
     "monome-session.pd",
     "monome-session-help.pd",
     "monome-session-smoke.pd",
+    "monome-session-lease-smoke.pd",
     "monome-session-contention-smoke.pd",
     "monome-session-displacement-smoke.pd",
     "monome-grid.pd",
@@ -95,7 +96,9 @@ class PdPatchTests(unittest.TestCase):
         self.assertIn("netreceive -u 17901", live)
         self.assertIn("route select session arc discovery", live)
         self.assertIn("monome-arc-session \\$1 120 \\$2", slot)
-        self.assertIn("never auto-selects or auto-claims", slot)
+        self.assertIn("opts into leases", slot)
+        self.assertIn("protocol lease", slot)
+        self.assertIn("takeover", live)
 
     def test_capability_osc_enters_only_through_session_core(self) -> None:
         session_patch = (PROJECT_ROOT / "monome-session.pd").read_text()
@@ -124,6 +127,26 @@ class PdPatchTests(unittest.TestCase):
         self.assertEqual(live_patch.count("else/popmenu"), 2)
         self.assertIn("Device menus are populated dynamically", live_patch)
         self.assertIn("menu protocol", live_slot)
+        self.assertIn("protocol lease", live_slot)
+        self.assertIn("takeover", live_patch)
+
+    def test_session_transport_routes_lease_protocol_and_renewal_timer(self) -> None:
+        session_patch = (PROJECT_ROOT / "monome-session.pd").read_text()
+        for path in (
+            "/sys/lease/state",
+            "/sys/lease/granted",
+            "/sys/lease/renewed",
+            "/sys/lease/released",
+            "/sys/lease/rejected",
+            "/sys/lease/lost",
+        ):
+            self.assertIn(path, session_patch)
+        self.assertIn("lease_timer cancel_lease_timer", session_patch)
+        self.assertIn("list prepend lease_state", session_patch)
+
+        smoke = (PROJECT_ROOT / "monome-session-lease-smoke.pd").read_text()
+        self.assertIn("protocol lease", smoke)
+        self.assertIn("monome-session 17780 120", smoke)
 
     def test_discovery_normalizes_remove_notification_to_serial(self) -> None:
         discovery_patch = (PROJECT_ROOT / "monome-discovery.pd").read_text()

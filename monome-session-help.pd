@@ -22,6 +22,10 @@
 #X text 30 510 Clicking release while displaced must not overwrite the rival destination.;
 #X text 30 560 Callback 17780 is separate from discovery callback 17779.;
 #X text 30 590 This patch never touches live SerialOSC discovery port 12002.;
+#X msg 30 155 protocol lease;
+#X msg 155 155 protocol legacy;
+#X msg 290 155 takeover;
+#X text 30 625 Lease mode fails closed when unsupported. takeover is explicit and never implied by probe.;
 #X connect 2 0 11 0;
 #X connect 3 0 11 0;
 #X connect 4 0 11 0;
@@ -33,3 +37,6 @@
 #X connect 10 0 11 0;
 #X connect 11 0 12 0;
 #X connect 11 1 13 0;
+#X connect 23 0 11 0;
+#X connect 24 0 11 0;
+#X connect 25 0 11 0;

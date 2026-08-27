@@ -5,9 +5,9 @@ application-destination protocol from the
 [`kasselvania/serialosc`](https://github.com/kasselvania/serialosc/blob/feature/leased-destinations/docs/leased-destinations.md)
 fork.
 
-This is the executable contract for the daemon and PlugData changes. It does
-not claim that the installed macOS or Steam Deck SerialOSC service supports
-leases yet.
+This is the executable contract for the daemon and PlugData changes. The fork
+worker and opt-in `monome-session` policy now implement it; the installed
+macOS and Steam Deck SerialOSC services do not support leases yet.
 
 ## Covered behavior
 
@@ -37,9 +37,23 @@ python3 -m unittest -v tests/fake_serialosc_spec.py
 The test uses only loopback UDP and simulated LED state. It never opens USB
 hardware or live SerialOSC discovery port `12002`.
 
+The PlugData state-machine suite proves the corresponding client boundary:
+
+```sh
+lua tests/lease_session_spec.lua
+```
+
+It covers capability probing, fail-closed unsupported behavior, acquisition,
+explicit legacy takeover, rival refusal, grant readback, renewal and renewal
+timeout, token rejection, lost notification, release, and independent
+free-state verification. `monome-session` remains legacy by default; the live
+Grid and Arc workbench slots explicitly send `protocol lease` at load so the
+A/B boundary stays visible.
+
 ## Remaining boundary
 
-The production SerialOSC worker, PlugData `monome.session`, macOS service,
-Bitwig lifecycle, Steam Deck installer, and physical devices still use the
-legacy destination protocol. Those layers gain no lease claim until they pass
-their own implementation and acceptance steps.
+The fork worker and PlugData session are implemented but have not yet replaced
+either installed service. No physical device, PlugData standalone process,
+Bitwig plug-in host, or Steam Deck service has passed the lease candidate.
+Those layers gain no crash-safe claim until their own readback and
+process-death acceptance steps pass.

@@ -49,6 +49,7 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "docs/WORKBENCH-BUNDLE.md",
                 "monome-discovery.pd",
                 "monome-session.pd",
+                "monome-session-lease-smoke.pd",
                 "monome_session.lua",
                 "monome-grid.pd",
                 "monome_grid.lua",
@@ -57,6 +58,7 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "tools/fake_serialosc.py",
                 "tools/build_workbench_bundle.sh",
                 "tests/session_spec.lua",
+                "tests/lease_session_spec.lua",
                 "tests/workbench_bundle_spec.py",
                 "patches/serialosc-null-port.patch",
             }

@@ -51,8 +51,10 @@
 #X obj 830 920 list trim;
 #X obj 970 920 list trim;
 #X obj 1110 920 print live-control;
+#X msg 750 280 takeover;
+#X msg 1380 280 takeover;
 #X text 30 650 LIVE SerialOSC Grid workbench. Load starts discovery and both callback transports only.;
-#X text 30 680 Slot A and B each require explicit dropdown selection then probe then claim.;
+#X text 30 680 Slot A and B each require selection then probe then claim from free \, or explicit takeover from legacy.;
 #X text 30 710 Use one slot for sequential 128/256 tests or both slots for simultaneous Grids.;
 #X text 30 740 release always asks the Grid layer to darken its valid surface before /sys/port 0.;
 #X text 30 770 Device menus are populated dynamically from each slot's identity-based registry.;
@@ -118,3 +120,5 @@
 #X connect 48 0 7 2;
 #X connect 49 0 7 3;
 #X connect 50 0 3 0;
+#X connect 52 0 6 2;
+#X connect 53 0 7 2;

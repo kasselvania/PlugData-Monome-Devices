@@ -18,12 +18,14 @@
 #X obj 430 600 outlet;
 #X obj 630 600 outlet;
 #X obj 830 600 outlet;
+#X obj 780 440 loadbang;
+#X msg 780 475 protocol lease;
 #X text 28 17 Discovery registry protocol.;
 #X text 207 17 Explicit registry selection.;
 #X text 387 17 Session commands.;
 #X text 567 17 Arc LED commands.;
 #X text 28 550 Outlets: encoder events / session status / Arc status / registry events / menu protocol.;
-#X text 28 520 This workbench slot never auto-selects or auto-claims.;
+#X text 28 520 This workbench slot opts into leases but never auto-selects \, auto-takes-over \, or auto-claims.;
 #X text 28 490 Creation arguments: callback port and explicit 2- or 4-ring count.;
 #X connect 0 0 4 0;
 #X connect 1 0 4 0;
@@ -46,3 +48,5 @@
 #X connect 13 1 15 0;
 #X connect 13 2 16 0;
 #X connect 4 1 18 0;
+#X connect 19 0 20 0;
+#X connect 20 0 13 0;

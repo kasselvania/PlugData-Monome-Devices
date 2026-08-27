@@ -93,12 +93,25 @@ function MonomeSessionCore:in_1_prefix(atoms)
     self:_call("set_prefix", atoms[1])
 end
 
+function MonomeSessionCore:in_1_protocol(atoms)
+    if #atoms ~= 1 then
+        self.session:_error("protocol_requires_value")
+        self:_dispatch()
+        return
+    end
+    self:_call("set_protocol", atoms[1])
+end
+
 function MonomeSessionCore:in_1_probe()
     self:_call("probe")
 end
 
 function MonomeSessionCore:in_1_claim()
     self:_call("claim")
+end
+
+function MonomeSessionCore:in_1_takeover()
+    self:_call("takeover")
 end
 
 function MonomeSessionCore:in_1_check()
@@ -120,6 +133,10 @@ end
 
 function MonomeSessionCore:in_1_release()
     self:_call("release")
+end
+
+function MonomeSessionCore:in_1_renew()
+    self:_call("renew")
 end
 
 function MonomeSessionCore:in_1_transport_ready()
@@ -156,6 +173,30 @@ end
 
 function MonomeSessionCore:in_1_info_end()
     self:_call("info_end")
+end
+
+function MonomeSessionCore:in_1_lease_state(atoms)
+    self:_call("lease_state", atoms)
+end
+
+function MonomeSessionCore:in_1_lease_granted(atoms)
+    self:_call("lease_granted", atoms[1], atoms[2])
+end
+
+function MonomeSessionCore:in_1_lease_renewed(atoms)
+    self:_call("lease_renewed", atoms[1], atoms[2])
+end
+
+function MonomeSessionCore:in_1_lease_released(atoms)
+    self:_call("lease_released", atoms[1])
+end
+
+function MonomeSessionCore:in_1_lease_rejected(atoms)
+    self:_call("lease_rejected", atoms[1], atoms[2])
+end
+
+function MonomeSessionCore:in_1_lease_lost(atoms)
+    self:_call("lease_lost", atoms[1], atoms[2])
 end
 
 function MonomeSessionCore:in_1_bang()

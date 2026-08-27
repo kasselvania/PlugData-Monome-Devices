@@ -30,8 +30,9 @@
 #X obj 430 760 list trim;
 #X obj 595 760 list trim;
 #X obj 760 760 print live-arc-control;
+#X msg 810 290 takeover;
 #X text 30 600 LIVE SerialOSC four-ring Arc workbench. Loading starts discovery and callback transport only.;
-#X text 30 625 Select the stable-ID menu entry then probe then claim. Ring count is explicitly fixed at four.;
+#X text 30 625 Select the stable-ID entry then probe then claim from free or explicitly take over legacy. Ring count is four.;
 #X text 30 650 release sends four all-dark maps before verified /sys/port 0.;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
@@ -68,3 +69,4 @@
 #X connect 27 0 5 2;
 #X connect 28 0 5 3;
 #X connect 29 0 3 0;
+#X connect 31 0 5 2;

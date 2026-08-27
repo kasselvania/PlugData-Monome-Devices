@@ -9,6 +9,27 @@ matches the session.
 This workbench uses fake per-device servers. It does not open USB devices or
 send anything to live SerialOSC discovery port `12002`.
 
+## Destination policies
+
+`monome-session` retains the accepted legacy behavior by default. Before a
+probe, a caller may explicitly select:
+
+```text
+protocol legacy
+protocol lease
+```
+
+Lease policy sends both non-mutating `/sys/info` and `/sys/lease/info` during
+probe. Missing lease capability fails closed; it never falls back to legacy.
+`claim` acquires only a `free` destination. A probed `legacy` destination
+requires the separate `takeover` command, and a different active lease is
+always refused. A verified lease uses a 6000 ms TTL renewed every 2000 ms.
+Release is complete only after `/sys/lease/released` (or `no_lease`) is
+followed by an independent `free`, port-`0` state readback.
+
+The live Grid and Arc slots opt into lease policy automatically. Existing fake
+smoke patches remain on legacy policy as the regression lane.
+
 ## Ports
 
 - `12012` — fake discovery server;
@@ -27,8 +48,10 @@ Commands accepted by `monome-session <callback-port> <info-window-ms>`:
 start
 select <serial-id> <model> <device-server-port>
 prefix <osc-prefix>
+protocol <legacy|lease>
 probe
 claim
+takeover
 check
 release
 deselect
@@ -152,6 +175,7 @@ It must send no probe or claim to the device server.
 
 ```sh
 lua tests/session_spec.lua
+lua tests/lease_session_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 luac -p monome_session.lua monome-session-core.pd_lua
@@ -163,6 +187,10 @@ displacement, process-local contention, removal, stale self-destination
 recovery after same-ID reconnect, refusal to overwrite a rival destination,
 callback readiness, and incomplete readback. Python tests exercise the actual
 loopback OSC wire behavior of the fake device server.
+
+The lease suite separately covers unsupported capability, free acquire,
+explicit legacy takeover, rival refusal, exact grant and release readback,
+renewal, renewal timeout, rejection, lost notification, and grant timeout.
 
 ## Acceptance boundary
 

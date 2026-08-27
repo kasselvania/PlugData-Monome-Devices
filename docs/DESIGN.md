@@ -19,8 +19,10 @@ path, device-server port, and menu index are not identity.
 - A device is claimed only after explicit user selection and `claim`.
 - No device is silently replaced because another device was added or removed.
 - Connection truth comes from SerialOSC readback, not a button or menu label.
-- SerialOSC has one outgoing application destination per device but no atomic
-  lock. The UI therefore says **claimed** or **displaced**, never **locked**.
+- Legacy SerialOSC has one last-writer application destination per device.
+  Lease-capable SerialOSC adds cooperative callback ownership and expiry, not
+  authentication or a hardware ACL. The UI therefore says **claimed** or
+  **displaced**, never **locked**.
 - Every internal Pd send/receive is instance-scoped; global names are forbidden.
 - Grid and Arc capabilities have separate output paths.
 - Demos consume the public device API and never manage SerialOSC themselves.
@@ -76,12 +78,13 @@ absent -> available -> probing -> available
                           release intent -> available
 ```
 
-It probes `/sys/info` before claiming, changes host/port/prefix only during an
-explicit claim, verifies readback, detects displacement, and releases only if
-it is still the current destination. A verified release sends `/sys/port 0`;
-it does not delete SerialOSC preferences. Grid and Arc capability owners must
-darken their valid surfaces before requesting release rather than making the
-generic session layer guess an LED protocol.
+It supports an accepted legacy policy and an opt-in lease policy. Both probe
+before claiming and require exact readback. Lease mode fails closed when the
+daemon extension is absent, renews a verified token, requires explicit
+takeover of a legacy destination, and independently verifies free state after
+release. Legacy mode retains verified `/sys/port 0` release. Grid and Arc
+capability owners still darken their valid surfaces before requesting release;
+daemon expiry supplies the crash path when client cleanup cannot run.
 
 ### `monome.grid`
 
