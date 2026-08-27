@@ -238,8 +238,13 @@ directions, and released independently to port `0`. Both Grids and the Arc then
 passed the all-three standalone slice: distinct claims and input/output routes,
 fresh ownership checks, active removal and same-ID recovery of each device,
 unchanged verified survivors in every direction, and independent dark release
-to port `0`. See `docs/THREE-DEVICE-ACCEPTANCE.md`. All Bitwig
-lifecycle/contention gates remain open.
+to port `0`. See `docs/THREE-DEVICE-ACCEPTANCE.md`. On 2026-08-27, the pinned
+PlugData candidate at commit `98ae0f78` passed the host editor preflight in
+Bitwig 6.1: five CLAP and three VST3 close/reopen cycles retained their
+respective plug-in-host processes with no new crash report. No Monome patch or
+hardware was exercised inside Bitwig. Transport, bypass, save/reload, process
+restart, physical device, and standalone-versus-Bitwig contention gates remain
+open. See `docs/PLUGDATA-BITWIG-AB.md`.
 
 ### Step 6 — Demos and package
 
@@ -259,11 +264,13 @@ SerialOSC job remains stopped. The older 1.4.1 Intel launch job is preserved
 but disabled. Service verification and physical Grid results remain separate
 acceptance layers.
 
-The installed PlugData standalone is the official 0.9.4 nightly from successful
-run `32892289806`, commit `6bb2b60c8`. It launches, loads the workbench, and
-passes the dynamic-menu gate. The installed VST3 remains a separate stale
-compatibility lane and no Bitwig plugin claim is made. See
-`docs/PLUGDATA-MACOS.md`.
+The physical standalone record was produced with the official 0.9.4 nightly
+from run `32892289806`, commit `6bb2b60c8`. The currently installed host
+candidate is the official 0.9.4 package from run `27418767000`, commit
+`98ae0f78`; it passes the standalone dynamic-menu smoke and the bounded Bitwig
+CLAP/VST3 editor-lifecycle preflight. It has not yet run the Monome patch or
+hardware inside Bitwig. See `docs/PLUGDATA-MACOS.md` and
+`docs/PLUGDATA-BITWIG-AB.md`.
 
 Fake-server acceptance remains the deterministic regression layer. It exposes
 the same `/sys/info`, `/sys/host`, `/sys/port`, `/sys/prefix`,

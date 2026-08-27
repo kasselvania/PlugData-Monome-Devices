@@ -65,6 +65,10 @@ SerialOSC destination ownership is cooperative state verified through
 workbench detects and verifies the destination it owns, detaches on removal,
 and does not claim a rival destination as its own.
 
-The remaining physical gate is the Bitwig CLAP lifecycle and contention slice:
-load, close/reopen, stopped transport, bypass, save/reload, plugin-process
-restart, and displacement between PlugData standalone and Bitwig.
+The pinned PlugData candidate at commit `98ae0f78` has passed a hardware-free
+Bitwig editor preflight: five CLAP and three VST3 close/reopen cycles without a
+plug-in-host restart or new crash report. The remaining physical gate is to
+load the Monome patch in Bitwig and cover stopped transport, bypass,
+save/reload, intentional plug-in-process restart, device combinations, and
+displacement between PlugData standalone and Bitwig. See
+`docs/PLUGDATA-BITWIG-AB.md`.

@@ -225,6 +225,10 @@ function Session:select(serial, model, port)
         return self:_error("request_in_progress")
     end
 
+    local previous = self.selected
+    local endpoint_changed = previous ~= nil
+        and (previous.serial ~= serial or previous.port ~= port)
+
     if self.selected and self.selected.serial ~= serial
         and (self.state == "connected" or self.state == "claiming"
             or self.state == "releasing") then
@@ -250,7 +254,12 @@ function Session:select(serial, model, port)
         and self.state ~= "releasing" then
         self:_set_state("available", "selected")
     end
-    self:_emit("control", "connect", { self.device_host, port })
+    if endpoint_changed then
+        self:_emit("control", "disconnect", {})
+    end
+    if previous == nil or endpoint_changed then
+        self:_emit("control", "connect", { self.device_host, port })
+    end
     self:_emit("status", "selected", { serial, model, port })
     return true
 end

@@ -65,18 +65,20 @@ routing, removal and recovery in both directions, surviving-session checks,
 and isolated port-`0` release.
 
 The Arc core, Pd-Lua bridge, session composition, fake device server, smoke
-patch, and four-ring live workbench are now implemented. The installed
-PlugData nightly passed the deterministic fake lifecycle and the physical
-four-ring Arc passed discovery, non-mutating probe, verified claim, independent
-ring/position output, encoder deltas in both directions, all-dark cleanup,
-verified destination port `0`, released reconnect, and active-claim
+patch, and four-ring live workbench are now implemented. The accepted
+standalone PlugData nightly passed the deterministic fake lifecycle, and the
+physical four-ring Arc passed discovery, non-mutating probe, verified claim,
+independent ring/position output, encoder deltas in both directions, all-dark
+cleanup, verified destination port `0`, released reconnect, and active-claim
 hot-unplug recovery. The physical reconnect exposed SerialOSC's retained
 callback destination; the session now verifies and releases that exact stale
 self-destination without touching a rival destination. The two Grids and Arc
 have now passed simultaneous standalone claims, isolated output and input,
 ownership checks, active removal/recovery in every direction, survivor checks,
-and independent release to port `0`. Bitwig lifecycle and contention
-acceptance remains open.
+and independent release to port `0`. A pinned 2026-06-12 PlugData candidate
+now also passes the native discovery-menu smoke plus five Bitwig CLAP and three
+VST3 editor close/reopen cycles without restarting either plug-in host. The
+Bitwig patch, hardware, save/reload, restart, and contention gates remain open.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -87,10 +89,13 @@ smoke patches, live controls, and the physical acceptance boundary.
 [`docs/ARC-WORKBENCH.md`](docs/ARC-WORKBENCH.md) covers the explicit Arc API,
 fake smoke run, and live controls. The exact simultaneous hardware record is
 in [`docs/THREE-DEVICE-ACCEPTANCE.md`](docs/THREE-DEVICE-ACCEPTANCE.md).
+The exact moving-nightly-versus-pinned-candidate record is in
+[`docs/PLUGDATA-BITWIG-AB.md`](docs/PLUGDATA-BITWIG-AB.md).
 
 ## Requirements
 
-- PlugData official nightly `0.9.4`; known-good commit `6bb2b60c8`
+- PlugData official `0.9.4` candidate, commit `98ae0f78`, for the current
+  standalone-menu and Bitwig editor-lifecycle lane
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 
@@ -112,6 +117,7 @@ lua tests/session_spec.lua
 lua tests/grid_spec.lua
 lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
+python3 -m unittest -v tests/live_serialosc_state_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 python3 -m unittest -v tests/macos_serialosc_spec.py
 luac -p monome_registry.lua monome-registry.pd_lua \
@@ -122,6 +128,11 @@ luac -p monome_registry.lua monome-registry.pd_lua \
 
 The Python tests bind only ephemeral loopback UDP ports. The simulator itself
 refuses live SerialOSC port `12002`.
+
+For an independent, non-mutating readback during physical host tests, run
+`python3 tools/live_serialosc_state.py`. It discovers the live devices and
+prints each device server plus its current destination, prefix, rotation, and
+reported size without claiming or releasing anything.
 
 Run `python3 tools/fake_serialosc.py`, then open
 [`monome-discovery-help.pd`](monome-discovery-help.pd) in PlugData for the

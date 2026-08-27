@@ -25,7 +25,7 @@ The identifying report signature is:
 - launch lifetime under one second;
 - shell/Codex/ChatGPT shown as parent, responsible process, or coalition.
 
-## Version decision (2026-08-25)
+## Standalone version decision (2026-08-25)
 
 Use the installed official macOS Universal nightly from successful run
 `32892289806`, commit
@@ -34,9 +34,9 @@ Use the installed official macOS Universal nightly from successful run
 LaunchServices, loads the Pd-Lua workbench, and passes the native dynamic-menu
 gate below.
 
-This exact build is the known-good development basis. A moving nightly should
-not be treated as equivalent merely because it also reports `0.9.4`; re-run
-the menu and workbench smoke gates after updating.
+This exact build is the historical standalone physical-acceptance basis. A
+moving nightly should not be treated as equivalent merely because it also
+reports `0.9.4`; re-run the menu and workbench smoke gates after updating.
 
 An earlier nightly from run `32880948901`, commit `28cd449b1555e01d`, crashed
 in `Fonts::Fonts()` before opening a window. That failure is historical and
@@ -56,9 +56,24 @@ The same probe remains a documented failure on stable 0.9.3. That distinction
 is why the repository records an exact known-good nightly rather than a bare
 version number.
 
+## Bitwig candidate decision (2026-08-27)
+
+The moving `0.9.4` nightly installed on 2026-08-27 crashed Bitwig's isolated
+CLAP host when its editor was closed. The workbench now uses the complete
+official macOS package from run `27418767000`, commit `98ae0f78ba43d17f`, as
+the pinned host-compatibility candidate. That package passes the standalone
+native-menu smoke, five CLAP editor close/reopen cycles, and three VST3 editor
+close/reopen cycles. See [`PLUGDATA-BITWIG-AB.md`](PLUGDATA-BITWIG-AB.md) for
+artifact hashes, crash signatures, exact scope, and remaining gates.
+
+The June candidate has not inherited the later build's physical-device
+acceptance by implication. Hardware and standalone-versus-Bitwig contention
+remain separate tests.
+
 References:
 
 - <https://plugdata.org/download>
 - <https://github.com/plugdata-team/plugdata/releases/tag/v0.9.3-2>
 - <https://github.com/plugdata-team/plugdata/actions/runs/32892289806>
+- <https://github.com/plugdata-team/plugdata/actions/runs/27418767000>
 - <https://github.com/porres/pd-else/blob/master/Documentation/Help-files/popmenu-help.pd>

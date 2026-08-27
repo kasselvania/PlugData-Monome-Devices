@@ -112,6 +112,26 @@ test("probe is non-mutating and records observed destination", function()
     assert(find(outputs, "status", "probed"))
 end)
 
+test("changing an available selection reconnects the device sender", function()
+    local target = session("selection-switch")
+    ready_and_select(target, "m100", 17001)
+
+    assert(target:select("m200", "monome zero", 17002))
+    local outputs = target:drain()
+    local controls = {}
+    for _, output in ipairs(outputs) do
+        if output.channel == "control" then
+            table.insert(controls, output)
+        end
+    end
+
+    equal(#controls, 2)
+    equal(controls[1].selector, "disconnect")
+    equal(controls[2].selector, "connect")
+    equal(controls[2].atoms[1], "127.0.0.1")
+    equal(controls[2].atoms[2], 17002)
+end)
+
 test("probe accepts an explicit zero-by-zero non-Grid surface", function()
     local target = session("arc")
     ready_and_select(target, "a100", 17003)
