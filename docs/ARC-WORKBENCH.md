@@ -111,10 +111,34 @@ Ports are loopback-only:
 The dedicated ports allow this patch to run beside the existing two-Grid live
 workbench for later Grid-plus-Arc and all-three-device acceptance.
 
-## Remaining physical gate
+## Physical acceptance
 
-No physical Arc claim is made yet. The first hardware run must record the real
-stable ID, model string, `/sys/info` fields, and released destination before
-mutating anything. Then it must prove all four rings, distinct ring/position
-output, encoder delta routing, all-dark cleanup, verified release, unplug and
-same-ID reconnect. Key input is not required for the available buttonless Arc.
+The physical four-ring Arc passed its PlugData standalone gate on 2026-08-26:
+
+- stable ID `m1001113`, model `monome arc`, device-server port `18226`;
+- `/sys/info` reported host `127.0.0.1`, rotation `0`, and the Arc-specific
+  zero-by-zero size `0 0`;
+- the initial non-mutating probe preserved the pre-existing `/bitwig:19996`
+  destination before the explicit claim;
+- the verified claim moved the destination to `127.0.0.1:17782` with prefix
+  `/monome` and initialized all four rings dark;
+- all-ring level output, isolated ring `0`/position `0` and ring `3`/position
+  `63` output, positive encoder-`0` deltas, and negative encoder-`3` deltas
+  were physically confirmed;
+- orderly release sent four dark maps before verified `/sys/port 0`;
+- released unplug/reconnect restored the same stable identity at port `0`;
+- active-claim unplug removed only the Arc while both Grids remained
+  registered and capability commands failed closed with `no_device_selected`;
+  and
+- active-claim reconnect retained SerialOSC's stale `17782` destination. A
+  fresh probe plus guarded release verified that it still matched this
+  workbench, then set and read back port `0`.
+
+That last case is now a session regression: a release from `available` may
+adopt a stale destination only when fresh `/sys/info` matches the session's
+bound host, callback port, prefix, and stable ID. It performs a second readback
+before sending `/sys/port 0`. A nonzero destination belonging to another app
+is reported as `release_skipped destination_not_owned` and is never changed.
+
+Key input is not required for this buttonless Arc. Grid-plus-Arc,
+all-three-device, and Bitwig lifecycle/contention acceptance remain open.

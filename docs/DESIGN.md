@@ -213,8 +213,13 @@ validation, delta and optional key normalization, duplicate-key suppression,
 synthetic held-key release, stale-buffer clearing, and four all-dark maps
 before verified `/sys/port 0` release. The accepted PlugData nightly completed
 the fake four-ring lifecycle and input-routing pass with independent all-dark
-and port-`0` simulator readback. Physical four-ring Arc acceptance remains
-open and is not inferred from the simulator.
+and port-`0` simulator readback. The physical four-ring Arc then passed stable
+identity and zero-by-zero `/sys/info`, explicit claim, all-ring and isolated
+position output, signed encoder input, orderly dark/release, released
+reconnect, and active-claim hot-unplug recovery. The active reconnect exposed
+a retained self callback; the repaired session requires a fresh exact probe
+and a second ownership readback before clearing it to port `0`, while a rival
+destination remains untouched.
 
 ### Step 5 — Host and hot-swap acceptance
 

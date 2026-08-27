@@ -112,6 +112,39 @@ test("probe is non-mutating and records observed destination", function()
     assert(find(outputs, "status", "probed"))
 end)
 
+test("probe accepts an explicit zero-by-zero non-Grid surface", function()
+    local target = session("arc")
+    ready_and_select(target, "a100", 17003)
+
+    assert(target:probe())
+    target:drain()
+    feed_info(target, {
+        id = "a100",
+        size = { 0, 0 },
+        port = 19996,
+        prefix = "/bitwig",
+    })
+    assert(target:info_end())
+    local outputs = target:drain()
+    equal(target.observed.width, 0)
+    equal(target.observed.height, 0)
+    assert(find(outputs, "status", "probed"))
+    equal(find(outputs, "status", "error"), nil)
+end)
+
+test("probe rejects mixed zero surface dimensions", function()
+    local target = session("invalid-size")
+    ready_and_select(target)
+    assert(target:probe())
+    target:drain()
+
+    local ok, err = target:info("size", { 0, 4 })
+    equal(ok, nil)
+    equal(err, "invalid_info_size")
+    equal(target.info_fields.width, nil)
+    equal(target.info_fields.height, nil)
+end)
+
 test("claim requires a completed probe", function()
     local target = session("one")
     ready_and_select(target)
@@ -268,6 +301,52 @@ test("device removal clears process ownership and selected identity", function()
     equal(target.state, "absent")
     equal(target.selected, nil)
     equal(claims:owner("m100"), nil)
+end)
+
+test("same-ID reconnect can verify and release its stale callback", function()
+    local claims = Core.ClaimRegistry.new()
+    local target = session("one", claims)
+    ready_and_select(target)
+    complete_probe(target)
+    complete_claim(target)
+
+    assert(target:device_removed("m100"))
+    target:drain()
+    equal(target.state, "absent")
+    equal(claims:owner("m100"), nil)
+
+    assert(target:select("m100", "monome 128", 17002))
+    target:drain()
+    complete_probe(target, { port = 17780 })
+    equal(target.state, "available")
+
+    assert(target:release())
+    local outputs = target:drain()
+    equal(osc_addresses(outputs), "/sys/info")
+    equal(target.state, "releasing")
+    equal(claims:owner("m100"), "one")
+
+    feed_info(target, { port = 17780 })
+    assert(target:info_end())
+    outputs = target:drain()
+    equal(osc_addresses(outputs), "/sys/port")
+    equal(find(outputs, "osc", "/sys/port").atoms[1], 0)
+    equal(target.state, "available")
+    equal(target.observed.port, 0)
+    equal(claims:owner("m100"), nil)
+end)
+
+test("available release never overwrites another destination", function()
+    local target = session("one")
+    ready_and_select(target)
+    complete_probe(target, { port = 19000, prefix = "/rival" })
+
+    assert(target:release())
+    local outputs = target:drain()
+    equal(osc_addresses(outputs), "")
+    equal(find(outputs, "status", "released"), nil)
+    assert(find(outputs, "status", "release_skipped"))
+    equal(target.state, "available")
 end)
 
 test("transport readiness and stop are fail closed", function()

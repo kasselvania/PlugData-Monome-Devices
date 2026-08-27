@@ -47,6 +47,11 @@ local function valid_prefix(value)
         and value:sub(-1) ~= "/"
 end
 
+local function valid_size(width, height)
+    return is_integer(width) and is_integer(height)
+        and ((width == 0 and height == 0) or (width >= 1 and height >= 1))
+end
+
 local function copy_info(info)
     if not info then
         return nil
@@ -411,9 +416,43 @@ function Session:release()
     end
 
     if self.state == "available" then
-        self:_emit("status", "released", {
-            self.selected.serial, "already_released",
-        })
+        if not self.observed then
+            return self:_error("probe_required")
+        end
+
+        if self:_matches_claim(self.observed) then
+            local ready, err = self:_ready_for_request()
+            if not ready then
+                return self:_error(err)
+            end
+            local acquired, claim_err = self.claims:acquire(
+                self.selected.serial, self.owner
+            )
+            if not acquired then
+                return self:_error(claim_err, { self.selected.serial })
+            end
+            self.acquired = true
+            self:_set_state("releasing", "stale_self_destination")
+            self:_emit("status", "release", {
+                "begin", self.selected.serial, "stale_self_destination",
+            })
+            self:_request_info("release")
+            return true
+        end
+
+        if self.observed.port == 0 then
+            self:_emit("status", "released", {
+                self.selected.serial, "verified_already_zero",
+            })
+        else
+            self:_emit("status", "release_skipped", {
+                self.selected.serial,
+                "destination_not_owned",
+                self.observed.host,
+                self.observed.port,
+                self.observed.prefix,
+            })
+        end
         return true
     end
     if self.state == "displaced" then
@@ -462,8 +501,7 @@ function Session:info(field, atoms)
         end
         self.info_fields.rotation = atoms[1]
     elseif field == "size" then
-        if #atoms ~= 2 or not is_integer(atoms[1]) or not is_integer(atoms[2])
-            or atoms[1] < 1 or atoms[2] < 1 then
+        if #atoms ~= 2 or not valid_size(atoms[1], atoms[2]) then
             return self:_error("invalid_info_size")
         end
         self.info_fields.width = atoms[1]

@@ -30,6 +30,8 @@ The workbench now contains `monome-discovery`, `monome-registry`,
 - verify host, port, prefix, and serial ID before reporting `connected`;
 - detect another application's destination as `displaced`;
 - release with `/sys/port 0` only after ownership still matches;
+- recover a stale self-destination after an active USB unplug only after a
+  fresh exact readback, without overwriting another application's destination;
 - refuse two claims for the same serial inside one PlugData process;
 - normalize 128 and 256 Grid key events through one capability API;
 - coalesce 0-15 LED state into dirty 8-by-8 level maps;
@@ -64,10 +66,14 @@ and isolated port-`0` release.
 
 The Arc core, Pd-Lua bridge, session composition, fake device server, smoke
 patch, and four-ring live workbench are now implemented. The installed
-PlugData nightly passed the deterministic fake lifecycle with normalized
-encoder delta and optional key input, four-ring LED maps, all-dark cleanup,
-verified destination port `0`, and independent all-dark simulator readback.
-Physical Arc and Bitwig acceptance are still pending.
+PlugData nightly passed the deterministic fake lifecycle and the physical
+four-ring Arc passed discovery, non-mutating probe, verified claim, independent
+ring/position output, encoder deltas in both directions, all-dark cleanup,
+verified destination port `0`, released reconnect, and active-claim
+hot-unplug recovery. The physical reconnect exposed SerialOSC's retained
+callback destination; the session now verifies and releases that exact stale
+self-destination without touching a rival destination. Grid-plus-Arc,
+all-three-device, and Bitwig acceptance remain open.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)

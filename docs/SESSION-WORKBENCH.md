@@ -159,9 +159,10 @@ luac -p monome_session.lua monome-session-core.pd_lua
 
 The session core suite covers non-mutating probe, probe-before-claim, verified
 claim, claim mismatch, displacement, verified release, release after
-displacement, process-local contention, removal, callback readiness, and
-incomplete readback. Python tests exercise the actual loopback OSC wire
-behavior of the fake device server.
+displacement, process-local contention, removal, stale self-destination
+recovery after same-ID reconnect, refusal to overwrite a rival destination,
+callback readiness, and incomplete readback. Python tests exercise the actual
+loopback OSC wire behavior of the fake device server.
 
 ## Acceptance boundary
 
@@ -194,12 +195,14 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
   with distinct 16-by-16 and 16-by-8 readback;
 - surviving-session verification and live output after removing either Grid;
 - same-ID rediscovery, re-probe, and re-claim in both pair-removal directions;
-  and
 - isolated orderly release of each Grid to port `0` while the other session
-  remained verified.
+  remained verified;
+- physical Arc probe, claim, ring output, signed encoder input, all-dark
+  cleanup, verified release, and same-ID reconnect; and
+- physical active-claim Arc unplug followed by exact stale-self-destination
+  recovery and verified port-`0` readback while both Grids remained present.
 
 Still open:
 
-- physical Arc session acceptance;
-- Arc encoder/ring capability;
+- Grid-plus-Arc and all-three-device acceptance;
 - standalone-versus-Bitwig contention.
