@@ -43,6 +43,7 @@ class WorkbenchBundleSpec(unittest.TestCase):
             required = {
                 "README.md",
                 "docs/DESIGN.md",
+                "docs/LEASE-WORKBENCH.md",
                 "docs/PROJECT-MAP.md",
                 "docs/PLUGDATA-BITWIG-AB.md",
                 "docs/WORKBENCH-BUNDLE.md",

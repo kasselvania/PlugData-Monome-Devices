@@ -72,6 +72,17 @@ class RunningDevice:
         self.thread.join(timeout=1)
 
 
+class ManualClock:
+    def __init__(self) -> None:
+        self.value = 100.0
+
+    def __call__(self) -> float:
+        return self.value
+
+    def advance_ms(self, milliseconds: int) -> None:
+        self.value += milliseconds / 1000
+
+
 def receive(callback: socket.socket) -> tuple[str, tuple[object, ...]]:
     packet, _ = callback.recvfrom(65535)
     return decode_message(packet)
@@ -258,6 +269,417 @@ class FakeSerialOSCTests(unittest.TestCase):
             )
             replies = dict(receive(callback) for _ in range(6))
             self.assertEqual(replies["/sys/port"], (0,))
+
+    def test_lease_info_reports_versioned_free_and_owned_state(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        clock = ManualClock()
+        with FakeDeviceServer(device, clock=clock) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+
+            server.handle_packet(encode_message("/sys/lease/info", host, port))
+            self.assertEqual(
+                receive(callback),
+                (
+                    "/sys/lease/state",
+                    (1, "m100", "free", "127.0.0.1", 0, "/monome", 0, 0),
+                ),
+            )
+
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/plugdata",
+                    6000,
+                )
+            )
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/granted", ("session-a", 6000)),
+            )
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/info", "session-a", host, port
+                )
+            )
+            state = receive(callback)
+            self.assertEqual(state[0], "/sys/lease/state")
+            self.assertEqual(
+                state[1],
+                (
+                    1,
+                    "m100",
+                    "leased",
+                    host,
+                    port,
+                    "/plugdata",
+                    6000,
+                    1,
+                ),
+            )
+
+    def test_lease_acquire_is_atomic_dark_and_nonpersistent(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        clock = ManualClock()
+        with FakeDeviceServer(device, clock=clock) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            server.handle_packet(
+                encode_message(
+                    "/monome/grid/led/level/map", 0, 0, *([15] * 64)
+                )
+            )
+            host, port = callback.getsockname()
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/plugdata",
+                    6000,
+                )
+            )
+
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/granted", ("session-a", 6000)),
+            )
+            self.assertTrue(server.all_dark())
+            self.assertEqual(
+                (server.destination_host, server.destination_port, server.prefix),
+                (host, port, "/plugdata"),
+            )
+            self.assertEqual(server.persistent_destination_port, 0)
+            self.assertEqual(
+                server.lease_events[:2],
+                [("dark", "acquire"), ("leased", "acquire")],
+            )
+
+    def test_lease_requires_explicit_legacy_takeover(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            server.set_destination("127.0.0.1", 19999, "/legacy")
+            host, port = callback.getsockname()
+            request = (
+                "session-a",
+                host,
+                port,
+                "/plugdata",
+                6000,
+            )
+
+            server.handle_packet(encode_message("/sys/lease/acquire", *request))
+            self.assertEqual(
+                receive(callback),
+                (
+                    "/sys/lease/rejected",
+                    ("session-a", "legacy_destination"),
+                ),
+            )
+            self.assertEqual(server.destination_port, 19999)
+            self.assertIsNone(server.lease_token)
+
+            server.handle_packet(encode_message("/sys/lease/takeover", *request))
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/granted", ("session-a", 6000)),
+            )
+            self.assertEqual(server.destination_port, port)
+            self.assertEqual(server.lease_token, "session-a")
+
+    def test_lease_token_guards_retry_renew_and_release(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        clock = ManualClock()
+        with FakeDeviceServer(device, clock=clock) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as owner, bind_callback("127.0.0.1", 0) as contender:
+            owner.settimeout(1)
+            contender.settimeout(1)
+            host, port = owner.getsockname()
+            request = (
+                "session-a",
+                host,
+                port,
+                "/plugdata",
+                6000,
+            )
+            server.handle_packet(encode_message("/sys/lease/acquire", *request))
+            self.assertEqual(receive(owner)[0], "/sys/lease/granted")
+
+            clock.advance_ms(1000)
+            server.handle_packet(encode_message("/sys/lease/acquire", *request))
+            self.assertEqual(
+                receive(owner),
+                ("/sys/lease/granted", ("session-a", 6000)),
+            )
+            self.assertEqual(server.remaining_lease_ms(), 6000)
+
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/different",
+                    6000,
+                )
+            )
+            self.assertEqual(
+                receive(owner),
+                (
+                    "/sys/lease/rejected",
+                    ("session-a", "claim_mismatch"),
+                ),
+            )
+
+            other_host, other_port = contender.getsockname()
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-b",
+                    other_host,
+                    other_port,
+                    "/other",
+                    6000,
+                )
+            )
+            self.assertEqual(
+                receive(contender),
+                ("/sys/lease/rejected", ("session-b", "busy")),
+            )
+
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/renew",
+                    "session-b",
+                    6000,
+                    other_host,
+                    other_port,
+                )
+            )
+            self.assertEqual(
+                receive(contender),
+                ("/sys/lease/rejected", ("session-b", "not_owner")),
+            )
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/release",
+                    "session-b",
+                    other_host,
+                    other_port,
+                )
+            )
+            self.assertEqual(
+                receive(contender),
+                ("/sys/lease/rejected", ("session-b", "not_owner")),
+            )
+            self.assertEqual(server.lease_token, "session-a")
+
+            clock.advance_ms(1000)
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/renew", "session-a", 5000, host, port
+                )
+            )
+            self.assertEqual(
+                receive(owner),
+                ("/sys/lease/renewed", ("session-a", 5000)),
+            )
+            self.assertEqual(server.remaining_lease_ms(), 5000)
+
+    def test_lease_expiry_without_traffic_darkens_and_frees_grid(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        clock = ManualClock()
+        with FakeDeviceServer(device, clock=clock) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/plugdata",
+                    1000,
+                )
+            )
+            self.assertEqual(receive(callback)[0], "/sys/lease/granted")
+            server.handle_packet(
+                encode_message(
+                    "/plugdata/grid/led/level/map", 0, 0, *([15] * 64)
+                )
+            )
+            self.assertFalse(server.all_dark())
+
+            clock.advance_ms(1000)
+            self.assertFalse(server.serve_once(0))
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/lost", ("session-a", "expired")),
+            )
+            self.assertTrue(server.all_dark())
+            self.assertEqual(server.destination_port, 0)
+            self.assertIsNone(server.lease_token)
+            self.assertEqual(
+                server.lease_events[-2:],
+                [("dark", "expired"), ("free", "expired")],
+            )
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/renew", "session-a", 1000, host, port
+                )
+            )
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/rejected", ("session-a", "no_lease")),
+            )
+
+    def test_lease_expiry_darkens_two_and_four_ring_arcs(self) -> None:
+        for rings in (2, 4):
+            with self.subTest(rings=rings):
+                device = Device(
+                    f"a{rings}00", f"monome arc {rings}", 0, rings=rings
+                )
+                clock = ManualClock()
+                with FakeDeviceServer(
+                    device, clock=clock
+                ) as server, bind_callback("127.0.0.1", 0) as callback:
+                    callback.settimeout(1)
+                    host, port = callback.getsockname()
+                    server.handle_packet(
+                        encode_message(
+                            "/sys/lease/acquire",
+                            "session-a",
+                            host,
+                            port,
+                            "/plugdata",
+                            1000,
+                        )
+                    )
+                    self.assertEqual(receive(callback)[0], "/sys/lease/granted")
+                    for ring in range(rings):
+                        server.handle_packet(
+                            encode_message(
+                                "/plugdata/ring/map", ring, *([15] * 64)
+                            )
+                        )
+                    self.assertFalse(server.arc_all_dark())
+
+                    clock.advance_ms(1000)
+                    self.assertFalse(server.serve_once(0))
+                    self.assertEqual(receive(callback)[0], "/sys/lease/lost")
+                    self.assertTrue(server.arc_all_dark())
+                    self.assertEqual(server.destination_port, 0)
+
+    def test_matching_release_darkens_every_arc_ring(self) -> None:
+        device = Device("a200", "monome arc 2", 0, rings=2)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/plugdata",
+                    6000,
+                )
+            )
+            self.assertEqual(receive(callback)[0], "/sys/lease/granted")
+            server.handle_packet(
+                encode_message("/plugdata/ring/map", 0, *([15] * 64))
+            )
+            server.handle_packet(
+                encode_message("/plugdata/ring/map", 1, *([8] * 64))
+            )
+            self.assertFalse(server.arc_all_dark())
+
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/release", "session-a", host, port
+                )
+            )
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/released", ("session-a",)),
+            )
+            self.assertTrue(server.arc_all_dark())
+            self.assertEqual(server.destination_port, 0)
+            self.assertEqual(
+                server.lease_events[-2:],
+                [("dark", "released"), ("free", "released")],
+            )
+
+    def test_legacy_write_displaces_lease_without_darkening(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            callback.settimeout(1)
+            host, port = callback.getsockname()
+            server.handle_packet(
+                encode_message(
+                    "/sys/lease/acquire",
+                    "session-a",
+                    host,
+                    port,
+                    "/plugdata",
+                    6000,
+                )
+            )
+            self.assertEqual(receive(callback)[0], "/sys/lease/granted")
+            server.handle_packet(
+                encode_message(
+                    "/plugdata/grid/led/level/map", 0, 0, *([15] * 64)
+                )
+            )
+            prior_dark_events = server.lease_events.count(("dark", "acquire"))
+
+            server.handle_packet(encode_message("/sys/port", 19999))
+            self.assertEqual(
+                receive(callback),
+                ("/sys/lease/lost", ("session-a", "legacy_write")),
+            )
+            self.assertIsNone(server.lease_token)
+            self.assertEqual(server.destination_port, 19999)
+            self.assertFalse(server.all_dark())
+            self.assertEqual(
+                server.lease_events.count(("dark", "acquire")),
+                prior_dark_events,
+            )
+            self.assertEqual(server.persistent_destination_port, 19999)
+
+    def test_invalid_lease_ttl_fails_closed(self) -> None:
+        device = Device("m100", "monome 128", 0, 16, 8)
+        with FakeDeviceServer(device) as server:
+            with self.assertRaisesRegex(OSCError, "invalid_lease_request"):
+                server.handle_packet(
+                    encode_message(
+                        "/sys/lease/acquire",
+                        "session-a",
+                        "127.0.0.1",
+                        18000,
+                        "/plugdata",
+                        999,
+                    )
+                )
+            self.assertEqual(server.destination_port, 0)
+            self.assertIsNone(server.lease_token)
 
     def test_grid_level_map_updates_one_8_by_8_quad_row_major(self) -> None:
         device = Device("m100", "monome 128", 0, 16, 8)

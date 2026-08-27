@@ -96,6 +96,11 @@ see [`docs/WORKBENCH-BUNDLE.md`](docs/WORKBENCH-BUNDLE.md). The division between
 this device layer, the SerialOSC lease fork, the Steam Deck installer, and the
 later musical patches is recorded in [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md).
 
+The feature lease workbench now executes the proposed version 1 contract in
+the fake SerialOSC server without changing the installed daemon or the legacy
+PlugData session path. See
+[`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md).
+
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
 for discovery. [`docs/SESSION-WORKBENCH.md`](docs/SESSION-WORKBENCH.md) covers

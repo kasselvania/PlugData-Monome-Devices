@@ -8,18 +8,25 @@ project. It never opens a serial device and refuses SerialOSC's live port 12002.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 from dataclasses import dataclass, replace
+import math
 import select
 import shlex
 import socket
 import struct
 import sys
+import time
 from typing import Iterable
 
 
 LIVE_SERIALOSC_PORT = 12002
 DEFAULT_FAKE_PORT = 12012
 DEFAULT_ARC_PORT = 17003
+LEASE_PROTOCOL_VERSION = 1
+MIN_LEASE_TTL_MS = 1000
+MAX_LEASE_TTL_MS = 60000
+MAX_LEASE_TOKEN_BYTES = 128
 
 
 class OSCError(ValueError):
@@ -147,7 +154,12 @@ def bind_callback(host: str, port: int) -> socket.socket:
 class FakeDeviceServer:
     """A fake per-device SerialOSC server with mutable application settings."""
 
-    def __init__(self, device: Device, host: str = "127.0.0.1") -> None:
+    def __init__(
+        self,
+        device: Device,
+        host: str = "127.0.0.1",
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
         if device.port < 0 or device.port > 65535:
             raise ValueError("invalid_device_port")
         if (device.width is None) != (device.height is None):
@@ -168,6 +180,14 @@ class FakeDeviceServer:
         self.destination_host = "127.0.0.1"
         self.destination_port = 0
         self.prefix = "/monome"
+        self.persistent_destination_host = self.destination_host
+        self.persistent_destination_port = self.destination_port
+        self.persistent_prefix = self.prefix
+        self.lease_token: str | None = None
+        self.lease_deadline: float | None = None
+        self.lease_ttl_ms = 0
+        self.lease_events: list[tuple[str, str]] = []
+        self._clock = clock
         self.rotation = 0
         surface = (device.width or 0) * (device.height or 0)
         self.levels = [0] * surface
@@ -245,6 +265,236 @@ class FakeDeviceServer:
         for address, arguments in messages:
             self.socket.sendto(encode_message(address, *arguments), target)
 
+    @staticmethod
+    def _reply_target(host: object, port: object) -> tuple[str, int]:
+        if (
+            not isinstance(host, str)
+            or not host
+            or not isinstance(port, int)
+            or port < 1
+            or port > 65535
+        ):
+            raise OSCError("invalid_lease_request")
+        try:
+            return socket.gethostbyname(host), port
+        except OSError as error:
+            raise OSCError("invalid_lease_request") from error
+
+    @staticmethod
+    def _lease_identity(token: object) -> str:
+        if (
+            not isinstance(token, str)
+            or not token
+            or len(token.encode("utf-8")) > MAX_LEASE_TOKEN_BYTES
+        ):
+            raise OSCError("invalid_lease_request")
+        return token
+
+    @staticmethod
+    def _lease_ttl(ttl_ms: object) -> int:
+        if (
+            not isinstance(ttl_ms, int)
+            or ttl_ms < MIN_LEASE_TTL_MS
+            or ttl_ms > MAX_LEASE_TTL_MS
+        ):
+            raise OSCError("invalid_lease_request")
+        return ttl_ms
+
+    @staticmethod
+    def _lease_prefix(prefix: object) -> str:
+        if not isinstance(prefix, str) or not prefix.startswith("/"):
+            raise OSCError("invalid_lease_request")
+        return prefix
+
+    def _send(self, target: tuple[str, int], address: str, *arguments: object) -> None:
+        self.socket.sendto(encode_message(address, *arguments), target)
+
+    def lease_mode(self) -> str:
+        if self.lease_token is not None:
+            return "leased"
+        if self.destination_port == 0:
+            return "free"
+        return "legacy"
+
+    def remaining_lease_ms(self) -> int:
+        if self.lease_deadline is None:
+            return 0
+        return max(0, math.ceil((self.lease_deadline - self._clock()) * 1000))
+
+    def next_lease_timeout(self) -> float | None:
+        if self.lease_deadline is None:
+            return None
+        return max(0.0, self.lease_deadline - self._clock())
+
+    def _dark_surface(self, reason: str) -> None:
+        self.levels = [0] * len(self.levels)
+        self.ring_levels = [[0] * 64 for _ in self.ring_levels]
+        self.lease_events.append(("dark", reason))
+
+    def _set_free_after_lease(self, reason: str) -> None:
+        self.destination_host = self.persistent_destination_host
+        self.destination_port = 0
+        self.prefix = self.persistent_prefix
+        self.persistent_destination_port = 0
+        self.lease_token = None
+        self.lease_deadline = None
+        self.lease_ttl_ms = 0
+        self.lease_events.append(("free", reason))
+
+    def expire_lease_if_due(self) -> bool:
+        if self.lease_deadline is None or self._clock() < self.lease_deadline:
+            return False
+        token = self.lease_token
+        target = self._reply_target(self.destination_host, self.destination_port)
+        self._dark_surface("expired")
+        if token is not None:
+            self._send(target, "/sys/lease/lost", token, "expired")
+        self._set_free_after_lease("expired")
+        return True
+
+    def _cancel_lease_for_legacy_write(self) -> None:
+        if self.lease_token is None:
+            return
+        token = self.lease_token
+        target = self._reply_target(self.destination_host, self.destination_port)
+        self._send(target, "/sys/lease/lost", token, "legacy_write")
+        self.persistent_destination_host = self.destination_host
+        self.persistent_destination_port = self.destination_port
+        self.persistent_prefix = self.prefix
+        self.lease_token = None
+        self.lease_deadline = None
+        self.lease_ttl_ms = 0
+        self.lease_events.append(("legacy", "legacy_write"))
+
+    def _lease_destination(
+        self, arguments: tuple[object, ...]
+    ) -> tuple[str, str, int, str, int, tuple[str, int]]:
+        if len(arguments) != 5:
+            raise OSCError("invalid_lease_request")
+        token = self._lease_identity(arguments[0])
+        host = arguments[1]
+        port = arguments[2]
+        prefix = self._lease_prefix(arguments[3])
+        ttl_ms = self._lease_ttl(arguments[4])
+        target = self._reply_target(host, port)
+        assert isinstance(host, str)
+        assert isinstance(port, int)
+        return token, host, port, prefix, ttl_ms, target
+
+    def _handle_lease_info(self, arguments: tuple[object, ...]) -> None:
+        token: str | None = None
+        if len(arguments) == 2:
+            host, port = arguments
+        elif len(arguments) == 3:
+            token = self._lease_identity(arguments[0])
+            host, port = arguments[1:]
+        else:
+            raise OSCError("invalid_lease_request")
+        target = self._reply_target(host, port)
+        owner = int(token is not None and token == self.lease_token)
+        self._send(
+            target,
+            "/sys/lease/state",
+            LEASE_PROTOCOL_VERSION,
+            self.device.serial,
+            self.lease_mode(),
+            self.destination_host,
+            self.destination_port,
+            self.prefix,
+            self.remaining_lease_ms(),
+            owner,
+        )
+
+    def _handle_lease_acquire(
+        self, arguments: tuple[object, ...], takeover: bool
+    ) -> None:
+        token, host, port, prefix, ttl_ms, target = self._lease_destination(
+            arguments
+        )
+        if self.lease_token is not None:
+            if token != self.lease_token:
+                self._send(target, "/sys/lease/rejected", token, "busy")
+                return
+            if (
+                host != self.destination_host
+                or port != self.destination_port
+                or prefix != self.prefix
+            ):
+                self._send(
+                    target,
+                    "/sys/lease/rejected",
+                    token,
+                    "claim_mismatch",
+                )
+                return
+            self.lease_ttl_ms = ttl_ms
+            self.lease_deadline = self._clock() + (ttl_ms / 1000)
+            self._send(target, "/sys/lease/granted", token, ttl_ms)
+            return
+
+        if self.destination_port != 0 and not takeover:
+            self._send(
+                target,
+                "/sys/lease/rejected",
+                token,
+                "legacy_destination",
+            )
+            return
+
+        reason = "takeover" if takeover and self.destination_port != 0 else "acquire"
+        self._dark_surface(reason)
+        self.persistent_destination_port = 0
+        self.destination_host = host
+        self.destination_port = port
+        self.prefix = prefix
+        self.lease_token = token
+        self.lease_ttl_ms = ttl_ms
+        self.lease_deadline = self._clock() + (ttl_ms / 1000)
+        self.lease_events.append(("leased", reason))
+        self._send(target, "/sys/lease/granted", token, ttl_ms)
+
+    def _lease_reply_request(
+        self,
+        arguments: tuple[object, ...],
+        include_ttl: bool,
+    ) -> tuple[str, int | None, tuple[str, int]]:
+        expected = 4 if include_ttl else 3
+        if len(arguments) != expected:
+            raise OSCError("invalid_lease_request")
+        token = self._lease_identity(arguments[0])
+        if include_ttl:
+            ttl_ms: int | None = self._lease_ttl(arguments[1])
+            host, port = arguments[2:]
+        else:
+            ttl_ms = None
+            host, port = arguments[1:]
+        return token, ttl_ms, self._reply_target(host, port)
+
+    def _handle_lease_renew(self, arguments: tuple[object, ...]) -> None:
+        token, ttl_ms, target = self._lease_reply_request(arguments, True)
+        assert ttl_ms is not None
+        if self.lease_token is None:
+            self._send(target, "/sys/lease/rejected", token, "no_lease")
+            return
+        if token != self.lease_token:
+            self._send(target, "/sys/lease/rejected", token, "not_owner")
+            return
+        self.lease_ttl_ms = ttl_ms
+        self.lease_deadline = self._clock() + (ttl_ms / 1000)
+        self._send(target, "/sys/lease/renewed", token, ttl_ms)
+
+    def _handle_lease_release(self, arguments: tuple[object, ...]) -> None:
+        token, _, target = self._lease_reply_request(arguments, False)
+        if self.lease_token is None:
+            self._send(target, "/sys/lease/rejected", token, "no_lease")
+            return
+        if token != self.lease_token:
+            self._send(target, "/sys/lease/rejected", token, "not_owner")
+            return
+        self._dark_surface("released")
+        self._set_free_after_lease("released")
+        self._send(target, "/sys/lease/released", token)
+
     def _grid_size(self) -> tuple[int, int]:
         if self.device.width is None or self.device.height is None:
             raise OSCError("device_has_no_grid")
@@ -306,6 +556,7 @@ class FakeDeviceServer:
         self.arc_messages.append((address, arguments))
 
     def handle_packet(self, packet: bytes) -> None:
+        self.expire_lease_if_due()
         address, arguments = decode_message(packet)
         if address == "/sys/info":
             target = self._info_target(
@@ -313,15 +564,33 @@ class FakeDeviceServer:
             )
             if target is not None:
                 self._send_info(target)
+        elif address == "/sys/lease/info":
+            self._handle_lease_info(arguments)
+        elif address == "/sys/lease/acquire":
+            self._handle_lease_acquire(arguments, takeover=False)
+        elif address == "/sys/lease/takeover":
+            self._handle_lease_acquire(arguments, takeover=True)
+        elif address == "/sys/lease/renew":
+            self._handle_lease_renew(arguments)
+        elif address == "/sys/lease/release":
+            self._handle_lease_release(arguments)
         elif address == "/sys/host":
-            self.destination_host = self._string(arguments, "invalid_sys_host")
+            host = self._string(arguments, "invalid_sys_host")
+            self._cancel_lease_for_legacy_write()
+            self.destination_host = host
+            self.persistent_destination_host = host
         elif address == "/sys/port":
-            self.destination_port = self._port(arguments, allow_zero=True)
+            port = self._port(arguments, allow_zero=True)
+            self._cancel_lease_for_legacy_write()
+            self.destination_port = port
+            self.persistent_destination_port = port
         elif address == "/sys/prefix":
             prefix = self._string(arguments, "invalid_sys_prefix")
             if not prefix.startswith("/"):
                 raise OSCError("invalid_sys_prefix")
+            self._cancel_lease_for_legacy_write()
             self.prefix = prefix
+            self.persistent_prefix = prefix
         elif address == "/sys/rotation":
             rotation = self._port(arguments, allow_zero=True)
             if rotation not in (0, 90, 180, 270):
@@ -335,8 +604,13 @@ class FakeDeviceServer:
             raise OSCError("unsupported_device_message")
 
     def serve_once(self, timeout: float = 0.1) -> bool:
+        self.expire_lease_if_due()
+        lease_timeout = self.next_lease_timeout()
+        if lease_timeout is not None:
+            timeout = min(timeout, lease_timeout)
         readable, _, _ = select.select([self.socket], [], [], timeout)
         if not readable:
+            self.expire_lease_if_due()
             return False
         packet, _ = self.socket.recvfrom(65535)
         self.handle_packet(packet)
@@ -345,9 +619,13 @@ class FakeDeviceServer:
     def set_destination(self, host: str, port: int, prefix: str) -> None:
         if not host or port < 0 or port > 65535 or not prefix.startswith("/"):
             raise ValueError("invalid_destination")
+        self._cancel_lease_for_legacy_write()
         self.destination_host = host
         self.destination_port = port
         self.prefix = prefix
+        self.persistent_destination_host = host
+        self.persistent_destination_port = port
+        self.persistent_prefix = prefix
 
     def level(self, x: int, y: int) -> int:
         width, height = self._grid_size()
@@ -528,8 +806,19 @@ class FakeSerialOSC:
             raise OSCError("unsupported_discovery_message")
 
     def serve_once(self, timeout: float = 0.1) -> bool:
+        for endpoint in self.device_servers.values():
+            endpoint.expire_lease_if_due()
+        lease_timeouts = [
+            endpoint.next_lease_timeout()
+            for endpoint in self.device_servers.values()
+        ]
+        active_timeouts = [value for value in lease_timeouts if value is not None]
+        if active_timeouts:
+            timeout = min(timeout, min(active_timeouts))
         readable, _, _ = select.select(self.sockets, [], [], timeout)
         if not readable:
+            for endpoint in self.device_servers.values():
+                endpoint.expire_lease_if_due()
             return False
         self.serve_socket(readable[0])
         return True
