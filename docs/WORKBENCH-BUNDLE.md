@@ -5,6 +5,11 @@ committed PlugData device layer, fake server, live workbench, tests,
 documentation, macOS SerialOSC provisioning tools, and preserved legacy
 reference.
 
+The provisioning tools include both the accepted null-port-safe stable
+installer and a separately rooted lease-candidate manager. The latter can
+prepare a pinned candidate without changing the running service and requires
+an explicit, rollback-guarded activation.
+
 From a clean checkout:
 
 ```sh

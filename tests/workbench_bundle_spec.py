@@ -47,6 +47,7 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "docs/PROJECT-MAP.md",
                 "docs/PLUGDATA-BITWIG-AB.md",
                 "docs/WORKBENCH-BUNDLE.md",
+                "docs/MACOS-LEASE-CANDIDATE.md",
                 "monome-discovery.pd",
                 "monome-session.pd",
                 "monome-session-lease-smoke.pd",
@@ -57,8 +58,10 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "monome_arc.lua",
                 "tools/fake_serialosc.py",
                 "tools/build_workbench_bundle.sh",
+                "tools/macos_serialosc_lease_candidate.sh",
                 "tests/session_spec.lua",
                 "tests/lease_session_spec.lua",
+                "tests/macos_lease_candidate_spec.py",
                 "tests/workbench_bundle_spec.py",
                 "patches/serialosc-null-port.patch",
             }

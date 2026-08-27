@@ -52,8 +52,10 @@ A/B boundary stays visible.
 
 ## Remaining boundary
 
-The fork worker and PlugData session are implemented but have not yet replaced
-either installed service. No physical device, PlugData standalone process,
+The fork worker and PlugData session are implemented. A separately rooted,
+pinned, checksum-verified macOS candidate can now be prepared without touching
+the accepted service; see [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
+It has not yet been activated. No physical device, PlugData standalone process,
 Bitwig plug-in host, or Steam Deck service has passed the lease candidate.
-Those layers gain no crash-safe claim until their own readback and
-process-death acceptance steps pass.
+Those layers gain no crash-safe claim until their own readback and process-death
+acceptance steps pass.

@@ -84,6 +84,11 @@ wire behavior, legacy compatibility, port-`0` persistence boundary, and idle
 event-loop expiry pass automated tests. It is not an upstream release or a
 physical acceptance claim.
 
+The PlugData repository carries the macOS acceptance wrapper because that
+wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
+It pins the full fork revision, installs beside the stable daemon, and switches
+distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
+
 ## Delivery order
 
 1. Freeze the current PlugData tree as a reproducible development workbench.

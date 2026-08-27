@@ -104,9 +104,11 @@ later musical patches is recorded in [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md
 
 The feature lease workbench now executes the version 1 contract in the fake
 server and the opt-in PlugData session path. The live Grid and Arc slots select
-lease policy at load; the older smoke patches remain the legacy A/B lane. The
-installed macOS and Steam Deck services are still unchanged. See
-[`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md).
+lease policy at load; the older smoke patches remain the legacy A/B lane. A
+separate, rollback-safe macOS candidate manager is ready, but the installed
+macOS and Steam Deck services are still unchanged. See
+[`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
+[`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -151,6 +153,7 @@ python3 -m unittest -v tests/live_grid_control_spec.py
 python3 -m unittest -v tests/live_serialosc_state_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 python3 -m unittest -v tests/macos_serialosc_spec.py
+python3 -m unittest -v tests/macos_lease_candidate_spec.py
 luac -p monome_registry.lua monome-registry.pd_lua \
   monome_session.lua monome-session-core.pd_lua \
   monome_grid.lua monome-grid-core.pd_lua \
