@@ -109,7 +109,7 @@ Ports are loopback-only:
 - `17901` live Arc control.
 
 The dedicated ports allow this patch to run beside the existing two-Grid live
-workbench for later Grid-plus-Arc and all-three-device acceptance.
+workbench without callback collisions.
 
 ## Physical acceptance
 
@@ -140,5 +140,8 @@ bound host, callback port, prefix, and stable ID. It performs a second readback
 before sending `/sys/port 0`. A nonzero destination belonging to another app
 is reported as `release_skipped destination_not_owned` and is never changed.
 
-Key input is not required for this buttonless Arc. Grid-plus-Arc,
-all-three-device, and Bitwig lifecycle/contention acceptance remain open.
+Key input is not required for this buttonless Arc. The Arc subsequently passed
+simultaneous standalone acceptance with both Grids, including isolated routing,
+survivor checks, and removal/recovery of every device. See
+`docs/THREE-DEVICE-ACCEPTANCE.md`. Bitwig lifecycle/contention acceptance
+remains open.

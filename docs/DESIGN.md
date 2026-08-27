@@ -163,9 +163,10 @@ accepted PlugData nightly standalone. Non-mutating probe, verified claim,
 periodic readback, simulated external displacement, release refusal after
 displacement, verified `/sys/port 0` release, callback collision, and
 process-local duplicate claim refusal pass. The same probe, exact claim
-readback, and verified release
-also pass on a physical legacy 128 and modern 16-by-16 zero Grid. Arc,
-multi-device, and Bitwig session acceptance remain open. See
+readback, and verified release also pass on a physical legacy 128, modern
+16-by-16 zero Grid, and four-ring Arc. The three devices then passed
+simultaneous standalone session acceptance, active removal/recovery in every
+direction, and independent release. Bitwig session acceptance remains open. See
 `docs/SESSION-WORKBENCH.md`.
 
 ### Step 3 — Grid capability
@@ -233,8 +234,12 @@ Status on 2026-08-26: the physical legacy 128 and zero Grid passed the Grid-pair
 slice in PlugData standalone. Both devices held simultaneous verified claims
 on separate callback ports, routed distinct LED and key traffic, survived
 removal of the other device, restored the removed stable identity in both
-directions, and released independently to port `0`. Grid-plus-Arc, all-three,
-and all Bitwig lifecycle/contention gates remain open.
+directions, and released independently to port `0`. Both Grids and the Arc then
+passed the all-three standalone slice: distinct claims and input/output routes,
+fresh ownership checks, active removal and same-ID recovery of each device,
+unchanged verified survivors in every direction, and independent dark release
+to port `0`. See `docs/THREE-DEVICE-ACCEPTANCE.md`. All Bitwig
+lifecycle/contention gates remain open.
 
 ### Step 6 — Demos and package
 

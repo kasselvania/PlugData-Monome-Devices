@@ -200,9 +200,14 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
 - physical Arc probe, claim, ring output, signed encoder input, all-dark
   cleanup, verified release, and same-ID reconnect; and
 - physical active-claim Arc unplug followed by exact stale-self-destination
-  recovery and verified port-`0` readback while both Grids remained present.
+  recovery and verified port-`0` readback while both Grids remained present;
+- simultaneous physical claims for zero, legacy 128, and Arc on three distinct
+  callback ports, with isolated visible output and input routing;
+- active removal and same-ID recovery of each of the three devices while both
+  surviving sessions retained state and passed fresh ownership checks; and
+- independent dark cleanup, release, and final port-`0` readback for all three
+  devices. See `docs/THREE-DEVICE-ACCEPTANCE.md`.
 
 Still open:
 
-- Grid-plus-Arc and all-three-device acceptance;
 - standalone-versus-Bitwig contention.

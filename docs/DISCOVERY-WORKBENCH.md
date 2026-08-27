@@ -137,13 +137,15 @@ Passed:
 - explicit callback-collision failure in PlugData;
 - dynamic `else/popmenu` population and output in the accepted nightly;
 - full real add/remove tuple normalization;
-- live SerialOSC discovery of a physical legacy 128 and modern zero Grid;
+- live SerialOSC discovery of a physical legacy 128, modern zero Grid, and
+  four-ring Arc;
 - concurrent stable-ID registry population for both physical Grids;
-- selection preservation when the second device reorders the menu; and
+- selection preservation when the second device reorders the menu;
 - remove/add notification and isolated menu cleanup in both removal
-  directions.
+  directions; and
+- same-ID rediscovery of each device during the simultaneous three-device
+  removal/recovery run documented in `docs/THREE-DEVICE-ACCEPTANCE.md`.
 
 Still open:
 
-- physical Arc discovery;
 - standalone-versus-Bitwig discovery contention.

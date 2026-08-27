@@ -72,8 +72,11 @@ ring/position output, encoder deltas in both directions, all-dark cleanup,
 verified destination port `0`, released reconnect, and active-claim
 hot-unplug recovery. The physical reconnect exposed SerialOSC's retained
 callback destination; the session now verifies and releases that exact stale
-self-destination without touching a rival destination. Grid-plus-Arc,
-all-three-device, and Bitwig acceptance remain open.
+self-destination without touching a rival destination. The two Grids and Arc
+have now passed simultaneous standalone claims, isolated output and input,
+ownership checks, active removal/recovery in every direction, survivor checks,
+and independent release to port `0`. Bitwig lifecycle and contention
+acceptance remains open.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -82,7 +85,8 @@ probe, claim, readback, displacement, contention, and safe release.
 [`docs/GRID-WORKBENCH.md`](docs/GRID-WORKBENCH.md) covers the Grid API, fake
 smoke patches, live controls, and the physical acceptance boundary.
 [`docs/ARC-WORKBENCH.md`](docs/ARC-WORKBENCH.md) covers the explicit Arc API,
-fake smoke run, live controls, and remaining physical gate.
+fake smoke run, and live controls. The exact simultaneous hardware record is
+in [`docs/THREE-DEVICE-ACCEPTANCE.md`](docs/THREE-DEVICE-ACCEPTANCE.md).
 
 ## Requirements
 

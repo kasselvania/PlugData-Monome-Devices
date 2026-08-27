@@ -173,6 +173,19 @@ to the installed production LaunchAgent:
 The pair-removal runs did not hold a physical key during unplug; held-key
 synthesis was already accepted separately on each single-Grid run.
 
+## Physical three-device record
+
+The zero Grid and legacy 128 subsequently passed alongside the physical
+four-ring Arc in the same PlugData standalone process. All three held distinct
+verified callback destinations, routed distinguishable output and input, and
+survived active removal and same-ID recovery of each other device. Removing
+either Grid left the other Grid-plus-Arc pair verified with its visible state
+unchanged; removing the Arc left both Grids verified. The three sessions then
+darkened and released independently to port `0`.
+
+See `docs/THREE-DEVICE-ACCEPTANCE.md` for the exact identities, routes,
+physical observations, recovery sequence, and acceptance boundary.
+
 ## Remaining physical gates
 
 The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
@@ -186,8 +199,7 @@ instrumented build.
 
 Still required:
 
-- Grid plus Arc, then all three devices;
 - standalone-versus-Bitwig CLAP contention and lifecycle tests.
 
-Do not infer any of those results from the fake server or the completed
-Grid-only runs.
+Do not infer that remaining result from the fake server or the completed
+standalone hardware runs.
