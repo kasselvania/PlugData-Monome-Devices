@@ -9,11 +9,15 @@ commit
 [`98ae0f78ba43d17f4aa6d5409eca3bbf818b4e74`](https://github.com/plugdata-team/plugdata/commit/98ae0f78ba43d17f4aa6d5409eca3bbf818b4e74),
 built on 2026-06-12. It is the first tested candidate in this workbench that
 passes both the native discovery-menu smoke and the Bitwig editor lifecycle
-smoke.
+smoke. It subsequently completed the bounded Bitwig Monome hardware and
+standalone-contention run recorded below.
 
-This is a bounded host-compatibility decision. It does not transfer the later
-standalone physical-device acceptance to this earlier binary, and it does not
-complete the remaining Bitwig patch, hardware, or contention gates.
+This is a bounded host-compatibility decision. The hardware run is direct
+evidence for this candidate rather than an inference from the later standalone
+nightly. One lifecycle gate still fails: fully deactivating the Bitwig device
+terminates the isolated plug-in host without releasing its SerialOSC
+destination. Ordinary bypass is accepted; intentional plug-in-process restart
+is not.
 
 ## Why the moving nightly was rejected
 
@@ -109,15 +113,76 @@ saving, Bitwig and both plug-in hosts exited, the fake server stopped, and an
 independent live SerialOSC readback found the zero Grid, legacy 128, and Arc
 all released at destination port `0`.
 
-## Remaining gates
+## Bitwig Monome hardware run on 2026-08-27
 
-This pass accepts only startup, native-menu behavior, and editor-window
-lifecycle for the pinned candidate. The following remain open:
+The pinned CLAP loaded `monome-grid-live.pd` and `monome-arc-live.pd` in one
+Bitwig project. Device identity and callback routing were:
 
-- load the Monome session patch inside Bitwig CLAP;
-- transport-stopped behavior and bypass;
-- project save/reload and an intentional plug-in-process restart;
-- one-device, pair, and three-device hardware runs in Bitwig; and
-- verified displacement and release between standalone PlugData and Bitwig.
+| Device | Stable ID | Bitwig route |
+| --- | --- | --- |
+| legacy 128 Grid | `m1000853` | Grid slot A, callback `17780` |
+| zero Grid | `m23215901` | Grid slot B, callback `17781` |
+| four-ring Arc | `m1001113` | Arc session, callback `17782` |
 
-Do not describe the project as Bitwig-accepted until those gates pass.
+The following behavior passed with physical output/input observation plus
+independent `/sys/info` destination readback:
+
+1. The legacy 128 completed explicit selection, non-mutating probe, verified
+   claim, distinguishable LED output, and key press/release while Bitwig's
+   transport was stopped.
+2. Ordinary Bitwig bypass retained the same isolated plug-in-host process and
+   the Grid remained responsive to hardware input and output after bypass was
+   removed.
+3. Project save/reload failed closed rather than declaring a remembered device
+   connected. A fresh selection, probe, and claim restored the route, followed
+   by fresh physical output and input.
+4. The legacy and zero Grids held simultaneous verified callbacks `17780` and
+   `17781`, displayed different level patterns, and independently reported key
+   press/release coordinates.
+5. Both Grids and the Arc then held all three callbacks simultaneously. All
+   four Arc rings had distinct position markers; Grid key events and Arc
+   encoder deltas remained isolated to their own capability routes.
+6. Arc, legacy, and zero were actively unplugged and reconnected one at a time.
+   Each removal detached only that device. Both survivors kept their visible
+   state and exact callback destination. Each returning device kept its stable
+   ID and SerialOSC's prior self callback; recovery required a fresh exact
+   probe, guarded release to port `0`, explicit reclaim, restored output, and
+   fresh physical input.
+7. The final standalone-versus-Bitwig displacement test used
+   `monome-grid-contender-live.pd` on isolated discovery/session/control ports
+   `18779`, `18780`, and `18900`. The standalone patch claimed the legacy Grid,
+   displayed a new pattern, and received `key 8 3 1/0`.
+8. Bitwig's next ownership check reported `displaced destination_changed`,
+   detached the Grid, and read back the rival `127.0.0.1:18780` destination.
+   A Bitwig LED command failed with `grid_not_attached`; its release path
+   reported `darken_skipped grid_not_attached` and `release_skipped`. Direct
+   readback remained on `18780` throughout, so Bitwig never overwrote the
+   standalone owner.
+9. The standalone owner darkened and released the legacy Grid to port `0`.
+   After the standalone patch and all three isolated sockets closed, Bitwig
+   freshly selected, probed the free device, reclaimed `17780`, restored its
+   original pattern, and received `key 0 0 1/0`.
+10. Cleanup checked ownership, darkened, and released legacy, zero, then Arc.
+    Final direct readback reported destination port `0` for all three devices,
+    and both Grids plus all four Arc rings were physically confirmed dark.
+
+## Known failing lifecycle gate
+
+Fully deactivating the Bitwig device terminated the isolated PlugData host.
+SerialOSC retained the legacy Grid's `17780` destination and the Grid retained
+its LEDs because the dead process could not run `prepare_release`. This is a
+real stale-claim lifecycle failure, not a successful restart. Guarded manual
+recovery through exact readback, release to port `0`, and explicit reclaim
+worked, but it does not make unexpected or intentional process death safe.
+
+The accepted ordinary bypass and editor close/reopen paths do not terminate
+the plug-in host and must not be conflated with this failure.
+
+## Current boundary
+
+The pinned candidate is accepted for the Monome patch in Bitwig across stopped
+transport, ordinary bypass, save/reload, one device, two Grids, all three
+devices, active hot-swap in every direction, and deliberate displacement by
+standalone PlugData. The project is not yet accepted for full Bitwig device
+deactivation or plug-in-process restart. Packaging must not claim crash-safe
+or restart-safe SerialOSC cleanup until that lifecycle gap is closed.

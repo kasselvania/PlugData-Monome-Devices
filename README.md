@@ -77,8 +77,17 @@ have now passed simultaneous standalone claims, isolated output and input,
 ownership checks, active removal/recovery in every direction, survivor checks,
 and independent release to port `0`. A pinned 2026-06-12 PlugData candidate
 now also passes the native discovery-menu smoke plus five Bitwig CLAP and three
-VST3 editor close/reopen cycles without restarting either plug-in host. The
-Bitwig patch, hardware, save/reload, restart, and contention gates remain open.
+VST3 editor close/reopen cycles without restarting either plug-in host. That
+candidate now also passes the Monome patch inside Bitwig with stopped
+transport, ordinary bypass, fail-closed save/reload and explicit reclaim, one
+device, both Grids, all three devices, active hot-swap in every direction,
+survivor preservation, deliberate standalone displacement, safe refusal by the
+displaced Bitwig session, fresh reclaim, and final all-dark port-`0` cleanup.
+
+One Bitwig lifecycle gate fails and remains explicit: fully deactivating the
+device terminates the isolated PlugData host before it can darken or release,
+leaving a stale SerialOSC callback and lit hardware. Guarded manual recovery
+passes; plug-in-process restart safety does not.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -95,7 +104,8 @@ The exact moving-nightly-versus-pinned-candidate record is in
 ## Requirements
 
 - PlugData official `0.9.4` candidate, commit `98ae0f78`, for the current
-  standalone-menu and Bitwig editor-lifecycle lane
+  standalone-menu and bounded Bitwig hardware lane; full device deactivation
+  remains unsupported by the accepted lifecycle record
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 
@@ -117,6 +127,7 @@ lua tests/session_spec.lua
 lua tests/grid_spec.lua
 lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
+python3 -m unittest -v tests/live_grid_control_spec.py
 python3 -m unittest -v tests/live_serialosc_state_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 python3 -m unittest -v tests/macos_serialosc_spec.py
@@ -149,7 +160,10 @@ For Step 3, the 128, 256, and dual-device fake runs are
 [`monome-grid-256-smoke.pd`](monome-grid-256-smoke.pd), and
 [`monome-grid-dual-smoke.pd`](monome-grid-dual-smoke.pd). Use
 [`monome-grid-live.pd`](monome-grid-live.pd) only for explicit physical-device
-acceptance against live SerialOSC.
+acceptance against live SerialOSC. Use
+[`monome-grid-contender-live.pd`](monome-grid-contender-live.pd) only for a
+deliberate second-application displacement test; its isolated control port is
+selected with `tools/live_grid_control.py --port 18900`.
 
 For Step 4, start the simulator with `--with-arc 4` and open
 [`monome-arc-smoke.pd`](monome-arc-smoke.pd). Use

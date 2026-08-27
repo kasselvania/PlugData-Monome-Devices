@@ -144,8 +144,12 @@ Passed:
 - remove/add notification and isolated menu cleanup in both removal
   directions; and
 - same-ID rediscovery of each device during the simultaneous three-device
-  removal/recovery run documented in `docs/THREE-DEVICE-ACCEPTANCE.md`.
+  removal/recovery run documented in `docs/THREE-DEVICE-ACCEPTANCE.md`; and
+- concurrent Bitwig and standalone registries on isolated discovery callbacks
+  while all three physical devices remained visible. The standalone contender
+  could claim the legacy Grid without changing either registry's stable-ID
+  projection.
 
-Still open:
-
-- standalone-versus-Bitwig discovery contention.
+No discovery-specific Bitwig gate remains. The failed full-device-deactivation
+case is a plug-in-host/session cleanup problem, not a discovery failure; see
+`docs/PLUGDATA-BITWIG-AB.md`.

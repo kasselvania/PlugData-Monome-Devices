@@ -18,9 +18,27 @@ COMMANDS = (
 )
 
 
+def control_port(value: str) -> int:
+    try:
+        port = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("control port must be an integer") from exc
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError(
+            "control port must be between 1 and 65535"
+        )
+    return port
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Send one local control command to monome-grid-live.pd."
+        description="Send one local control command to a Monome Grid live patch."
+    )
+    parser.add_argument(
+        "--port",
+        type=control_port,
+        default=CONTROL_PORT,
+        help=f"local Pd control port (default: {CONTROL_PORT})",
     )
     parser.add_argument("command", choices=COMMANDS)
     parser.add_argument("arguments", nargs="+")
@@ -32,7 +50,7 @@ def main() -> int:
 
     message = (" ".join(tokens) + ";\n").encode("utf-8")
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.sendto(message, ("127.0.0.1", CONTROL_PORT))
+        sock.sendto(message, ("127.0.0.1", args.port))
 
     print("sent:", " ".join(tokens))
     return 0

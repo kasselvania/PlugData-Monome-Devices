@@ -21,6 +21,7 @@ PATCHES = (
     "monome-grid-dual-smoke.pd",
     "monome-grid-live-slot.pd",
     "monome-grid-live.pd",
+    "monome-grid-contender-live.pd",
     "monome-arc.pd",
     "monome-arc-session.pd",
     "monome-arc-smoke.pd",
@@ -108,6 +109,14 @@ class PdPatchTests(unittest.TestCase):
             "route a_select a_session a_grid b_select b_session b_grid discovery",
             live_patch,
         )
+
+    def test_contender_workbench_uses_isolated_ports(self) -> None:
+        contender = (PROJECT_ROOT / "monome-grid-contender-live.pd").read_text()
+        self.assertEqual(contender.count("else/popmenu"), 1)
+        self.assertIn("monome-discovery 18779 12002 180", contender)
+        self.assertIn("monome-grid-live-slot 18780", contender)
+        self.assertIn("netreceive -u 18900", contender)
+        self.assertIn("route a_select a_session a_grid discovery", contender)
 
     def test_live_workbench_uses_registry_backed_device_menus(self) -> None:
         live_patch = (PROJECT_ROOT / "monome-grid-live.pd").read_text()

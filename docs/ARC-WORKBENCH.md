@@ -143,5 +143,8 @@ is reported as `release_skipped destination_not_owned` and is never changed.
 Key input is not required for this buttonless Arc. The Arc subsequently passed
 simultaneous standalone acceptance with both Grids, including isolated routing,
 survivor checks, and removal/recovery of every device. See
-`docs/THREE-DEVICE-ACCEPTANCE.md`. Bitwig lifecycle/contention acceptance
-remains open.
+`docs/THREE-DEVICE-ACCEPTANCE.md`. It then passed the same bounded Bitwig CLAP
+surface: four independent ring markers, signed encoder input, removal/recovery
+with both Grids unchanged, exact stale-self callback recovery, and final
+all-dark release to port `0`. Bitwig's separate full-device-deactivation gap is
+documented in `docs/PLUGDATA-BITWIG-AB.md`.

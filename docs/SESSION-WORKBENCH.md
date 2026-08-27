@@ -206,8 +206,16 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
 - active removal and same-ID recovery of each of the three devices while both
   surviving sessions retained state and passed fresh ownership checks; and
 - independent dark cleanup, release, and final port-`0` readback for all three
-  devices. See `docs/THREE-DEVICE-ACCEPTANCE.md`.
+  devices. See `docs/THREE-DEVICE-ACCEPTANCE.md`;
+- the same three callback routes inside Bitwig CLAP, including removal and
+  stable-ID recovery of every device with both survivors unchanged; and
+- deliberate legacy-Grid displacement from Bitwig `17780` to standalone
+  `18780`: Bitwig reported `displaced destination_changed`, detached
+  capability output, refused an LED update, skipped release, and left the
+  rival destination untouched. The standalone owner released to port `0`,
+  after which Bitwig freshly probed and reclaimed the device.
 
-Still open:
-
-- standalone-versus-Bitwig contention.
+The remaining host lifecycle gap is process death, not displacement handling.
+Full Bitwig device deactivation terminates the plug-in host before it can
+darken or release, so SerialOSC retains a stale destination. See
+`docs/PLUGDATA-BITWIG-AB.md`.

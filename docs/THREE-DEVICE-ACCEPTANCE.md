@@ -65,10 +65,17 @@ SerialOSC destination ownership is cooperative state verified through
 workbench detects and verifies the destination it owns, detaches on removal,
 and does not claim a rival destination as its own.
 
-The pinned PlugData candidate at commit `98ae0f78` has passed a hardware-free
-Bitwig editor preflight: five CLAP and three VST3 close/reopen cycles without a
-plug-in-host restart or new crash report. The remaining physical gate is to
-load the Monome patch in Bitwig and cover stopped transport, bypass,
-save/reload, intentional plug-in-process restart, device combinations, and
-displacement between PlugData standalone and Bitwig. See
-`docs/PLUGDATA-BITWIG-AB.md`.
+## Separate Bitwig companion record
+
+The pinned PlugData candidate at commit `98ae0f78` subsequently completed a
+separate Bitwig CLAP physical run with these same three stable IDs. That run
+covered stopped transport, ordinary bypass, save/reload, one device, both
+Grids, all three devices, active removal/recovery in every direction,
+standalone displacement, safe release refusal by the displaced Bitwig session,
+fresh reclaim, and final all-dark port-`0` cleanup.
+
+The evidence remains separate because the host and callback assignment differ
+from this standalone record. Bitwig's full device-deactivation/process-restart
+gate failed: terminating the isolated host left a stale SerialOSC destination
+and lit hardware. See `docs/PLUGDATA-BITWIG-AB.md` for the exact accepted
+surface and the unresolved lifecycle gap.

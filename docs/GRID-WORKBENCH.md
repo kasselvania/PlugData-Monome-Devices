@@ -96,6 +96,31 @@ Ports are loopback-only:
 The command-line selector exists for repeatable automation. A person using the
 patch should select the visible stable-ID entry from the menu.
 
+### Isolated standalone contender
+
+`monome-grid-contender-live.pd` is a test-only second-application workbench for
+deliberate SerialOSC displacement. It reuses the same explicit Grid slot but
+cannot collide with the normal live patch's local sockets:
+
+- `18779` discovery callback;
+- `18780` Grid callback; and
+- `18900` control inlet.
+
+Pass `--port 18900` to `tools/live_grid_control.py` when controlling it:
+
+```sh
+python3 tools/live_grid_control.py --port 18900 a_select 0
+python3 tools/live_grid_control.py --port 18900 a_session probe
+python3 tools/live_grid_control.py --port 18900 a_session claim
+python3 tools/live_grid_control.py --port 18900 a_grid all 6
+python3 tools/live_grid_control.py --port 18900 a_grid led 8 3 15
+python3 tools/live_grid_control.py --port 18900 a_session release
+```
+
+The index is illustrative; inspect the visible stable-ID menu before selecting.
+This patch intentionally changes a device's one cooperative SerialOSC
+destination. It is an acceptance harness, not a coexistence mechanism.
+
 ## Physical legacy-128 record
 
 Passed on 2026-08-25 in PlugData standalone with Homebrew SerialOSC 1.4.7 and
@@ -186,7 +211,27 @@ darkened and released independently to port `0`.
 See `docs/THREE-DEVICE-ACCEPTANCE.md` for the exact identities, routes,
 physical observations, recovery sequence, and acceptance boundary.
 
-## Remaining physical gates
+## Bitwig Grid and contention record
+
+On 2026-08-27, the pinned PlugData CLAP candidate at commit `98ae0f78` ran the
+live Grid patch inside Bitwig 6.1. The legacy 128 and zero Grid passed isolated
+and simultaneous verified claims on `17780` and `17781`, distinct output and
+input, active removal/recovery in both directions, and survivor preservation.
+Each reconnect retained its own prior callback; recovery used fresh exact
+readback, guarded release to port `0`, and explicit reclaim.
+
+The isolated contender then displaced Bitwig's legacy-Grid route from `17780`
+to `18780`. It displayed a separate level pattern and received
+`key 8 3 1/0`. Bitwig reported `displaced destination_changed`, detached Grid
+output, rejected a new LED command with `grid_not_attached`, and skipped
+release. Direct readback remained at `18780`. After the standalone owner
+darkened and released to port `0`, Bitwig freshly probed, reclaimed `17780`,
+restored output, and received `key 0 0 1/0`.
+
+See `docs/PLUGDATA-BITWIG-AB.md` for the full three-device record and host
+lifecycle boundary.
+
+## Remaining lifecycle gate
 
 The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
 crash rather than a USB/dock failure. A valid `/sys/port 0` release left liblo
@@ -197,9 +242,8 @@ claimed hot-unplug, and physical held-key synthesis all passed on 2026-08-26.
 The held-key run used the installed production LaunchAgent, not the earlier
 instrumented build.
 
-Still required:
-
-- standalone-versus-Bitwig CLAP contention and lifecycle tests.
-
-Do not infer that remaining result from the fake server or the completed
-standalone hardware runs.
+Standalone-versus-Bitwig contention now passes. Full Bitwig device deactivation
+does not: terminating the isolated PlugData host leaves SerialOSC pointed at
+the dead callback and leaves the Grid lit. Guarded recovery worked, but the
+project must not claim crash-safe or plug-in-process-restart-safe cleanup until
+that host lifecycle gap is closed.

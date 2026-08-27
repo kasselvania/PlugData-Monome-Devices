@@ -158,7 +158,7 @@ registry mutation. See `docs/DISCOVERY-WORKBENCH.md`.
 Acceptance: a second app can displace the first, and the first reports
 `displaced` rather than claiming it remains connected.
 
-Status on 2026-08-25: complete against isolated fake device servers and the
+Status through 2026-08-27: complete against isolated fake device servers and the
 accepted PlugData nightly standalone. Non-mutating probe, verified claim,
 periodic readback, simulated external displacement, release refusal after
 displacement, verified `/sys/port 0` release, callback collision, and
@@ -166,8 +166,11 @@ process-local duplicate claim refusal pass. The same probe, exact claim
 readback, and verified release also pass on a physical legacy 128, modern
 16-by-16 zero Grid, and four-ring Arc. The three devices then passed
 simultaneous standalone session acceptance, active removal/recovery in every
-direction, and independent release. Bitwig session acceptance remains open. See
-`docs/SESSION-WORKBENCH.md`.
+direction, and independent release. The same session boundary later passed in
+Bitwig for one device, both Grids, all three devices, active hot-swap, and
+deliberate standalone displacement: Bitwig detected the rival callback,
+detached capability output, and refused unsafe release. Full plug-in-process
+death remains a separate host lifecycle gap. See `docs/SESSION-WORKBENCH.md`.
 
 ### Step 3 — Grid capability
 
@@ -230,7 +233,7 @@ destination remains untouched.
 - Test one device, pairs, all three devices, removal in each direction, and
   contention between standalone and Bitwig.
 
-Status on 2026-08-26: the physical legacy 128 and zero Grid passed the Grid-pair
+Status on 2026-08-27: the physical legacy 128 and zero Grid passed the Grid-pair
 slice in PlugData standalone. Both devices held simultaneous verified claims
 on separate callback ports, routed distinct LED and key traffic, survived
 removal of the other device, restored the removed stable identity in both
@@ -238,13 +241,22 @@ directions, and released independently to port `0`. Both Grids and the Arc then
 passed the all-three standalone slice: distinct claims and input/output routes,
 fresh ownership checks, active removal and same-ID recovery of each device,
 unchanged verified survivors in every direction, and independent dark release
-to port `0`. See `docs/THREE-DEVICE-ACCEPTANCE.md`. On 2026-08-27, the pinned
-PlugData candidate at commit `98ae0f78` passed the host editor preflight in
-Bitwig 6.1: five CLAP and three VST3 close/reopen cycles retained their
-respective plug-in-host processes with no new crash report. No Monome patch or
-hardware was exercised inside Bitwig. Transport, bypass, save/reload, process
-restart, physical device, and standalone-versus-Bitwig contention gates remain
-open. See `docs/PLUGDATA-BITWIG-AB.md`.
+to port `0`. See `docs/THREE-DEVICE-ACCEPTANCE.md`.
+
+The pinned PlugData candidate at commit `98ae0f78` then passed the bounded
+Bitwig 6.1 hardware lane: stopped transport, ordinary bypass with a stable host
+process, fail-closed save/reload followed by explicit reclaim, one device,
+both Grids, all three devices, active removal/recovery of each device with
+unchanged survivors, and deliberate displacement by an isolated standalone
+patch. The displaced Bitwig session detached output and skipped release rather
+than overwrite the standalone owner. After standalone released to port `0`,
+Bitwig freshly probed, reclaimed, restored output, and received input. Final
+cleanup left all three devices dark at port `0`.
+
+One Step 5 gate fails: full Bitwig device deactivation terminates the isolated
+PlugData host before it can darken or release, leaving the callback and LEDs
+stale. Guarded manual recovery succeeded, but intentional plug-in-process
+restart is not accepted. See `docs/PLUGDATA-BITWIG-AB.md`.
 
 ### Step 6 — Demos and package
 
@@ -253,11 +265,12 @@ open. See `docs/PLUGDATA-BITWIG-AB.md`.
 - Add help patches, release metadata, installation documentation, and a
   `.plugdata` package.
 
-Packaging starts only after standalone and Bitwig physical acceptance pass.
+Packaging starts only after Step 5 is accepted, including plug-in-process
+restart. The current full-device-deactivation failure blocks that claim.
 
 ## Current workbench boundary
 
-As of 2026-08-26, this Mac uses the pinned official SerialOSC source at
+As of 2026-08-27, this Mac uses the pinned official SerialOSC source at
 `ff53885` with the project's two null-port guards, built as native arm64 and
 run as a user LaunchAgent. Homebrew supplies the native libraries but its stock
 SerialOSC job remains stopped. The older 1.4.1 Intel launch job is preserved
@@ -267,9 +280,10 @@ acceptance layers.
 The physical standalone record was produced with the official 0.9.4 nightly
 from run `32892289806`, commit `6bb2b60c8`. The currently installed host
 candidate is the official 0.9.4 package from run `27418767000`, commit
-`98ae0f78`; it passes the standalone dynamic-menu smoke and the bounded Bitwig
-CLAP/VST3 editor-lifecycle preflight. It has not yet run the Monome patch or
-hardware inside Bitwig. See `docs/PLUGDATA-MACOS.md` and
+`98ae0f78`; it passes the standalone dynamic-menu smoke, the bounded Bitwig
+CLAP/VST3 editor-lifecycle preflight, and the Bitwig Monome hardware/contention
+surface listed in Step 5. Full device deactivation still leaves stale
+SerialOSC state and is not accepted. See `docs/PLUGDATA-MACOS.md` and
 `docs/PLUGDATA-BITWIG-AB.md`.
 
 Fake-server acceptance remains the deterministic regression layer. It exposes

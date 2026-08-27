@@ -63,12 +63,16 @@ CLAP host when its editor was closed. The workbench now uses the complete
 official macOS package from run `27418767000`, commit `98ae0f78ba43d17f`, as
 the pinned host-compatibility candidate. That package passes the standalone
 native-menu smoke, five CLAP editor close/reopen cycles, and three VST3 editor
-close/reopen cycles. See [`PLUGDATA-BITWIG-AB.md`](PLUGDATA-BITWIG-AB.md) for
-artifact hashes, crash signatures, exact scope, and remaining gates.
+close/reopen cycles. It subsequently passed the bounded Bitwig Monome hardware
+and standalone-contention run. See
+[`PLUGDATA-BITWIG-AB.md`](PLUGDATA-BITWIG-AB.md) for artifact hashes, crash
+signatures, the accepted hardware surface, and the remaining process-lifecycle
+gap.
 
-The June candidate has not inherited the later build's physical-device
-acceptance by implication. Hardware and standalone-versus-Bitwig contention
-remain separate tests.
+The June candidate did not inherit the later build's physical-device acceptance
+by implication; it passed its own direct hardware run. Full Bitwig device
+deactivation remains unaccepted because the terminated plug-in host cannot
+darken or release its SerialOSC destination.
 
 References:
 
