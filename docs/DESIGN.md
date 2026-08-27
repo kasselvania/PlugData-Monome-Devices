@@ -258,15 +258,41 @@ PlugData host before it can darken or release, leaving the callback and LEDs
 stale. Guarded manual recovery succeeded, but intentional plug-in-process
 restart is not accepted. See `docs/PLUGDATA-BITWIG-AB.md`.
 
-### Step 6 — Demos and package
+### Step 5A — Preserve the pre-lease workbench
+
+- Emit the complete committed source, tests, physical workbench, and evidence
+  as a checksum-addressed development bundle.
+- Keep the failed process-death gate explicit in that bundle.
+- Do not call the development bundle an end-user PlugData package.
+
+Status on 2026-08-27: implemented by
+`tools/build_workbench_bundle.sh`. See `docs/WORKBENCH-BUNDLE.md` and
+`docs/PROJECT-MAP.md`.
+
+### Step 5B — Opt-in SerialOSC lease
+
+- Specify lease claim, renewal, expiry, release, displacement, and readback in
+  the fake-server contract first.
+- Implement the protocol in a dedicated upstream-oriented SerialOSC fork
+  without changing legacy `/sys/port` behavior.
+- Align `monome.session` with the opt-in lease.
+- Repeat deterministic, macOS Bitwig, and Steam Deck physical acceptance,
+  including actual client-process death.
+
+Acceptance: a terminated PlugData host causes SerialOSC itself to darken the
+device and clear the expired runtime destination, while legacy clients retain
+their existing behavior. See `docs/PROJECT-MAP.md`.
+
+### Step 6 — Demos and end-user package
 
 - Grid demo: dynamic 128/256 layout with momentary and latch modes.
 - Arc demo: encoder-following animation with bounded refresh.
 - Add help patches, release metadata, installation documentation, and a
-  `.plugdata` package.
+  user-facing archive that matches the accepted PlugData distribution format.
 
-Packaging starts only after Step 5 is accepted, including plug-in-process
-restart. The current full-device-deactivation failure blocks that claim.
+End-user packaging starts only after Step 5B is accepted on macOS and
+SteamOS. The current full-device-deactivation failure blocks that claim; the
+Step 5A development bundle does not soften or bypass it.
 
 ## Current workbench boundary
 
@@ -294,7 +320,7 @@ hardware or touching live SerialOSC port `12002`.
 ## Deferred decisions
 
 - Repository license.
-- Final `.plugdata` package metadata after inspecting the schema used by the
-  release version of PlugData.
+- Final PlugData archive/store metadata after inspecting the schema used by
+  the release version of PlugData.
 - Whether the legacy patches remain in release archives after the new Grid and
   Arc demos replace their educational value.

@@ -89,6 +89,13 @@ device terminates the isolated PlugData host before it can darken or release,
 leaving a stale SerialOSC callback and lit hardware. Guarded manual recovery
 passes; plug-in-process restart safety does not.
 
+The complete committed state can now be emitted as a checksum-addressed
+development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
+a reproducible continuation baseline, not the final end-user PlugData package;
+see [`docs/WORKBENCH-BUNDLE.md`](docs/WORKBENCH-BUNDLE.md). The division between
+this device layer, the SerialOSC lease fork, the Steam Deck installer, and the
+later musical patches is recorded in [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md).
+
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
 for discovery. [`docs/SESSION-WORKBENCH.md`](docs/SESSION-WORKBENCH.md) covers
