@@ -147,6 +147,29 @@ The real `/serialosc/remove` arrived as `SERIAL MODEL PORT`, exposing and then
 closing a simulator mismatch: discovery now preserves the full status tuple
 while sending only `remove SERIAL` to the registry.
 
+### Lease-candidate legacy-128 record
+
+Passed on 2026-08-29 with the pinned SerialOSC lease candidate at revision
+`6701959e` and the installed PlugData 0.9.4 candidate:
+
+- loading the live patch bound the expected loopback ports but did not
+  auto-select or claim;
+- explicit discovery, selection, and non-mutating lease probe;
+- verified lease claim on callback port `17780`;
+- renewal observed beyond the original six-second TTL;
+- full 16-by-8 output at level 4 and independently bright top-left output at
+  level 15;
+- exact top-left `key 0 0 1` and `key 0 0 0` input in PlugData;
+- orderly full-surface darkness before verified release to port `0`;
+- a second lit claim followed by abrupt termination of only the PlugData
+  process, with the destination still leased immediately afterward; and
+- automatic daemon expiry, visibly complete hardware darkness, and independent
+  free port-`0` readback.
+
+This record accepts the legacy-128 standalone lease lifecycle. It does not
+transfer acceptance to the zero Grid, Arc, simultaneous devices, Bitwig, or
+Steam Deck.
+
 ## Physical modern-256 record
 
 Passed on 2026-08-26 in PlugData standalone with the accepted nightly and the

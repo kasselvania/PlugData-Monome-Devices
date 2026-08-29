@@ -148,7 +148,7 @@ This record does not accept PlugData standalone, Bitwig, the zero Grid, the
 Arc, simultaneous devices, or Steam Deck. Those gates remain in the sequence
 above.
 
-## Accepted standalone control-plane slice
+## Accepted standalone legacy-128 slice
 
 Also on 2026-08-29, the installed PlugData 0.9.4 candidate opened
 `monome-grid-live.pd` through macOS LaunchServices. This unattended run
@@ -172,10 +172,27 @@ established the following narrower evidence:
   daemon log recorded expiry, and the candidate remained the sole healthy owner
   of discovery port `12002`.
 
-No LED command or physical key input was used in this unattended run. It proves
-standalone selection, probe, claim, renewal, orderly release, and daemon expiry
-after abrupt client death at the control-plane boundary. It does not yet prove
-PlugData-routed output/input or visible darkening after PlugData death.
+An attended continuation then completed the physical I/O boundary:
+
+- PlugData lit the full 16-by-8 surface at level 4;
+- it independently raised the top-left LED to level 15;
+- the user confirmed both physical patterns;
+- PlugData's console recorded exact top-left `key 0 0 1` and `key 0 0 0`
+  events while lease renewals continued;
+- orderly release visibly darkened the entire Grid before independent free
+  port-`0` readback;
+- PlugData reclaimed and relit the full surface for the process-death run;
+- `SIGKILL` left the destination leased immediately after client death;
+- the full Grid remained lit briefly, then visibly went completely dark by
+  itself on lease expiry; and
+- final independent readback reported free port `0`, while the candidate
+  remained the sole healthy discovery owner.
+
+Together, the unattended control-plane and attended physical runs accept the
+legacy-128 PlugData standalone lifecycle: explicit selection, non-mutating
+probe, claim, renewal, output, input, orderly dark/release, and abrupt-client
+expiry with automatic hardware darkening. They do not accept Bitwig, the zero
+Grid, Arc, simultaneous devices, or Steam Deck.
 
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

@@ -114,8 +114,16 @@ and independent reads beyond the original six-second TTL proved that
 PlugData's two-second renewals kept arriving. Orderly release returned port
 `0`. On a second claim, `SIGKILL` terminated only the test-owned PlugData
 process: the immediate readback remained leased, then the daemon expired it and
-returned port `0`. No LED output or key input was sent during that unattended
-run, so it does not complete standalone physical acceptance.
+returned port `0`.
+
+The attended continuation completes the legacy-128 standalone physical gate.
+PlugData lit the full Grid dimly, addressed the top-left LED independently, and
+printed the exact top-left press and release events while renewals continued.
+Its orderly release visibly darkened the full surface before independent free
+port-`0` readback. On a final lit lease, `SIGKILL` again left the destination
+leased immediately after PlugData died; the Grid then went completely dark by
+itself when the daemon expired the lease and returned port `0`. This does not
+accept Bitwig, the zero Grid, the Arc, combined devices, or Steam Deck.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -129,9 +137,9 @@ server and the opt-in PlugData session path. The live Grid and Arc slots select
 lease policy at load; the older smoke patches remain the legacy A/B lane. A
 separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
-expiry gate and the standalone control-plane claim/renew/release/process-death
-slice have passed; standalone physical I/O, Bitwig, and every Steam Deck lease
-gate remain open. See
+expiry gate and the complete legacy-128 PlugData standalone physical lifecycle
+have passed; Bitwig, the other devices, combined-device runs, and every Steam
+Deck lease gate remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 

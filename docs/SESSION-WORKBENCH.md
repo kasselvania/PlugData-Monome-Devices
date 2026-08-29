@@ -241,9 +241,19 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
   `18780`: Bitwig reported `displaced destination_changed`, detached
   capability output, refused an LED update, skipped release, and left the
   rival destination untouched. The standalone owner released to port `0`,
-  after which Bitwig freshly probed and reclaimed the device.
+  after which Bitwig freshly probed and reclaimed the device;
+- physical legacy-128 lease claim and renewal beyond the original daemon TTL;
+- PlugData-routed legacy-128 output and exact top-left press/release input;
+- orderly lease darkening and independently verified release to free port `0`;
+  and
+- abrupt PlugData standalone process death while the Grid remained lit and
+  leased, followed by automatic daemon expiry, visible full darkness, and
+  independent free port-`0` readback.
 
-The remaining host lifecycle gap is process death, not displacement handling.
-Full Bitwig device deactivation terminates the plug-in host before it can
-darken or release, so SerialOSC retains a stale destination. See
+The remaining macOS host lifecycle gap is Bitwig process death, not standalone
+process death or displacement handling. In the accepted pre-lease Bitwig lane,
+full device deactivation terminates the plug-in host before it can darken or
+release, so stable SerialOSC retains a stale destination. The lease candidate
+has closed the equivalent physical standalone failure, but it has not yet
+passed the Bitwig process-death gate. See
 `docs/PLUGDATA-BITWIG-AB.md`.

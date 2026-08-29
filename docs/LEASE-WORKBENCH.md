@@ -86,10 +86,17 @@ PlugData process stayed leased immediately after death, then expired to free
 port `0`. The daemon log independently recorded grant, release, grant, and
 expiry.
 
-This is not complete PlugData acceptance. No LED output or key input was sent
-during the unattended standalone run. Standalone physical I/O and visible
-expiry darkening, Bitwig plug-in-host termination, the zero Grid, the Arc, the
-combined-device matrix, and every Steam Deck lease gate remain open. Those
-layers gain no crash-safe claim until their own physical readback and
-process-death acceptance steps pass. See
+An attended continuation completed the legacy-128 standalone physical gate.
+PlugData-routed output visibly lit the full 16-by-8 surface at level 4 and made
+the top-left LED independently bright. PlugData printed exact `key 0 0 1` and
+`key 0 0 0` events while lease renewals continued. Orderly release visibly
+darkened the complete surface before independent free port-`0` readback. A
+final full-surface pattern remained lit immediately after `SIGKILL` proved the
+client had not released; it then went completely dark on daemon expiry, with a
+separate probe again reporting free port `0`.
+
+Bitwig plug-in-host termination, the zero Grid, the Arc, the combined-device
+matrix, and every Steam Deck lease gate remain open. Those layers gain no
+crash-safe claim until their own physical readback and process-death acceptance
+steps pass. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
