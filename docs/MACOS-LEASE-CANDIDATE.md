@@ -119,5 +119,34 @@ acts automatically only after exact readback says `free` with port `0`.
 verified legacy destination and must be used only after the operator approves
 that crossing. It still never replaces a different active lease.
 
+## Accepted direct-daemon slice
+
+On 2026-08-29, candidate revision
+`6701959e432665b1d081ca68523966666d53b75a` passed acceptance steps 1 and 2
+with physical legacy 128 `m1000853`:
+
+- the candidate was the sole owner of UDP discovery port `12002`;
+- a read-only probe reported lease version 1 and the exact legacy destination
+  `127.0.0.1:17780`, prefix `/monome`, with no lease owner;
+- the operator explicitly approved `--takeover-legacy`;
+- a three-second lease was granted and independently read back;
+- the complete 16-by-8 surface visibly lit at level 4;
+- the harness deliberately sent no renewal and no release;
+- `/sys/lease/lost` and the daemon's `lease expired` record were both observed;
+- the full physical surface automatically went dark; and
+- a separate post-test probe reported `free` at `127.0.0.1:0`, remaining time
+  `0`, and owner `0`.
+
+The first physical attempt against the preceding candidate failed closed with
+`device_error` before a grant. It exposed a libmonome transport difference:
+series writes return zero on success, while mext writes may return a positive
+byte count. The candidate now treats only negative Grid or Arc write results as
+failures. Its deterministic C suite passed before the corrected physical run.
+At no point did the failed attempt overwrite the verified legacy destination.
+
+This record does not accept PlugData standalone, Bitwig, the zero Grid, the
+Arc, simultaneous devices, or Steam Deck. Those gates remain in the sequence
+above.
+
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

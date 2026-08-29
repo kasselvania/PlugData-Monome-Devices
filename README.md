@@ -95,6 +95,17 @@ passes; plug-in-process restart safety does not. The lease-enabled daemon and
 PlugData session are now implemented and deterministically tested, but this
 failure is not closed until the physical Bitwig process-death run passes.
 
+The pinned macOS lease candidate at SerialOSC revision `6701959e` has now
+passed its first direct-daemon physical gate with legacy 128 `m1000853`. After
+an operator-authorized takeover of the verified legacy destination, the daemon
+granted a three-second lease, lit the full 16-by-8 surface at a low level, and
+expired the lease when the harness deliberately sent neither renewal nor
+release. The Grid visibly went completely dark, `/sys/lease/lost` arrived, the
+daemon recorded the expiry, and an independent probe reported `free` at
+`127.0.0.1:0` with no owner. This proves only the legacy-128 direct-daemon
+expiry lane; PlugData standalone, Bitwig, the other devices, and Steam Deck
+lease acceptance remain open.
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -105,8 +116,10 @@ later musical patches is recorded in [`docs/PROJECT-MAP.md`](docs/PROJECT-MAP.md
 The feature lease workbench now executes the version 1 contract in the fake
 server and the opt-in PlugData session path. The live Grid and Arc slots select
 lease policy at load; the older smoke patches remain the legacy A/B lane. A
-separate, rollback-safe macOS candidate manager is ready, but the installed
-macOS and Steam Deck services are still unchanged. See
+separate, rollback-safe macOS candidate manager now runs the pinned candidate
+beside a fully preserved stable installation. Its first direct-daemon physical
+expiry gate has passed; the PlugData-hosted macOS gates and every Steam Deck
+lease gate remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 

@@ -6,8 +6,10 @@ application-destination protocol from the
 fork.
 
 This is the executable contract for the daemon and PlugData changes. The fork
-worker and opt-in `monome-session` policy now implement it; the installed
-macOS and Steam Deck SerialOSC services do not support leases yet.
+worker and opt-in `monome-session` policy now implement it. A separately rooted
+macOS candidate runs the lease daemon while the accepted stable installation
+remains preserved; the accepted stable daemon and Steam Deck service do not
+support leases.
 
 ## Covered behavior
 
@@ -56,12 +58,27 @@ physical acceptance. Its default `probe` is read-only. The separately named
 map only after a grant and owner readback, omits renewal/release on purpose,
 and then requires free port-`0` readback after the deadline.
 
-## Remaining boundary
+## Physical acceptance boundary
 
-The fork worker and PlugData session are implemented. A separately rooted,
-pinned, checksum-verified macOS candidate can now be prepared without touching
-the accepted service; see [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
-It has not yet been activated. No physical device, PlugData standalone process,
-Bitwig plug-in host, or Steam Deck service has passed the lease candidate.
-Those layers gain no crash-safe claim until their own readback and process-death
-acceptance steps pass.
+On 2026-08-29, the pinned macOS candidate at SerialOSC revision `6701959e`
+passed one direct-daemon expiry run with physical legacy 128 `m1000853`. The
+read-only probe first reported lease version 1 in `legacy` mode at
+`127.0.0.1:17780`. After explicit operator approval, the harness crossed that
+boundary with `--takeover-legacy`, verified the grant, lit the full Grid at
+level 4, and deliberately omitted renewal and release. The client observed
+`/sys/lease/lost`; the daemon recorded `lease expired`; the user confirmed the
+full surface lit dimly and then went completely dark; and a separate probe
+reported `free`, port `0`, and owner `0`.
+
+That run also verifies the corrected libmonome result boundary: Grid and Arc
+writes fail only on a negative result. Positive mext byte counts are successful
+writes. The earlier candidate rejected this physical Grid because it treated
+every nonzero result as failure; it never granted that attempted lease and
+preserved the legacy destination.
+
+This is not PlugData acceptance. Standalone claim/renewal/input/release and
+forced-process-expiry, Bitwig plug-in-host termination, the zero Grid, the Arc,
+the combined-device matrix, and every Steam Deck lease gate remain open. Those
+layers gain no crash-safe claim until their own physical readback and
+process-death acceptance steps pass. See
+[MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
