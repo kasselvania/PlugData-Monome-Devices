@@ -148,5 +148,34 @@ This record does not accept PlugData standalone, Bitwig, the zero Grid, the
 Arc, simultaneous devices, or Steam Deck. Those gates remain in the sequence
 above.
 
+## Accepted standalone control-plane slice
+
+Also on 2026-08-29, the installed PlugData 0.9.4 candidate opened
+`monome-grid-live.pd` through macOS LaunchServices. This unattended run
+established the following narrower evidence:
+
+- no PlugData or Bitwig host was running before launch;
+- the patch bound only its expected local ports `17779`, `17780`, `17781`, and
+  `17900`;
+- opening the patch did not claim the free Grid;
+- discovery, explicit index selection, and probe left the Grid free at port
+  `0`;
+- explicit claim produced a lease at `127.0.0.1:17780`;
+- independent reads spanning longer than the original six-second TTL remained
+  leased and showed the remaining time reset upward, proving renewal;
+- orderly PlugData release returned an independently verified free port `0`;
+- a second claim was followed by `SIGKILL` of the exact PlugData process opened
+  for the test;
+- immediate readback after process death remained leased, proving that no
+  orderly release had run; and
+- after the lease deadline, independent readback reported free port `0`, the
+  daemon log recorded expiry, and the candidate remained the sole healthy owner
+  of discovery port `12002`.
+
+No LED command or physical key input was used in this unattended run. It proves
+standalone selection, probe, claim, renewal, orderly release, and daemon expiry
+after abrupt client death at the control-plane boundary. It does not yet prove
+PlugData-routed output/input or visible darkening after PlugData death.
+
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

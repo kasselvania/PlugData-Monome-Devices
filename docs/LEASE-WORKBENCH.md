@@ -76,9 +76,20 @@ writes. The earlier candidate rejected this physical Grid because it treated
 every nonzero result as failure; it never granted that attempted lease and
 preserved the legacy destination.
 
-This is not PlugData acceptance. Standalone claim/renewal/input/release and
-forced-process-expiry, Bitwig plug-in-host termination, the zero Grid, the Arc,
-the combined-device matrix, and every Steam Deck lease gate remain open. Those
+The same day, an unattended PlugData standalone control-plane run passed. The
+live Grid patch opened through LaunchServices, bound only its expected local
+ports, and did not auto-claim. Explicit probe remained non-mutating. Explicit
+claim produced a lease at port `17780`; independent state reads spanning more
+than the original six-second TTL proved renewal; and orderly release returned
+free port `0`. A second claim followed by `SIGKILL` of the exact test-owned
+PlugData process stayed leased immediately after death, then expired to free
+port `0`. The daemon log independently recorded grant, release, grant, and
+expiry.
+
+This is not complete PlugData acceptance. No LED output or key input was sent
+during the unattended standalone run. Standalone physical I/O and visible
+expiry darkening, Bitwig plug-in-host termination, the zero Grid, the Arc, the
+combined-device matrix, and every Steam Deck lease gate remain open. Those
 layers gain no crash-safe claim until their own physical readback and
 process-death acceptance steps pass. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).

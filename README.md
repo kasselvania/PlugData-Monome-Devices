@@ -106,6 +106,17 @@ daemon recorded the expiry, and an independent probe reported `free` at
 expiry lane; PlugData standalone, Bitwig, the other devices, and Steam Deck
 lease acceptance remain open.
 
+An unattended standalone control-plane slice has also passed with the same
+candidate and Grid. Opening `monome-grid-live.pd` through LaunchServices bound
+the expected local ports without claiming the device. Explicit discovery,
+selection, and probe left it free; explicit claim leased it at port `17780`;
+and independent reads beyond the original six-second TTL proved that
+PlugData's two-second renewals kept arriving. Orderly release returned port
+`0`. On a second claim, `SIGKILL` terminated only the test-owned PlugData
+process: the immediate readback remained leased, then the daemon expired it and
+returned port `0`. No LED output or key input was sent during that unattended
+run, so it does not complete standalone physical acceptance.
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -118,8 +129,9 @@ server and the opt-in PlugData session path. The live Grid and Arc slots select
 lease policy at load; the older smoke patches remain the legacy A/B lane. A
 separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
-expiry gate has passed; the PlugData-hosted macOS gates and every Steam Deck
-lease gate remain open. See
+expiry gate and the standalone control-plane claim/renew/release/process-death
+slice have passed; standalone physical I/O, Bitwig, and every Steam Deck lease
+gate remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 
