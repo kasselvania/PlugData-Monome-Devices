@@ -221,6 +221,7 @@ def expiry_test(
     ttl_ms: int,
     level: int,
     arc_rings: int | None,
+    takeover_legacy: bool = False,
     report: Callable[[str], None] | None = None,
 ) -> ExpiryResult:
     devices = discover(callback, serialosc_server, timeout_seconds)
@@ -237,16 +238,27 @@ def expiry_test(
     )
     if before is None:
         raise ValueError("lease_unsupported")
-    if before.mode != "free" or before.destination_port != 0:
+    if before.mode == "leased":
         raise ValueError(
             f"lease_not_free {before.mode} {before.destination_port}"
         )
+    if before.mode == "legacy" and not takeover_legacy:
+        raise ValueError(
+            f"legacy_takeover_required {before.destination_port}"
+        )
+    if before.mode == "free" and before.destination_port != 0:
+        raise ValueError("inconsistent_free_destination")
 
     callback_host, callback_port = callback.getsockname()
     endpoint = (serialosc_server[0], device.server_port)
+    acquire_path = (
+        "/sys/lease/takeover"
+        if before.mode == "legacy"
+        else "/sys/lease/acquire"
+    )
     callback.sendto(
         encode_message(
-            "/sys/lease/acquire",
+            acquire_path,
             token,
             callback_host,
             callback_port,
@@ -340,6 +352,11 @@ def main() -> int:
     expiry.add_argument("--ttl-ms", type=int, default=3000)
     expiry.add_argument("--level", type=int, default=4)
     expiry.add_argument("--arc-rings", type=int, choices=(2, 4))
+    expiry.add_argument(
+        "--takeover-legacy",
+        action="store_true",
+        help="Explicitly permit replacing a verified legacy destination.",
+    )
     arguments = parser.parse_args()
 
     if arguments.timeout <= 0:
@@ -366,7 +383,8 @@ def main() -> int:
                     arguments.ttl_ms,
                     arguments.level,
                     arguments.arc_rings,
-                    lambda message: print(message, flush=True),
+                    takeover_legacy=arguments.takeover_legacy,
+                    report=lambda message: print(message, flush=True),
                 )
                 print(
                     "LOST_OBSERVED "

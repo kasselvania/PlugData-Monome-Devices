@@ -99,6 +99,38 @@ class LiveSerialOSCLeaseTests(unittest.TestCase):
             self.assertIn(("dark", "expired"), endpoint.lease_events)
             self.assertIn(("free", "expired"), endpoint.lease_events)
 
+    def test_legacy_destination_requires_explicit_takeover(self) -> None:
+        with RunningSerialOSC() as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            endpoint = server.device_servers["m100"]
+            endpoint.set_destination("127.0.0.1", 17780, "/monome")
+            with self.assertRaisesRegex(ValueError, "legacy_takeover_required"):
+                expiry_test(
+                    callback,
+                    (server.host, server.port),
+                    "m100",
+                    0.5,
+                    1000,
+                    4,
+                    None,
+                )
+
+            result = expiry_test(
+                callback,
+                (server.host, server.port),
+                "m100",
+                0.5,
+                1000,
+                4,
+                None,
+                takeover_legacy=True,
+            )
+            self.assertEqual(result.claimed.mode, "leased")
+            self.assertEqual(result.released.mode, "free")
+            self.assertTrue(endpoint.all_dark())
+            self.assertIn(("leased", "takeover"), endpoint.lease_events)
+
 
 if __name__ == "__main__":
     unittest.main()

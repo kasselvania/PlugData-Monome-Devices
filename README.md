@@ -171,10 +171,12 @@ reported size without claiming or releasing anything.
 
 Against the lease candidate, `python3 tools/live_serialosc_lease.py probe`
 adds a non-mutating version/mode/remaining-time readback. Its explicit
-`expiry-test --serial SERIAL` command refuses non-free devices, acquires one
-short lease, sends a bounded test pattern, deliberately omits renewal and
-release, and verifies that the daemon returns to free port `0`. Arc runs also
-require `--arc-rings 2` or `--arc-rings 4`.
+`expiry-test --serial SERIAL` command refuses non-free devices by default,
+acquires one short lease, sends a bounded test pattern, deliberately omits
+renewal and release, and verifies that the daemon returns to free port `0`. Arc runs also
+require `--arc-rings 2` or `--arc-rings 4`. A verified legacy destination is
+crossed only with the separately named `--takeover-legacy` flag after explicit
+operator approval; a different active lease is never crossed.
 
 Run `python3 tools/fake_serialosc.py`, then open
 [`monome-discovery-help.pd`](monome-discovery-help.pd) in PlugData for the

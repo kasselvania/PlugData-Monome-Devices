@@ -79,10 +79,12 @@ commit only after its acceptance gates pass.
 
 The version 1 implementation and protocol are recorded on the fork's
 [`feature/leased-destinations`](https://github.com/kasselvania/serialosc/blob/feature/leased-destinations/docs/leased-destinations.md)
-branch at commit `65ca6c2`. Its timer core, runtime transitions, loopback OSC
+branch at commit `6701959`. Its timer core, runtime transitions, loopback OSC
 wire behavior, legacy compatibility, port-`0` persistence boundary, and idle
-event-loop expiry pass automated tests. It is not an upstream release or a
-physical acceptance claim.
+event-loop expiry pass automated tests. That revision also normalizes
+libmonome's protocol-dependent success returns: series/40h report zero while
+mext/OSC report a positive byte count, and only negative values are failures.
+It is not an upstream release or a physical acceptance claim.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.

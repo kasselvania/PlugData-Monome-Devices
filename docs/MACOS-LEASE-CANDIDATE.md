@@ -8,8 +8,8 @@ stable service.
 Pinned source:
 
 - repository: `kasselvania/serialosc`;
-- revision: `65ca6c2ff4d8589c5e75d5e8b4e9cd38bec96bec`;
-- reported version: `serialoscd 1.4.8 (65ca6c2)`; and
+- revision: `6701959e432665b1d081ca68523966666d53b75a`;
+- reported version: `serialoscd 1.4.8 (6701959)`; and
 - protocol: opt-in leased destinations version 1.
 
 This remains an acceptance candidate, not an upstream SerialOSC release.
@@ -34,7 +34,7 @@ It installs the candidate below:
 
 ```text
 ~/Library/Application Support/PlugData Monome Devices/
-  serialosc-lease-candidate/65ca6c2/
+  serialosc-lease-candidate/6701959/
 ```
 
 The accepted build remains untouched at `serialosc/`.
@@ -109,11 +109,15 @@ The direct read-only and expiry commands are:
 ```sh
 python3 tools/live_serialosc_lease.py probe
 python3 tools/live_serialosc_lease.py expiry-test --serial SERIAL
+python3 tools/live_serialosc_lease.py expiry-test --serial SERIAL --takeover-legacy
 python3 tools/live_serialosc_lease.py expiry-test --serial ARC_SERIAL --arc-rings 4
 ```
 
 The expiry harness never takes over a legacy or rival leased destination. It
-will act only after exact readback says `free` with port `0`.
+acts automatically only after exact readback says `free` with port `0`.
+`--takeover-legacy` is a separately named, explicit authorization for a
+verified legacy destination and must be used only after the operator approves
+that crossing. It still never replaces a different active lease.
 
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

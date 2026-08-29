@@ -3,8 +3,8 @@
 set -euo pipefail
 
 FORK_REPOSITORY="https://github.com/kasselvania/serialosc.git"
-FORK_REVISION="65ca6c2ff4d8589c5e75d5e8b4e9cd38bec96bec"
-FORK_SHORT_REVISION="65ca6c2"
+FORK_REVISION="6701959e432665b1d081ca68523966666d53b75a"
+FORK_SHORT_REVISION="6701959"
 STABLE_SERVICE_LABEL="com.kasselvania.plugdata-monome.serialosc"
 CANDIDATE_SERVICE_LABEL="com.kasselvania.plugdata-monome.serialosc-lease-candidate"
 DISCOVERY_PORT="12002"
