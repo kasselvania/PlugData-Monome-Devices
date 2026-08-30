@@ -194,5 +194,31 @@ probe, claim, renewal, output, input, orderly dark/release, and abrupt-client
 expiry with automatic hardware darkening. They do not accept Bitwig, the zero
 Grid, Arc, simultaneous devices, or Steam Deck.
 
+## Accepted standalone zero-Grid slice
+
+On 2026-08-29, physical zero Grid `m23215901` passed the equivalent isolated
+PlugData standalone lifecycle in OSC/SerialOSC mode:
+
+- discovery identified `monome zero` and lease version 1 while free at port
+  `0`;
+- loading the workbench did not auto-claim;
+- explicit selection and probe remained non-mutating;
+- explicit claim verified callback port `17780` and renewed beyond the original
+  TTL;
+- all 256 LEDs visibly lit at level 4;
+- the bottom-right LED independently rose to level 15, proving 16-by-16
+  addressing;
+- PlugData printed exact `key 15 15 1` and `key 15 15 0` input;
+- orderly release visibly darkened the complete surface before independent
+  free port-`0` readback;
+- a second full-surface pattern remained lit immediately after `SIGKILL`
+  terminated only the test PlugData process; and
+- the zero Grid then visibly went completely dark by itself on lease expiry,
+  after which independent readback reported free port `0` and the candidate
+  remained healthy.
+
+This accepts the isolated zero-Grid standalone lease lifecycle. It does not
+accept Arc, simultaneous devices, Bitwig, or Steam Deck.
+
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

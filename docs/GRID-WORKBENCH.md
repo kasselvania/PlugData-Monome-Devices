@@ -192,6 +192,27 @@ installed patched production LaunchAgent. SerialOSC identified the device as
 No bottom-right key-input claim is made by this record; that coordinate was
 used only for LED-output verification.
 
+### Lease-candidate modern-256 record
+
+Passed on 2026-08-29 with the pinned SerialOSC lease candidate at revision
+`6701959e` and the installed PlugData 0.9.4 candidate:
+
+- SerialOSC identified `m23215901` as `monome zero` in OSC/SerialOSC mode and
+  free at port `0`;
+- loading the patch did not auto-claim;
+- explicit selection, non-mutating probe, verified lease claim, and renewal
+  beyond the original daemon TTL;
+- all 256 LEDs at level 4 and the bottom-right LED independently at level 15;
+- exact bottom-right `key 15 15 1` and `key 15 15 0` input in PlugData;
+- orderly full-surface darkness before verified release to port `0`;
+- a second lit claim followed by abrupt termination of only the PlugData
+  process, with the destination still leased immediately afterward; and
+- automatic daemon expiry, visibly complete hardware darkness, and independent
+  free port-`0` readback.
+
+This record accepts the isolated zero-Grid standalone lease lifecycle. It does
+not transfer acceptance to Arc, simultaneous devices, Bitwig, or Steam Deck.
+
 ## Physical two-Grid record
 
 Passed on 2026-08-26 with the legacy 128 and zero Grid connected concurrently

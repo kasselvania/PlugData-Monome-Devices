@@ -95,8 +95,14 @@ final full-surface pattern remained lit immediately after `SIGKILL` proved the
 client had not released; it then went completely dark on daemon expiry, with a
 separate probe again reporting free port `0`.
 
-Bitwig plug-in-host termination, the zero Grid, the Arc, the combined-device
-matrix, and every Steam Deck lease gate remain open. Those layers gain no
-crash-safe claim until their own physical readback and process-death acceptance
-steps pass. See
+The physical zero Grid `m23215901` then passed the equivalent isolated
+standalone lifecycle in OSC/SerialOSC mode. The accepted evidence includes
+16-by-16 readback, all-256 output, independent bottom-right output, exact
+bottom-right press/release input, renewal, orderly all-dark release to port
+`0`, and a second lit lease that automatically darkened and became free after
+`SIGKILL` terminated PlugData.
+
+Bitwig plug-in-host termination, the Arc, the combined-device matrix, and every
+Steam Deck lease gate remain open. Those layers gain no crash-safe claim until
+their own physical readback and process-death acceptance steps pass. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).

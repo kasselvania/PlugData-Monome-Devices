@@ -123,7 +123,17 @@ Its orderly release visibly darkened the full surface before independent free
 port-`0` readback. On a final lit lease, `SIGKILL` again left the destination
 leased immediately after PlugData died; the Grid then went completely dark by
 itself when the daemon expired the lease and returned port `0`. This does not
-accept Bitwig, the zero Grid, the Arc, combined devices, or Steam Deck.
+transfer acceptance to Bitwig, the zero Grid, the Arc, combined devices, or
+Steam Deck.
+
+The physical zero Grid `m23215901` has now passed the same isolated standalone
+lease lifecycle in OSC/SerialOSC mode. PlugData verified its 16-by-16 surface,
+lit all 256 LEDs at level 4, addressed the bottom-right LED independently at
+level 15, and printed exact `key 15 15 1` and `key 15 15 0` input while the
+lease renewed. Orderly release visibly darkened the full surface and returned
+port `0`. A second lit lease remained present immediately after `SIGKILL`, then
+the zero went completely dark by itself when the daemon expired it and an
+independent probe reported free port `0`.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -137,8 +147,8 @@ server and the opt-in PlugData session path. The live Grid and Arc slots select
 lease policy at load; the older smoke patches remain the legacy A/B lane. A
 separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
-expiry gate and the complete legacy-128 PlugData standalone physical lifecycle
-have passed; Bitwig, the other devices, combined-device runs, and every Steam
+expiry gate and the complete isolated PlugData standalone physical lifecycles
+for both Grids have passed; Bitwig, Arc, combined-device runs, and every Steam
 Deck lease gate remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
