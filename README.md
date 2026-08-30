@@ -135,6 +135,17 @@ port `0`. A second lit lease remained present immediately after `SIGKILL`, then
 the zero went completely dark by itself when the daemon expired it and an
 independent probe reported free port `0`.
 
+The current macOS lease candidate is SerialOSC revision `7187832`. It resets
+the macOS IOKit serial-property buffer length for every enumerated device; the
+previous reuse of a shortened in/out length could omit the later, longer FTDI
+path of Arc `m1001113`. With that detector correction, the four-ring Arc passed
+the complete isolated PlugData lifecycle: explicit legacy takeover, renewal,
+all-ring output, independent first/fourth-ring markers, positive ring-`0` and
+negative ring-`3` encoder deltas, orderly all-dark release, and automatic
+all-dark expiry after abrupt PlugData death. Independent reads ended at free
+port `0`, and the daemon log recorded takeover, release, fresh grant, and
+expiry.
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -148,8 +159,8 @@ lease policy at load; the older smoke patches remain the legacy A/B lane. A
 separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
-for both Grids have passed; Bitwig, Arc, combined-device runs, and every Steam
-Deck lease gate remain open. See
+for both Grids and the four-ring Arc have passed; the combined-device run,
+Bitwig process-death run, and every Steam Deck lease gate remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 

@@ -8,8 +8,8 @@ stable service.
 Pinned source:
 
 - repository: `kasselvania/serialosc`;
-- revision: `6701959e432665b1d081ca68523966666d53b75a`;
-- reported version: `serialoscd 1.4.8 (6701959)`; and
+- revision: `7187832c349202b1a94a9b10080ae57d40069946`;
+- reported version: `serialoscd 1.4.8 (7187832)`; and
 - protocol: opt-in leased destinations version 1.
 
 This remains an acceptance candidate, not an upstream SerialOSC release.
@@ -34,7 +34,7 @@ It installs the candidate below:
 
 ```text
 ~/Library/Application Support/PlugData Monome Devices/
-  serialosc-lease-candidate/6701959/
+  serialosc-lease-candidate/7187832/
 ```
 
 The accepted build remains untouched at `serialosc/`.
@@ -219,6 +219,53 @@ PlugData standalone lifecycle in OSC/SerialOSC mode:
 
 This accepts the isolated zero-Grid standalone lease lifecycle. It does not
 accept Arc, simultaneous devices, Bitwig, or Steam Deck.
+
+## Arc detector correction
+
+The initial Arc gate exposed a separate macOS discovery defect, not a lease
+failure. macOS listed physical Arc `m1001113` at
+`/dev/tty.usbserial-m1001113`, but the candidate did not create its device
+worker. The detector passed one mutable IOKit property-buffer length through
+the whole enumeration. Earlier, shorter modem paths reduced that in/out length,
+so the later, longer FTDI Arc path could not be read.
+
+SerialOSC revision `7187832c349202b1a94a9b10080ae57d40069946` resets the
+buffer length for every enumerated device and requires a successful property
+read before dispatching a connection. Its native ARM64 build and complete CTest
+suite passed. The rollback-safe candidate manager installed it in its own
+revision root, activated it as the sole owner of UDP `12002`, and immediately
+discovered `m1001113` on device-server port `18226`. The earlier `6701959`
+physical Grid records remain historical evidence for the lease core; the
+current candidate pin is `7187832`.
+
+## Accepted standalone Arc slice
+
+On 2026-08-29, physical four-ring Arc `m1001113` passed the isolated PlugData
+standalone lease lifecycle against corrected candidate `7187832`:
+
+- opening `monome-arc-live.pd` bound control port `17901`, discovery callback
+  `17778`, and Arc callback `17782` without auto-claiming;
+- explicit discovery, selection, and probe preserved the verified legacy
+  destination at `127.0.0.1:17782`;
+- after explicit operator approval, takeover produced a version-1 lease on
+  callback `17782` and independent readback proved renewal beyond the original
+  six-second TTL;
+- all four rings visibly lit at level 4, with distinct ring `0`/position `0`
+  and ring `3`/position `63` markers;
+- PlugData printed positive encoder deltas for ring `0` and negative deltas for
+  ring `3`; this physical Arc has no buttons;
+- orderly release visibly darkened all four rings before independent free
+  port-`0` readback;
+- a fresh lease and full-ring pattern remained active immediately after
+  `SIGKILL` terminated only the verified PlugData process; and
+- after the deadline, all four rings visibly went dark by themselves and
+  independent readback reported free port `0`.
+
+The daemon log independently recorded the takeover grant, orderly release,
+fresh grant, and expiry. The candidate remained the sole healthy owner of UDP
+`12002`. This accepts the isolated Arc standalone lease lifecycle. The
+simultaneous-device matrix, Bitwig process death, and every Steam Deck lease
+gate remain open.
 
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

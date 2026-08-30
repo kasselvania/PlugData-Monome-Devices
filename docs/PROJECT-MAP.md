@@ -84,7 +84,10 @@ wire behavior, legacy compatibility, port-`0` persistence boundary, and idle
 event-loop expiry pass automated tests. That revision also normalizes
 libmonome's protocol-dependent success returns: series/40h report zero while
 mext/OSC report a positive byte count, and only negative values are failures.
-It is not an upstream release or a physical acceptance claim.
+The current candidate pin is `7187832`, which adds correct per-device IOKit
+property-buffer handling so a short serial path cannot prevent a later, longer
+FTDI Arc path from being detected. It is not an upstream release or a physical
+acceptance claim.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.

@@ -148,3 +148,39 @@ surface: four independent ring markers, signed encoder input, removal/recovery
 with both Grids unchanged, exact stale-self callback recovery, and final
 all-dark release to port `0`. Bitwig's separate full-device-deactivation gap is
 documented in `docs/PLUGDATA-BITWIG-AB.md`.
+
+## Lease-candidate standalone record
+
+On 2026-08-29, the same physical Arc passed the isolated opt-in lease lifecycle
+with PlugData 0.9.4 and SerialOSC candidate revision `7187832`:
+
+- macOS reported USB serial `m1001113` at
+  `/dev/tty.usbserial-m1001113`, while SerialOSC exposed model `monome arc` on
+  device-server port `18226`;
+- the first candidate build did not discover the Arc even though macOS did.
+  Its IOKit enumeration reused an in/out property-buffer length after shorter
+  modem paths, so the later, longer FTDI Arc path was omitted. Revision
+  `7187832` resets that length for every device and checks the property read;
+- opening `monome-arc-live.pd` bound only its expected control, discovery, and
+  Arc callback ports and did not auto-claim;
+- an independent probe reported the exact legacy destination
+  `127.0.0.1:17782`; the operator explicitly approved takeover before PlugData
+  changed it;
+- the verified lease renewed beyond its original six-second TTL at callback
+  port `17782`;
+- all four rings visibly lit at level 4, with independent markers at ring `0`,
+  position `0`, level 15 and ring `3`, position `63`, level 10;
+- PlugData printed positive ring-`0` deltas and negative ring-`3` deltas from
+  the buttonless physical encoders;
+- orderly release visibly darkened every ring before independent readback
+  reported free port `0`;
+- after a fresh claim settled, all four rings lit again. `SIGKILL` terminated
+  only the verified PlugData process, and immediate readback still reported a
+  live lease with about 4.4 seconds remaining; and
+- the daemon then expired the abandoned lease, all four rings visibly went
+  dark by themselves, and independent readback returned free port `0`.
+
+The candidate log independently recorded `lease granted by takeover`,
+`lease released`, a fresh `lease granted`, and `lease expired`. This accepts
+the Arc's isolated standalone lease lifecycle. It does not accept the
+simultaneous lease matrix, Bitwig process death, or Steam Deck behavior.

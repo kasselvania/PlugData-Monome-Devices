@@ -251,7 +251,11 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
   independent free port-`0` readback;
 - the equivalent isolated lease lifecycle on physical zero Grid `m23215901`,
   including renewal, full 16-by-16 output, exact bottom-right input, orderly
-  dark/release, and automatic all-dark expiry after abrupt PlugData death.
+  dark/release, and automatic all-dark expiry after abrupt PlugData death; and
+- the equivalent isolated lease lifecycle on physical four-ring Arc
+  `m1001113`, including explicit legacy takeover, renewal, independent ring
+  output, signed encoder input, orderly all-dark release, and automatic
+  all-dark expiry after abrupt PlugData death.
 
 The remaining macOS host lifecycle gap is Bitwig process death, not standalone
 process death or displacement handling. In the accepted pre-lease Bitwig lane,

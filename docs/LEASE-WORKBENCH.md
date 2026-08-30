@@ -102,7 +102,16 @@ bottom-right press/release input, renewal, orderly all-dark release to port
 `0`, and a second lit lease that automatically darkened and became free after
 `SIGKILL` terminated PlugData.
 
-Bitwig plug-in-host termination, the Arc, the combined-device matrix, and every
+Current candidate revision `7187832` then corrected the macOS detector's reuse
+of a shortened IOKit serial-property buffer length, which had hidden the later,
+longer FTDI path for Arc `m1001113`. With discovery restored, that four-ring Arc
+passed explicit legacy takeover, renewal, all-ring and isolated-position output,
+positive ring-`0` and negative ring-`3` encoder input, orderly all-dark release,
+and automatic all-dark expiry after `SIGKILL` terminated PlugData. Independent
+readback ended at free port `0`, and the daemon recorded takeover, release,
+fresh grant, and expiry.
+
+Bitwig plug-in-host termination, the combined-device lease matrix, and every
 Steam Deck lease gate remain open. Those layers gain no crash-safe claim until
 their own physical readback and process-death acceptance steps pass. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
