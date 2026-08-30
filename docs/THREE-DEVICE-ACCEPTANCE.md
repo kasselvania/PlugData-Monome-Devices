@@ -58,6 +58,52 @@ This also accepts the standalone Grid-plus-Arc survivor combinations: removing
 the zero left the legacy 128 plus Arc verified, and removing the legacy 128 left
 the zero plus Arc verified. Removing the Arc left both Grids verified.
 
+## Lease-candidate record
+
+On 2026-08-29, the same hardware passed the opt-in lease matrix with PlugData
+0.9.4 candidate `98ae0f78` and SerialOSC candidate `7187832`:
+
+1. Both live patches opened in one fresh PlugData process. It alone bound the
+   seven expected loopback ports: Grid control/discovery/session ports `17900`,
+   `17779`, `17780`, and `17781`, plus Arc control/discovery/session ports
+   `17901`, `17778`, and `17782`. Opening the patches did not auto-claim.
+2. Independent readback found all three lease-capable devices free on port `0`.
+   The registry's observed menu mapping was explicitly probed before use: zero
+   at index `2`, legacy at index `0`, and Arc at index `1`. Initial wrong-slot
+   probes remained non-mutating and exposed their actual model/shape before the
+   assignments were corrected.
+3. Zero, legacy, and Arc then held simultaneous renewable leases on `17780`,
+   `17781`, and `17782`. A readback after more than the original six-second TTL
+   showed every lease refreshed independently.
+4. Output remained isolated: all 256 zero LEDs were dim, only legacy position
+   `(15,7)` was bright, and all four Arc rings were dim. Input remained
+   isolated: zero produced only slot-A `key 0 0 1/0`, legacy produced only
+   slot-B `key 15 7 1/0`, and clockwise motion on Arc ring `1` produced only
+   positive `delta 1 ...` events.
+5. Legacy, zero, and Arc were actively unplugged and reconnected one at a time.
+   Each removal deleted only that device while both survivors kept their exact
+   visible patterns, renewed their leases, and stayed in the same PlugData
+   process.
+6. Every device returned with the same stable ID and a fresh, non-persisted
+   free destination at port `0`. Its PlugData session reported
+   `no_device_selected` until the operator explicitly reselected the stable-ID
+   entry, reprobed the exact model and shape, reclaimed the assigned callback,
+   and restored the visible pattern. Neither survivor changed.
+7. Orderly release of legacy, then Arc, then zero darkened only the released
+   surface, returned it to free port `0`, and preserved every still-owned
+   survivor. Final readback found all three free, and all hardware was visibly
+   dark.
+8. All three were freshly reclaimed and relit, then the exact shared PlugData
+   process was terminated with `SIGKILL`. Immediate readback still showed all
+   three leases and their distinct callback ports with roughly four seconds
+   remaining. After the deadline, all three independently reported free port
+   `0`; both Grids and all four Arc rings visibly went dark by themselves.
+
+The candidate daemon log independently recorded each grant, USB-worker
+disconnect/reconnect, orderly release, fresh grant, and final expiry. This
+accepts the complete macOS PlugData-standalone multi-device lease lifecycle. It
+does not accept Bitwig process death or any Steam Deck lease behavior.
+
 ## Boundary
 
 SerialOSC destination ownership is cooperative state verified through

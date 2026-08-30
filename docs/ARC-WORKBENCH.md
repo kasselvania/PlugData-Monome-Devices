@@ -184,3 +184,11 @@ The candidate log independently recorded `lease granted by takeover`,
 `lease released`, a fresh `lease granted`, and `lease expired`. This accepts
 the Arc's isolated standalone lease lifecycle. It does not accept the
 simultaneous lease matrix, Bitwig process death, or Steam Deck behavior.
+
+The Arc subsequently passed the 2026-08-29 lease-candidate matrix with both
+Grids in one PlugData process. Its lease, ring output, and encoder route stayed
+isolated through removal/recovery of every device. Arc reconnect returned the
+same stable ID as free port `0`, required explicit reselection and reclaim, and
+did not disturb either Grid. A final shared-process `SIGKILL` left all three
+leases active briefly before SerialOSC expired and darkened each surface. See
+`docs/THREE-DEVICE-ACCEPTANCE.md`.

@@ -111,7 +111,16 @@ and automatic all-dark expiry after `SIGKILL` terminated PlugData. Independent
 readback ended at free port `0`, and the daemon recorded takeover, release,
 fresh grant, and expiry.
 
-Bitwig plug-in-host termination, the combined-device lease matrix, and every
-Steam Deck lease gate remain open. Those layers gain no crash-safe claim until
-their own physical readback and process-death acceptance steps pass. See
+The complete simultaneous standalone matrix then passed with zero, legacy 128,
+and Arc in one PlugData process. Three renewable callbacks stayed isolated;
+output and input routing passed; and every hot-unplug left both survivors
+unchanged. Each reconnect returned as the same stable ID at free port `0` and
+required explicit reselection, reprobe, and reclaim. Independent releases
+passed. After a final `SIGKILL`, all three leases remained active briefly, then
+expired independently and visibly darkened every surface before free port-`0`
+readback.
+
+Bitwig plug-in-host termination and every Steam Deck lease gate remain open.
+Those layers gain no crash-safe claim until their own physical readback and
+process-death acceptance steps pass. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).

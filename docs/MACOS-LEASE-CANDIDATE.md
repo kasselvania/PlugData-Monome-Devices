@@ -267,5 +267,39 @@ fresh grant, and expiry. The candidate remained the sole healthy owner of UDP
 simultaneous-device matrix, Bitwig process death, and every Steam Deck lease
 gate remain open.
 
+## Accepted simultaneous three-device slice
+
+Also on 2026-08-29, corrected candidate `7187832` passed the complete
+standalone PlugData matrix with zero `m23215901`, legacy 128 `m1000853`, and
+four-ring Arc `m1001113`:
+
+- one fresh PlugData process opened both live workbenches, bound their seven
+  distinct loopback ports, and did not auto-claim;
+- explicit selection and non-mutating probes verified zero `16×16`, legacy
+  `16×8`, and Arc `0×0` before any claim;
+- all three leases renewed simultaneously beyond the original TTL on callback
+  ports `17780`, `17781`, and `17782`;
+- full-zero, single-legacy-position, and four-ring patterns were visibly
+  isolated, while exact zero and legacy key events and positive Arc ring-`1`
+  deltas reached only their assigned sessions;
+- active removal of each device left both surviving patterns and leases
+  unchanged in the same PlugData process;
+- every reconnect restored the same stable ID as free on port `0`. PlugData
+  reported `no_device_selected` until explicit reselection, exact reprobe,
+  reclaim, and pattern restore;
+- independent orderly releases darkened and freed legacy, Arc, then zero while
+  preserving each remaining lease; and
+- after all three were freshly reclaimed and relit, `SIGKILL` of the exact
+  shared PlugData process left all three immediately leased. The daemon expired
+  every abandoned lease after its deadline, both Grids and all four Arc rings
+  visibly darkened by themselves, and independent readback found all three free
+  on port `0`.
+
+The candidate log independently recorded all grants, device-worker reconnects,
+orderly releases, and final expiries while the candidate remained the sole
+healthy owner of UDP `12002`. This accepts the macOS PlugData-standalone
+simultaneous-device and shared-process-death lifecycle. Bitwig process death and
+every Steam Deck lease gate remain open.
+
 No crash-safe or cross-platform claim is earned until this Mac sequence and
 the corresponding Steam Deck sequence both pass physically.

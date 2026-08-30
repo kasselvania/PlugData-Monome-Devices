@@ -255,7 +255,13 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
 - the equivalent isolated lease lifecycle on physical four-ring Arc
   `m1001113`, including explicit legacy takeover, renewal, independent ring
   output, signed encoder input, orderly all-dark release, and automatic
-  all-dark expiry after abrupt PlugData death.
+  all-dark expiry after abrupt PlugData death; and
+- simultaneous renewable leases for zero, legacy 128, and Arc in one PlugData
+  process, including isolated output/input, every hot-unplug direction with two
+  preserved survivors, reconnect as free port `0`, fail-closed
+  `no_device_selected`, explicit reselection/reprobe/reclaim, independent
+  releases, and automatic all-device darkening/free-state recovery after the
+  shared PlugData process was killed.
 
 The remaining macOS host lifecycle gap is Bitwig process death, not standalone
 process death or displacement handling. In the accepted pre-lease Bitwig lane,

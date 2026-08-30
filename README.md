@@ -146,6 +146,18 @@ all-dark expiry after abrupt PlugData death. Independent reads ended at free
 port `0`, and the daemon log recorded takeover, release, fresh grant, and
 expiry.
 
+The same candidate has now passed the complete simultaneous standalone matrix
+with zero `m23215901`, legacy 128 `m1000853`, and Arc `m1001113` in one
+PlugData process. Their leases renewed independently on `17780`, `17781`, and
+`17782`; visibly distinct output and exact Grid/Arc input stayed isolated.
+Unplugging and reconnecting each device left both survivors unchanged. Every
+returning USB worker restored the same stable ID as free on port `0`, and
+PlugData refused to act until the device was explicitly reselected, reprobed,
+and reclaimed. Independent orderly releases passed. A final `SIGKILL` left all
+three lit and leased briefly; SerialOSC then expired all three leases, visibly
+darkened both Grids and every Arc ring, and returned every device to free port
+`0`.
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -159,8 +171,9 @@ lease policy at load; the older smoke patches remain the legacy A/B lane. A
 separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
-for both Grids and the four-ring Arc have passed; the combined-device run,
-Bitwig process-death run, and every Steam Deck lease gate remain open. See
+for both Grids and the four-ring Arc have passed, as has the full simultaneous
+standalone matrix. The Bitwig process-death run and every Steam Deck lease gate
+remain open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 
