@@ -129,13 +129,14 @@ Bitwig plug-in-host termination passed on macOS on 2026-08-31: the shared host
 died without release, all three leases expired, every surface auto-darkened,
 and a fresh host started fail-closed before explicit reclaim.
 
-The exact x86-64 SteamOS candidate then passed its direct legacy-128 protocol
-lanes and complete single-device PlugData standalone slice. That Deck run
-proved fail-closed startup, explicit renewal beyond the first TTL, exact Grid
+The exact x86-64 SteamOS candidate then passed corresponding bounded
+single-device lanes with the legacy 128, Zero/256, and four-ring Arc. Each
+device proved fail-closed startup, renewal beyond the first TTL, exact
 input/output, orderly dark release, automatic darkness and free port `0` after
 abrupt PlugData death, fresh fail-closed recovery, and active-lease
 unplug/reconnect followed by dark/free refusal before explicit reselection and
-reclaim. SerialOSC did not restart. The other devices, simultaneous matrix,
-and Bitwig on SteamOS remain open, so no complete cross-platform release claim
-is earned yet. See [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
+reclaim. SerialOSC did not restart. The simultaneous-device matrix, Bitwig,
+and remaining Deck lifecycle rows remain open, so no complete cross-platform
+release claim is earned yet. See
+[MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
 [STEAMOS-LEASE-CANDIDATE.md](STEAMOS-LEASE-CANDIDATE.md).

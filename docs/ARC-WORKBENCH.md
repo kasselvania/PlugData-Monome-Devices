@@ -207,4 +207,40 @@ The Arc then passed the macOS Bitwig host-death gate on 2026-08-31. Its
 `17782` lease expired when full device deactivation killed the shared PlugData
 host, all four rings auto-darkened, and fresh readback returned port `0`.
 Reactivation required explicit selection, probe, and claim; positive ring-`1`
-input remained isolated. Steam Deck acceptance remains open.
+input remained isolated.
+
+## SteamOS lease-candidate record
+
+On 2026-08-31, the exact x86-64 SerialOSC candidate at revision `7187832`
+passed the isolated four-ring Arc lane on SteamOS 3.8.16:
+
+- USB `0403:6001` produced `/dev/ttyUSB0`; SerialOSC preserved stable ID
+  `m1001113`, padded model `monome arc`, valid Arc size `0 0`, and saved device
+  port `11564`;
+- the direct harness refused an unapproved takeover of independently unbound
+  legacy port `12289`;
+- an initial harness attempt safely expired without output after exposing that
+  the Arc's zero-by-zero size had been misclassified as Grid. Commit `09c1224`
+  corrected the classifier and passed the complete deterministic suite before
+  deployment;
+- corrected direct expiry returned free port `0`; a separate full-brightness
+  12-second run visibly renewed beyond the initial TTL and darkened all four
+  rings on guarded release;
+- PlugData startup, selection, and probe remained dark/free. Explicit claim
+  renewed callback `17782`, addressed all four rings plus independent marker
+  points, and the machine observer captured exact positive ring-`0` and
+  negative ring-`3` delta events;
+- orderly release visibly darkened every ring and returned free port `0`;
+- abrupt death of the exact PlugData process left the lease briefly active,
+  then daemon expiry visibly darkened all rings and freed the destination;
+- a fresh PlugData host started fail-closed and required explicit
+  rediscovery, reselection, reprobe, and reclaim; and
+- active-lease unplug removed only the Arc worker. Reconnect restored the same
+  ID and device port as dark/free, rejected output before reselection, then
+  reclaimed and released cleanly. A fresh ephemeral discovery callback
+  recorded exactly one remove and one add.
+
+This accepts the isolated SteamOS Arc lifecycle only. Simultaneous-device,
+Bitwig, and remaining Deck lifecycle gates are still open. The complete exact
+authority and failure-accounting record is in
+`docs/STEAMOS-LEASE-CANDIDATE.md`.

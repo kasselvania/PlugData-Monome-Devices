@@ -23,15 +23,22 @@ The 2026-08-31 run used:
 - the official Debian x64 PlugData `0.9.4` nightly identified by download
   metadata commit `1c83c0c08c5a3d8d33f27b632e9772726ef56098`, with archive SHA-256
   `c31cd38f5317ea9e97ca6a8cfab0b63c2d0a0d03574238936afd7c36385a2ae3`;
-- this workbench at commit
-  `4ad7d9c7451c4e6aac708e8f32730e29ead3efa6`; and
+- the base two-Grid workbench at commit
+  `4ad7d9c7451c4e6aac708e8f32730e29ead3efa6`;
 - discovery-monitor correction
   `d893e8ebe466c0a7113c4bc25d495997d5f6b999`, used only for the final
-  fresh-callback hotplug trace;
-- legacy Grid `m1000853`, reported as `monome 128` with a 16-by-8 surface; and
+  fresh-callback hotplug traces;
+- Arc live patch and machine-readable event observer from commit
+  `bbb12bea50035d07eb55be9b36c23019e553f385`;
+- zero-by-zero Arc classification in the direct lease harness from commit
+  `09c1224d98d94f207037a30ac35cab48e9c04a6b`;
+- legacy Grid `m1000853`, reported as `monome 128` with a 16-by-8 surface;
 - Pico Zero Grid `m2321590`, enumerated as USB `cafe:1110`, reported as
   `monome zero` with a 16-by-16 surface, and served on saved device port
-  `19536` through `/dev/ttyACM1`.
+  `19536` through `/dev/ttyACM1`; and
+- classic four-ring Arc `m1001113`, enumerated as USB `0403:6001`, reported
+  as padded model `monome arc`, with the valid Arc-specific size `0 0`, and
+  served on saved device port `11564` through `/dev/ttyUSB0`.
 
 The PlugData build was the compatible Debian artifact. The contemporaneous
 Arch nightly required newer glibc symbols than both the SteamOS host and
@@ -146,12 +153,63 @@ The Zero evidence retained snapshots labeled
 `zero-isolated-lifecycle-physically-passed`, and
 `zero-isolated-final-disconnected`.
 
+The isolated four-ring Arc then passed the same bounded direct and standalone
+lanes:
+
+1. It arrived with the exact USB, SerialOSC, tty, and saved-port identity
+   above. Its initial destination was legacy port `12289`, which was
+   independently unbound; the direct tool refused to take it over without the
+   explicit takeover flag.
+2. The first takeover attempt exposed a workbench defect before any ring
+   output: the valid Arc `/sys/size 0 0` response was mistaken for a Grid
+   surface. The short lease expired safely to free port `0`. Commit `09c1224`
+   now classifies a device as Grid only for two positive dimensions and
+   requires padded model identity plus explicit two- or four-ring intent for
+   a zero-by-zero Arc. All 68 Python tests and all 78 Lua tests passed before
+   that exact file was deployed.
+3. The corrected direct expiry lane granted a short lease, sent four ring
+   maps, observed `/sys/lease/lost`, and independently read back free port
+   `0`. The short low-level pattern was not physically observed, so it is
+   recorded as machine evidence rather than a physical-light claim. A second
+   full-brightness run renewed five times over 12 seconds; the user visibly
+   confirmed all four rings lit and then went dark on token-guarded release.
+4. Fresh PlugData startup bound only its loopback callbacks. Explicit
+   selection and probe remained physically dark and independently free.
+   Explicit claim leased callback `17782`, renewed beyond the initial TTL,
+   and displayed all four rings with independently addressed marker points.
+5. The loopback-only event observer captured exactly two `arc_delta 0 1`
+   messages for a small clockwise turn of the leftmost encoder and exactly
+   two `arc_delta 3 -1` messages for a small counterclockwise turn of the
+   rightmost encoder. This physical Arc has no encoder push switches, so no
+   key-event claim is made.
+6. Orderly release visibly darkened all four rings and returned the device to
+   independently verified free port `0` while PlugData and SerialOSC both
+   retained `NRestarts=0`.
+7. On a second visibly lit lease, `SIGKILL` terminated only PlugData PID
+   `175523`. Immediate readback still showed the renewable lease; SerialOSC
+   then logged `lease expired`, all four rings visibly darkened by themselves,
+   and readback returned free port `0` without restarting the daemon.
+8. A fresh PlugData PID `186017` started dark and free from the exact Arc
+   patch. It required explicit rediscovery, reselection, probe, and claim
+   before output returned, then completed an orderly dark/free release.
+9. During a final active lease, a fresh monitor callback on ephemeral port
+   `49769` recorded exactly one remove and one add. Unplug removed the Arc
+   worker and freed device port `11564` without disturbing either service.
+   Reconnect restored the same stable ID and device port as dark/free; an
+   output command before reselection did not claim or light the device.
+   Explicit reselection, reprobe, and reclaim restored output, and final
+   release returned every ring to visible darkness and free port `0`.
+
+The first failed harness attempt remains explicitly superseded rather than
+being counted as acceptance. The corrected run ended with the Arc connected,
+dark, and free, PlugData active with zero restarts, and `serialoscd.service`
+still at its original PID with `NRestarts=0`.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- the isolated Arc lease lifecycle;
 - Grid/Grid, Grid/Arc, and three-device lease isolation and survivor recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
   fail-closed recovery; and

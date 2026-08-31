@@ -89,8 +89,9 @@ property-buffer handling so a short serial path cannot prevent a later, longer
 FTDI Arc path from being detected. It is not an upstream release. Its physical
 acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
 this repository plus the separately packaged SteamOS candidate record. The
-Deck legacy direct-protocol and complete single-device standalone slice passes,
-including hotplug and host death; the remaining Deck matrix is open.
+Deck's bounded single-device slices for the legacy 128, Zero/256, and
+four-ring Arc pass, including hotplug and host death; the simultaneous-device,
+Bitwig, and remaining lifecycle matrix is open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -114,9 +115,10 @@ distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
 
 Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
 three-device expiry after Bitwig plug-in-host termination and fail-closed
-restart. Step 7 is in progress: its exact SteamOS legacy direct-protocol and
-complete single-device standalone slice passes, including hotplug and host
-death, while the other devices, simultaneous matrix, and Bitwig remain open.
+restart. Step 7 is in progress: exact SteamOS single-device slices for the
+legacy 128, Zero/256, and four-ring Arc pass, including hotplug and host death,
+while the simultaneous matrix, Bitwig, and remaining lifecycle rows remain
+open.
 
 ## Release boundaries
 
@@ -126,7 +128,7 @@ death, while the other devices, simultaneous matrix, and Bitwig remain open.
   lease candidate is experimental.
 - The PlugData package must not claim complete crash-safe cleanup until the
   macOS Bitwig gate and the full Steam Deck process-death matrix pass. The
-  bounded Deck legacy-standalone result is not that full matrix.
+  bounded Deck single-device results are not that full matrix.
 - Legacy SerialOSC clients must behave exactly as before unless they opt into
   the lease extension.
 - Public package publication also requires an explicit repository license and

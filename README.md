@@ -161,16 +161,17 @@ three lit and leased briefly; SerialOSC then expired all three leases, visibly
 darkened both Grids and every Arc ring, and returned every device to free port
 `0`.
 
-The exact x86-64 SteamOS candidate at revision `7187832` has now passed its
-first bounded Deck slices with legacy Grid `m1000853`. Direct protocol expiry
-and renew/release passed, followed by PlugData standalone fail-closed startup,
-explicit claim, renewal, full-surface output, exact top-left input, orderly
-dark release, automatic dark/free recovery after abrupt PlugData death, and
-fresh fail-closed restart plus explicit reclaim. Active-lease unplug then
-removed only that worker; reconnect restored the same stable ID and device port
-as dark/free, refused output before explicit reselection, and reclaimed cleanly.
-SteamOS stayed read-only and SerialOSC did not restart. Zero, Arc, multiple
-devices, and Bitwig on the Deck remain open; see
+The exact x86-64 SteamOS candidate at revision `7187832` has now passed bounded
+single-device Deck slices with legacy Grid `m1000853`, Zero Grid `m2321590`,
+and four-ring Arc `m1001113`. Each device passed direct lease expiry and
+renew/release plus PlugData fail-closed startup, explicit claim and renewal,
+physical output and exact input, orderly dark release, automatic dark/free
+recovery after abrupt PlugData death, fresh fail-closed restart, and
+active-lease unplug/reconnect with same-ID/same-port dark/free recovery before
+explicit reclaim. The Arc lane captured signed ring-`0` and ring-`3` deltas;
+its hardware has no encoder switches. SteamOS stayed read-only and SerialOSC
+did not restart. Simultaneous devices, Bitwig, and the remaining Deck
+lifecycle rows remain open; see
 [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md).
 
 The complete committed state can now be emitted as a checksum-addressed
@@ -188,8 +189,9 @@ beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
 for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
-Steam Deck legacy direct-protocol and complete single-device standalone slice,
-including hotplug and host death, now pass; the rest of the Deck matrix remains
+Steam Deck's bounded single-device direct and PlugData standalone slices for
+the legacy 128, Zero/256, and four-ring Arc, including hotplug and host death,
+now pass; the simultaneous-device, Bitwig, and remaining lifecycle matrix stays
 open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
