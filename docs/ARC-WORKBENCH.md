@@ -240,7 +240,17 @@ passed the isolated four-ring Arc lane on SteamOS 3.8.16:
   reclaimed and released cleanly. A fresh ephemeral discovery callback
   recorded exactly one remove and one add.
 
-This accepts the isolated SteamOS Arc lifecycle only. Simultaneous-device,
-Bitwig, and remaining Deck lifecycle gates are still open. The complete exact
-authority and failure-accounting record is in
-`docs/STEAMOS-LEASE-CANDIDATE.md`.
+The same candidate now also passes the legacy-128 plus Arc lane. Renewable
+callbacks `17780` and `17782`, distinct Grid/ring output, exact Grid key input,
+and signed Arc delta input remained isolated. Hotplug and same-ID/same-port
+dark/free recovery passed in both directions; each survivor retained its
+pattern, lease, and fresh input. Preselection output was blocked, explicit
+reclaim restored the returning device, and independent release left the
+survivor unchanged. Killing the separate Grid and Arc workbench processes one
+at a time expired and darkened only the corresponding device; fresh processes
+started fail-closed. This proves reciprocal process isolation, not shared-host
+death.
+
+The Zero-plus-Arc, three-device, Bitwig, and remaining Deck lifecycle gates
+are still open. The complete exact authority and failure-accounting record is
+in `docs/STEAMOS-LEASE-CANDIDATE.md`.

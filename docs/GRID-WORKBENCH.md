@@ -325,6 +325,15 @@ independent releases left the other device untouched, and shared PlugData host
 death expired and visibly darkened both leases. A fresh host started
 fail-closed, explicitly recovered both, and released both to free port `0`.
 
-The Arc pair, three-device, and Bitwig Deck rows are still required before any
-complete cross-platform claim. See
+The legacy-plus-Arc lane now also passes. Grid callback `17780` and Arc
+callback `17782` renewed independently; distinct output and exact Grid/Arc
+input stayed isolated. Active removal/recovery passed in both directions, each
+survivor retained output and fresh input, and each returning device stayed
+dark/free until explicit reclaim. Reciprocal death of the separate Grid and
+Arc workbench processes expired and darkened only the dead process's device
+while the survivor continued. Those checks prove process isolation, not the
+still-open all-device shared-host-death row.
+
+The Zero-plus-Arc, three-device, and Bitwig Deck rows are still required before
+any complete cross-platform claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.

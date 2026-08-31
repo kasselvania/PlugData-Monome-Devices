@@ -300,9 +300,11 @@ SteamOS. The macOS full-device-deactivation gate now passes. SteamOS has passed
 bounded single-device standalone slices for the legacy 128, Zero/256, and
 four-ring Arc, including hotplug and host death. Its legacy-plus-Zero pair also
 passes isolated routing, hotplug in both directions, and shared-host expiry.
-The Arc pairs, three-device matrix, Bitwig, and remaining lifecycle lanes still
-block packaging. The Step 5A development bundle does not soften or bypass
-those remaining gates.
+Its legacy-plus-Arc pair now passes isolated Grid/ring routing, hotplug in both
+directions, independent release, and reciprocal separate-process expiry. That
+is not shared-host-death evidence. Zero-plus-Arc, three-device shared-host,
+Bitwig, and remaining lifecycle lanes still block packaging. The Step 5A
+development bundle does not soften or bypass those remaining gates.
 
 ## Current workbench boundary
 
@@ -321,8 +323,9 @@ CLAP/VST3 editor-lifecycle preflight, the Bitwig Monome hardware/contention
 surface listed in Step 5, and full host-death/restart acceptance against
 SerialOSC lease candidate `7187832`. Bounded Steam Deck single-device slices
 for the legacy 128, Zero/256, and four-ring Arc now pass against the exact
-x86-64 candidate, including hotplug and host death, while the simultaneous,
-Bitwig, and remaining lifecycle matrix stays open. See
+x86-64 candidate, including hotplug and host death. The legacy-plus-Zero and
+legacy-plus-Arc pair lanes also pass, while Zero-plus-Arc, three-device,
+Bitwig, and the remaining lifecycle matrix stay open. See
 `docs/PLUGDATA-MACOS.md`,
 `docs/PLUGDATA-BITWIG-AB.md`, and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

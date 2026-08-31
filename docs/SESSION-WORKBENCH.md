@@ -273,6 +273,9 @@ auto-darkened, readback returned free port `0`, and a fresh Bitwig host started
 fail-closed before explicit reclaim. The Steam Deck standalone host-death and
 fresh-recovery slices now also pass for the legacy 128, Zero/256, and four-ring
 Arc. The Deck legacy-plus-Zero shared-host expiry and fresh recovery also pass,
-but the Arc pairs, three-device, Bitwig, and remaining lifecycle rows remain
-open. See `docs/PLUGDATA-BITWIG-AB.md` and
+and the Deck legacy-plus-Arc routing, hotplug, independent release, and
+reciprocal separate-process expiry/recovery now pass. Because the latter used
+two PlugData processes, it does not claim shared-host death. Zero-plus-Arc,
+three-device, Bitwig, and remaining lifecycle rows remain open. See
+`docs/PLUGDATA-BITWIG-AB.md` and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

@@ -183,8 +183,22 @@ leases briefly active, then SerialOSC expired both, visibly darkened both
 Grids, and returned both to free port `0`. A fresh host started fail-closed,
 recovered only after explicit selection/probe/claim, and completed final
 all-dark release. SteamOS stayed read-only and SerialOSC retained zero
-restarts. The Arc pairs, three-device, Bitwig, and remaining lifecycle rows
-remain open.
+restarts.
+
+The legacy-128 plus Arc pair now also passes. Separate Grid and Arc PlugData
+workbenches held renewable callbacks `17780` and `17782`; distinct Grid/ring
+patterns, exact Grid key input, and signed Arc encoder input stayed isolated.
+Active unplug/reconnect in both directions preserved the survivor's lease,
+visible state, and fresh input. Each returning device kept its stable ID and
+saved device port, but stayed dark/free and blocked output until explicit
+rediscovery, selection, probe, and reclaim. Independent release passed in both
+directions. Killing each workbench separately expired and darkened only its
+own device while the other process and device continued; fresh processes
+started fail-closed before explicit recovery. Because the Grid and Arc ran in
+separate PlugData processes, that reciprocal evidence is process isolation,
+not the still-required all-device shared-host-death row. SteamOS stayed
+read-only and SerialOSC retained zero restarts. Zero-plus-Arc, three-device,
+Bitwig, and remaining lifecycle rows remain open.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -203,8 +217,9 @@ for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
 Steam Deck's bounded single-device direct and PlugData standalone slices for
 the legacy 128, Zero/256, and four-ring Arc, including hotplug and host death,
-now pass. The legacy-plus-Zero simultaneous lane also passes; the Arc pairs,
-three-device, Bitwig, and remaining lifecycle matrix stays open. See
+now pass. The legacy-plus-Zero and legacy-plus-Arc simultaneous lanes also
+pass; Zero-plus-Arc, three-device, Bitwig, and the remaining lifecycle matrix
+stay open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)

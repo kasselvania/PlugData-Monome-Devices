@@ -245,12 +245,72 @@ read-only mode remained enabled. PlugData and SerialOSC stayed healthy, and
 `serialoscd.service` retained its original PID and `NRestarts=0` across both
 hotplug directions and shared-host expiry.
 
+The legacy-128 plus four-ring Arc pair then passed the second
+simultaneous-device lane against the same exact candidate:
+
+1. Only legacy `m1000853` and Arc `m1001113` were connected. Legacy used saved
+   device port `16874` through `/dev/ttyUSB0`; Arc used saved device port
+   `11564` through `/dev/ttyUSB1`. A fresh discovery observer used ephemeral
+   callback port `48336`.
+2. Separate Grid PID `261033` and Arc PID `261036` started before the Arc was
+   connected and made no automatic claim. Stable-ID ordering mapped legacy to
+   Grid index `0` and Arc to Arc index `1`. Selection and capability probes
+   left both devices visibly dark and independently free at port `0`.
+3. Explicit claims established renewable callbacks `17780` for legacy and
+   `17782` for Arc. Readback after more than the first TTL showed both leases
+   renewed independently. Legacy displayed a dim 16-by-8 surface with a bright
+   bottom-right marker. All four Arc rings displayed a medium level, with
+   independent bright markers on rings `0` and `3`.
+4. Input stayed capability-isolated. The Grid observer received exactly
+   `a_key 0 0 1/0` for a top-left press/release; the Arc observer received
+   `arc_delta 0 1` for a small clockwise turn of the leftmost encoder.
+5. Active-lease legacy unplug produced exactly one remove, removed only its
+   worker, and freed device port `16874`. Arc retained its pattern and lease
+   and emitted fresh survivor input `arc_delta 3 -2`. Legacy returned with the
+   same ID and port as dark/free. Preselection output was blocked. An initial
+   recovery claim was sent before the asynchronous probe response had settled
+   and correctly remained free; a later wrong-capability Arc selection in the
+   Grid slot was also rejected without mutation. Explicit stable-ID index `0`
+   selection, a settled probe, and claim then restored callback `17780` and the
+   prior pattern. Independent Grid release darkened only legacy and left Arc
+   unchanged.
+6. After legacy was reclaimed, active-lease Arc unplug produced exactly one
+   remove, removed only its worker, and freed device port `11564`. Legacy
+   retained its pattern and lease and emitted exact survivor input
+   `a_key 15 0 1/0`. Arc returned with the same ID and port as dark/free;
+   preselection output was blocked. Explicit rediscovery, index `1` selection,
+   settled probe, and claim restored callback `17782` and the prior ring
+   pattern. Independent Arc release darkened only Arc and left legacy
+   unchanged.
+7. The two patches were separate processes, so this lane did not claim shared
+   host death. Instead, reciprocal process-isolation checks were run. Killing
+   only Grid PID `261033` left its lease briefly active; it then expired to
+   visible darkness and free port `0` while Arc PID `261036`, its lease, and
+   its pattern survived. Fresh Grid PID `267389` started dark/free without a
+   claim and recovered only after explicit selection, probe, and claim.
+8. Killing only Arc PID `261036` likewise left its lease briefly active; it
+   then expired, darkened all four rings, and returned to free port `0` while
+   Grid PID `267389`, its lease, and its pattern survived. Fresh Arc PID
+   `267683` started dark/free without a claim and recovered only after explicit
+   selection, probe, and claim.
+9. Final orderly release darkened both devices and independent readback found
+   both free at `127.0.0.1:0`. The temporary observer stopped cleanly. SteamOS
+   read-only mode remained enabled; both fresh workbenches were active with
+   `NRestarts=0`; and `serialoscd.service` retained PID `16328` with
+   `NRestarts=0` throughout.
+
+This accepts the SteamOS legacy-plus-Arc M2 routing, hotplug, survivor,
+independent-release, and reciprocal process-isolation row. It does not accept
+the all-device shared-host-death gate.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- legacy/Arc, Zero/Arc, and three-device lease isolation and survivor recovery;
+- Zero/Arc and three-device lease isolation and survivor recovery;
+- shared PlugData host death while all three devices are leased, followed by
+  automatic all-dark/free expiry and fresh fail-closed recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
   fail-closed recovery; and
 - the remaining dock, suspend/resume, update, and reboot lifecycle rows called

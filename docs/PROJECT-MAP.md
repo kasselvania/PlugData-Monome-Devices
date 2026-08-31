@@ -90,8 +90,9 @@ FTDI Arc path from being detected. It is not an upstream release. Its physical
 acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
 this repository plus the separately packaged SteamOS candidate record. The
 Deck's bounded single-device slices for the legacy 128, Zero/256, and
-four-ring Arc pass, including hotplug and host death; the simultaneous-device,
-Bitwig, and remaining lifecycle matrix is open.
+four-ring Arc pass, including hotplug and host death. The legacy-plus-Zero and
+legacy-plus-Arc pair lanes pass; Zero-plus-Arc, three-device, Bitwig, and the
+remaining lifecycle matrix are open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -118,8 +119,9 @@ three-device expiry after Bitwig plug-in-host termination and fail-closed
 restart. Step 7 is in progress: exact SteamOS single-device slices for the
 legacy 128, Zero/256, and four-ring Arc pass, including hotplug and host death,
 and the legacy-plus-Zero simultaneous lane now passes both hotplug directions
-and shared-host expiry. The Arc pairs, three-device matrix, Bitwig, and
-remaining lifecycle rows remain open.
+and shared-host expiry. The legacy-plus-Arc lane now passes both hotplug
+directions and reciprocal separate-process expiry. Zero-plus-Arc,
+three-device shared-host, Bitwig, and remaining lifecycle rows remain open.
 
 ## Release boundaries
 
