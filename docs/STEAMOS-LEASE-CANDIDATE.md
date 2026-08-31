@@ -25,7 +25,13 @@ The 2026-08-31 run used:
   `c31cd38f5317ea9e97ca6a8cfab0b63c2d0a0d03574238936afd7c36385a2ae3`;
 - this workbench at commit
   `4ad7d9c7451c4e6aac708e8f32730e29ead3efa6`; and
-- legacy Grid `m1000853`, reported as `monome 128` with a 16-by-8 surface.
+- discovery-monitor correction
+  `d893e8ebe466c0a7113c4bc25d495997d5f6b999`, used only for the final
+  fresh-callback hotplug trace;
+- legacy Grid `m1000853`, reported as `monome 128` with a 16-by-8 surface; and
+- Pico Zero Grid `m2321590`, enumerated as USB `cafe:1110`, reported as
+  `monome zero` with a 16-by-16 surface, and served on saved device port
+  `19536` through `/dev/ttyACM1`.
 
 The PlugData build was the compatible Debian artifact. The contemporaneous
 Arch nightly required newer glibc symbols than both the SteamOS host and
@@ -96,12 +102,55 @@ That continuation retained snapshots labeled
 `legacy-plugdata-hotplug-reclaimed-lit`, and
 `legacy-plugdata-hotplug-passed`.
 
+The isolated Zero then passed the same bounded direct and standalone lanes:
+
+1. It arrived in SerialOSC compatibility mode with the exact identity and
+   dimensions above. Its saved legacy destination was port `8000`, but that
+   port was independently unbound.
+2. The direct lease tool refused an unapproved takeover. Explicit takeover
+   then lit all 256 LEDs, expired to visible darkness and free port `0`, and a
+   separate renewal test stayed lit beyond the initial TTL before orderly
+   dark release.
+3. PlugData selection and probe remained dark and free. Explicit claim used
+   callback `17780`, renewed beyond the initial TTL, displayed a full-surface
+   pattern with a distinct corner, and emitted exact bottom-right input events
+   `a_key 15 15 1` and `a_key 15 15 0`.
+4. The first scripted output was sent immediately after the asynchronous claim
+   request and arrived too early; independent lease readback showed ownership,
+   and resending the same pattern after claim establishment lit the device.
+   Later claim/output steps deliberately waited for verified ownership. This
+   is a workbench-control sequencing constraint, not a SerialOSC failure.
+5. Orderly release visibly darkened the Zero and returned it to free port `0`.
+   On a second lit lease, abrupt PlugData `SIGKILL` left the lease briefly
+   active; SerialOSC then logged expiry, visibly darkened the Zero, and freed
+   it without restarting.
+6. A fresh PlugData process started dark and free. Explicit reselection and
+   claim restored output and renewal, followed by another orderly dark/free
+   release.
+7. Active-lease unplug removed only the Zero worker and freed port `19536`.
+   Reconnect restored the same ID and device port as dark/free, rejected output
+   before explicit reclaim, then reclaimed and released cleanly.
+
+An early trace showed a duplicate remove line because a stopped monitor had an
+undelivered one-shot notification and the next monitor reused its callback
+port. Commit `d893e8e` changed the monitor default to a fresh ephemeral port.
+The repeated final trace then contained exactly one add and one remove while
+SerialOSC itself logged one disconnect throughout.
+
+The Zero evidence retained snapshots labeled
+`zero-direct-lease-lifecycle-physically-passed`,
+`zero-plugdata-output-input-renewal-passed`,
+`zero-plugdata-host-death-expiry-machine-passed`,
+`zero-plugdata-restart-recovery-physically-passed`,
+`zero-hot-reconnect-explicit-reclaim-physically-passed`,
+`zero-isolated-lifecycle-physically-passed`, and
+`zero-isolated-final-disconnected`.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- the isolated Zero/256 lease lifecycle;
 - the isolated Arc lease lifecycle;
 - Grid/Grid, Grid/Arc, and three-device lease isolation and survivor recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
