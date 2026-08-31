@@ -6,10 +6,11 @@ application-destination protocol from the
 fork.
 
 This is the executable contract for the daemon and PlugData changes. The fork
-worker and opt-in `monome-session` policy now implement it. A separately rooted
-macOS candidate runs the lease daemon while the accepted stable installation
-remains preserved; the accepted stable daemon and Steam Deck service do not
-support leases.
+worker and opt-in `monome-session` policy now implement it. The pinned macOS
+candidate and the separately packaged SteamOS candidate run the lease daemon
+while their accepted stable rollback installations remain preserved. The
+publicly accepted Steam Deck package is still the non-lease 1.4.7 build until
+the candidate completes its own physical matrix.
 
 ## Covered behavior
 
@@ -56,7 +57,11 @@ A/B boundary stays visible.
 physical acceptance. Its default `probe` is read-only. The separately named
 `expiry-test` refuses anything except a verified free device, sends a bounded
 map only after a grant and owner readback, omits renewal/release on purpose,
-and then requires free port-`0` readback after the deadline.
+and then requires free port-`0` readback after the deadline. The independent
+`renew-release-test` renews beyond the initial TTL, requires an owned-lease
+readback after that boundary, sends a token-guarded release, and requires a
+separate free port-`0` readback. Its defaults match the PlugData policy: a
+6000 ms TTL, 2000 ms renewal interval, and 8000 ms hold.
 
 ## Physical acceptance boundary
 

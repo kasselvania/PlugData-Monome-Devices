@@ -243,9 +243,14 @@ Against the lease candidate, `python3 tools/live_serialosc_lease.py probe`
 adds a non-mutating version/mode/remaining-time readback. Its explicit
 `expiry-test --serial SERIAL` command refuses non-free devices by default,
 acquires one short lease, sends a bounded test pattern, deliberately omits
-renewal and release, and verifies that the daemon returns to free port `0`. Arc runs also
-require `--arc-rings 2` or `--arc-rings 4`. A verified legacy destination is
-crossed only with the separately named `--takeover-legacy` flag after explicit
+renewal and release, and verifies that the daemon returns to free port `0`.
+The separate `renew-release-test --serial SERIAL` command sends the same
+bounded pattern, renews the lease beyond its initial TTL, verifies that exact
+ownership remains active, then performs a token-guarded release and verifies
+free port `0`. Its defaults exercise the production policy: a 6000 ms TTL,
+2000 ms renewal interval, and 8000 ms hold. Arc runs also require
+`--arc-rings 2` or `--arc-rings 4`. A verified legacy destination is crossed
+only with the separately named `--takeover-legacy` flag after explicit
 operator approval; a different active lease is never crossed.
 
 Run `python3 tools/fake_serialosc.py`, then open

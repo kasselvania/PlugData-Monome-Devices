@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Probe live SerialOSC lease state or run one bounded expiry test."""
+"""Probe live SerialOSC leases or run bounded lifecycle tests."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ LEASE_VERSION = 1
 MIN_TTL_MS = 1000
 MAX_TEST_TTL_MS = 10000
 DEFAULT_CALLBACK_PORT = 17852
-DEFAULT_PREFIX = "/monome-expiry-test"
+DEFAULT_PREFIX = "/monome-lease-test"
 
 
 @dataclass(frozen=True)
@@ -45,6 +45,24 @@ class ExpiryResult:
     claimed: LeaseState
     released: LeaseState
     lost_observed: bool
+
+
+@dataclass(frozen=True)
+class RenewReleaseResult:
+    device: DeviceState
+    claimed: LeaseState
+    maintained: LeaseState
+    released: LeaseState
+    renewals: int
+
+
+@dataclass(frozen=True)
+class _ClaimedTestLease:
+    discovered: DiscoveredDevice
+    device: DeviceState
+    token: str
+    endpoint: tuple[str, int]
+    claimed: LeaseState
 
 
 def _parse_lease_state(
@@ -156,6 +174,45 @@ def _await_grant(
         raise ValueError("lease_grant_timeout")
 
 
+def _await_renewal(
+    callback: socket.socket,
+    token: str,
+    ttl_ms: int,
+    timeout_seconds: float,
+) -> None:
+    renewed = False
+    for address, atoms in _receive_batch(callback, timeout_seconds):
+        if address == "/sys/lease/renewed" and atoms == (token, ttl_ms):
+            renewed = True
+        elif address == "/sys/lease/rejected" and len(atoms) == 2:
+            reply_token, reason = atoms
+            if reply_token == token:
+                raise ValueError(f"lease_renew_rejected {reason}")
+        else:
+            raise ValueError(f"unexpected_renew_reply {address}")
+    if not renewed:
+        raise ValueError("lease_renew_timeout")
+
+
+def _await_release(
+    callback: socket.socket,
+    token: str,
+    timeout_seconds: float,
+) -> None:
+    released = False
+    for address, atoms in _receive_batch(callback, timeout_seconds):
+        if address == "/sys/lease/released" and atoms == (token,):
+            released = True
+        elif address == "/sys/lease/rejected" and len(atoms) == 2:
+            reply_token, reason = atoms
+            if reply_token == token:
+                raise ValueError(f"lease_release_rejected {reason}")
+        else:
+            raise ValueError(f"unexpected_release_reply {address}")
+    if not released:
+        raise ValueError("lease_release_timeout")
+
+
 def _send_test_pattern(
     callback: socket.socket,
     endpoint: tuple[str, int],
@@ -213,17 +270,16 @@ def _observe_expiry(
         raise ValueError(f"unexpected_expiry_reply {address}")
 
 
-def expiry_test(
+def _claim_test_lease(
     callback: socket.socket,
     serialosc_server: tuple[str, int],
     serial: str,
     timeout_seconds: float,
     ttl_ms: int,
-    level: int,
-    arc_rings: int | None,
-    takeover_legacy: bool = False,
+    takeover_legacy: bool,
+    token_label: str,
     report: Callable[[str], None] | None = None,
-) -> ExpiryResult:
+) -> _ClaimedTestLease:
     devices = discover(callback, serialosc_server, timeout_seconds)
     matches = [device for device in devices if device.serial == serial]
     if len(matches) != 1:
@@ -232,7 +288,7 @@ def expiry_test(
     device_state = probe(
         callback, device, serialosc_server[0], timeout_seconds
     )
-    token = "expiry-" + secrets.token_hex(24)
+    token = token_label + "-" + secrets.token_hex(24)
     before = query_lease(
         callback, device, serialosc_server[0], timeout_seconds, token
     )
@@ -283,11 +339,41 @@ def expiry_test(
         report(
             f"LEASE_GRANTED {device_state.serial} {claimed.remaining_ms}ms"
         )
+    return _ClaimedTestLease(
+        discovered=device,
+        device=device_state,
+        token=token,
+        endpoint=endpoint,
+        claimed=claimed,
+    )
+
+
+def expiry_test(
+    callback: socket.socket,
+    serialosc_server: tuple[str, int],
+    serial: str,
+    timeout_seconds: float,
+    ttl_ms: int,
+    level: int,
+    arc_rings: int | None,
+    takeover_legacy: bool = False,
+    report: Callable[[str], None] | None = None,
+) -> ExpiryResult:
+    active = _claim_test_lease(
+        callback,
+        serialosc_server,
+        serial,
+        timeout_seconds,
+        ttl_ms,
+        takeover_legacy,
+        "expiry",
+        report,
+    )
 
     _send_test_pattern(
         callback,
-        endpoint,
-        device_state,
+        active.endpoint,
+        active.device,
         DEFAULT_PREFIX,
         level,
         arc_rings,
@@ -296,10 +382,14 @@ def expiry_test(
         report("PATTERN_SENT")
         report("WAITING_FOR_EXPIRY")
     lost_observed = _observe_expiry(
-        callback, token, ttl_ms, timeout_seconds
+        callback, active.token, ttl_ms, timeout_seconds
     )
     released = query_lease(
-        callback, device, serialosc_server[0], timeout_seconds, token
+        callback,
+        active.discovered,
+        serialosc_server[0],
+        timeout_seconds,
+        active.token,
     )
     if (
         released is None
@@ -309,10 +399,124 @@ def expiry_test(
     ):
         raise ValueError("lease_expiry_readback_failed")
     return ExpiryResult(
-        device=device_state,
-        claimed=claimed,
+        device=active.device,
+        claimed=active.claimed,
         released=released,
         lost_observed=lost_observed,
+    )
+
+
+def renew_release_test(
+    callback: socket.socket,
+    serialosc_server: tuple[str, int],
+    serial: str,
+    timeout_seconds: float,
+    ttl_ms: int,
+    renew_ms: int,
+    hold_ms: int,
+    level: int,
+    arc_rings: int | None,
+    takeover_legacy: bool = False,
+    report: Callable[[str], None] | None = None,
+) -> RenewReleaseResult:
+    active = _claim_test_lease(
+        callback,
+        serialosc_server,
+        serial,
+        timeout_seconds,
+        ttl_ms,
+        takeover_legacy,
+        "renew-release",
+        report,
+    )
+    _send_test_pattern(
+        callback,
+        active.endpoint,
+        active.device,
+        DEFAULT_PREFIX,
+        level,
+        arc_rings,
+    )
+    if report is not None:
+        report("PATTERN_SENT")
+        report("RENEWING_BEYOND_INITIAL_TTL")
+
+    callback_host, callback_port = callback.getsockname()
+    started = time.monotonic()
+    deadline = started + (hold_ms / 1000)
+    next_renewal = started + (renew_ms / 1000)
+    renewals = 0
+    while next_renewal < deadline:
+        time.sleep(max(0.0, next_renewal - time.monotonic()))
+        callback.sendto(
+            encode_message(
+                "/sys/lease/renew",
+                active.token,
+                ttl_ms,
+                callback_host,
+                callback_port,
+            ),
+            active.endpoint,
+        )
+        _await_renewal(callback, active.token, ttl_ms, timeout_seconds)
+        renewals += 1
+        if report is not None:
+            report(f"LEASE_RENEWED {renewals}")
+        next_renewal += renew_ms / 1000
+    time.sleep(max(0.0, deadline - time.monotonic()))
+
+    maintained = query_lease(
+        callback,
+        active.discovered,
+        serialosc_server[0],
+        timeout_seconds,
+        active.token,
+    )
+    if (
+        maintained is None
+        or maintained.mode != "leased"
+        or not maintained.owner
+        or maintained.destination_port != callback_port
+        or maintained.prefix != DEFAULT_PREFIX
+    ):
+        raise ValueError("lease_renew_readback_failed")
+    if report is not None:
+        report(
+            f"INITIAL_TTL_SURVIVED {maintained.remaining_ms}ms"
+        )
+
+    callback.sendto(
+        encode_message(
+            "/sys/lease/release",
+            active.token,
+            callback_host,
+            callback_port,
+        ),
+        active.endpoint,
+    )
+    _await_release(callback, active.token, timeout_seconds)
+    released = query_lease(
+        callback,
+        active.discovered,
+        serialosc_server[0],
+        timeout_seconds,
+        active.token,
+    )
+    if (
+        released is None
+        or released.mode != "free"
+        or released.destination_port != 0
+        or released.owner
+    ):
+        raise ValueError("lease_release_readback_failed")
+    if report is not None:
+        report("LEASE_RELEASED")
+    return RenewReleaseResult(
+        device=active.device,
+        claimed=active.claimed,
+        maintained=maintained,
+        released=released,
+        renewals=renewals,
     )
 
 
@@ -357,24 +561,44 @@ def main() -> int:
         action="store_true",
         help="Explicitly permit replacing a verified legacy destination.",
     )
+    renew_release = subparsers.add_parser(
+        "renew-release-test",
+        help="Renew one lease beyond its initial TTL, then release it.",
+    )
+    renew_release.add_argument("--serial", required=True)
+    renew_release.add_argument("--ttl-ms", type=int, default=6000)
+    renew_release.add_argument("--renew-ms", type=int, default=2000)
+    renew_release.add_argument("--hold-ms", type=int, default=8000)
+    renew_release.add_argument("--level", type=int, default=4)
+    renew_release.add_argument("--arc-rings", type=int, choices=(2, 4))
+    renew_release.add_argument(
+        "--takeover-legacy",
+        action="store_true",
+        help="Explicitly permit replacing a verified legacy destination.",
+    )
     arguments = parser.parse_args()
 
     if arguments.timeout <= 0:
         parser.error("--timeout must be positive")
-    if arguments.command == "expiry-test":
+    if arguments.command in ("expiry-test", "renew-release-test"):
         if not MIN_TTL_MS <= arguments.ttl_ms <= MAX_TEST_TTL_MS:
             parser.error(
                 f"--ttl-ms must be between {MIN_TTL_MS} and {MAX_TEST_TTL_MS}"
             )
         if not 1 <= arguments.level <= 15:
             parser.error("--level must be between 1 and 15")
+    if arguments.command == "renew-release-test":
+        if not 0 < arguments.renew_ms < arguments.ttl_ms:
+            parser.error("--renew-ms must be positive and less than --ttl-ms")
+        if arguments.hold_ms <= arguments.ttl_ms:
+            parser.error("--hold-ms must be greater than --ttl-ms")
 
     server = (arguments.serialosc_host, arguments.serialosc_port)
     try:
         with bind_callback(arguments.host, arguments.callback_port) as callback:
             if arguments.command == "probe":
                 _print_probe(lease_snapshot(callback, server, arguments.timeout))
-            else:
+            elif arguments.command == "expiry-test":
                 result = expiry_test(
                     callback,
                     server,
@@ -392,6 +616,25 @@ def main() -> int:
                 )
                 print(
                     f"EXPIRY_VERIFIED {result.released.mode} "
+                    f"port={result.released.destination_port}"
+                )
+            else:
+                result = renew_release_test(
+                    callback,
+                    server,
+                    arguments.serial,
+                    arguments.timeout,
+                    arguments.ttl_ms,
+                    arguments.renew_ms,
+                    arguments.hold_ms,
+                    arguments.level,
+                    arguments.arc_rings,
+                    takeover_legacy=arguments.takeover_legacy,
+                    report=lambda message: print(message, flush=True),
+                )
+                print(
+                    f"RENEW_RELEASE_VERIFIED renewals={result.renewals} "
+                    f"{result.released.mode} "
                     f"port={result.released.destination_port}"
                 )
     except (OSError, ValueError) as error:

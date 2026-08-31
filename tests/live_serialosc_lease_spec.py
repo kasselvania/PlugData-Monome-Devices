@@ -13,7 +13,11 @@ PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "tools"))
 
 from fake_serialosc import Device, FakeSerialOSC, bind_callback  # noqa: E402
-from live_serialosc_lease import expiry_test, lease_snapshot  # noqa: E402
+from live_serialosc_lease import (  # noqa: E402
+    expiry_test,
+    lease_snapshot,
+    renew_release_test,
+)
 
 
 def available_udp_port() -> int:
@@ -98,6 +102,34 @@ class LiveSerialOSCLeaseTests(unittest.TestCase):
             self.assertTrue(endpoint.all_dark())
             self.assertIn(("dark", "expired"), endpoint.lease_events)
             self.assertIn(("free", "expired"), endpoint.lease_events)
+
+    def test_renew_release_test_survives_initial_ttl_then_frees_grid(self) -> None:
+        with RunningSerialOSC() as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            result = renew_release_test(
+                callback,
+                (server.host, server.port),
+                "m100",
+                0.5,
+                1000,
+                250,
+                1250,
+                4,
+                None,
+            )
+            endpoint = server.device_servers["m100"]
+            self.assertEqual(result.claimed.mode, "leased")
+            self.assertGreaterEqual(result.renewals, 3)
+            self.assertEqual(result.maintained.mode, "leased")
+            self.assertTrue(result.maintained.owner)
+            self.assertEqual(result.released.mode, "free")
+            self.assertEqual(result.released.destination_port, 0)
+            self.assertTrue(endpoint.all_dark())
+            self.assertEqual(
+                endpoint.lease_events[-2:],
+                [("dark", "released"), ("free", "released")],
+            )
 
     def test_legacy_destination_requires_explicit_takeover(self) -> None:
         with RunningSerialOSC() as server, bind_callback(
