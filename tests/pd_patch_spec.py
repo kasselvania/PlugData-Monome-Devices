@@ -120,8 +120,13 @@ class PdPatchTests(unittest.TestCase):
         self.assertIn("list prepend a_key", live_patch)
         self.assertIn("list prepend b_key", live_patch)
         self.assertIn("list prepend send", live_patch)
+        self.assertEqual(live_patch.count("route key"), 2)
         for connection in (
+            "#X connect 6 0 62 0;",
+            "#X connect 62 0 54 0;",
             "#X connect 55 0 58 0;",
+            "#X connect 7 0 63 0;",
+            "#X connect 63 0 56 0;",
             "#X connect 57 0 58 0;",
             "#X connect 58 0 59 0;",
             "#X connect 59 0 60 0;",
