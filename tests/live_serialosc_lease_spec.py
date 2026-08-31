@@ -12,12 +12,19 @@ import unittest
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "tools"))
 
-from fake_serialosc import Device, FakeSerialOSC, bind_callback  # noqa: E402
+from fake_serialosc import (  # noqa: E402
+    Device,
+    FakeSerialOSC,
+    bind_callback,
+    decode_message,
+)
 from live_serialosc_lease import (  # noqa: E402
+    _send_test_pattern,
     expiry_test,
     lease_snapshot,
     renew_release_test,
 )
+from live_serialosc_state import DeviceState  # noqa: E402
 
 
 def available_udp_port() -> int:
@@ -27,10 +34,9 @@ def available_udp_port() -> int:
 
 
 class RunningSerialOSC:
-    def __init__(self) -> None:
-        self.server = FakeSerialOSC(
-            port=0,
-            devices=(
+    def __init__(self, devices: tuple[Device, ...] | None = None) -> None:
+        if devices is None:
+            devices = (
                 Device(
                     "m100",
                     "monome 128",
@@ -38,7 +44,10 @@ class RunningSerialOSC:
                     16,
                     8,
                 ),
-            ),
+            )
+        self.server = FakeSerialOSC(
+            port=0,
+            devices=devices,
             spawn_device_servers=True,
         )
         self.stopping = threading.Event()
@@ -162,6 +171,89 @@ class LiveSerialOSCLeaseTests(unittest.TestCase):
             self.assertEqual(result.released.mode, "free")
             self.assertTrue(endpoint.all_dark())
             self.assertIn(("leased", "takeover"), endpoint.lease_events)
+
+    def test_zero_by_zero_padded_arc_sends_four_ring_maps(self) -> None:
+        state = DeviceState(
+            serial="m1001113",
+            model="monome arc                       ",
+            server_host="127.0.0.1",
+            server_port=11564,
+            destination_host="127.0.0.1",
+            destination_port=0,
+            prefix="/monome",
+            rotation=0,
+            width=0,
+            height=0,
+        )
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver:
+            receiver.bind(("127.0.0.1", 0))
+            receiver.settimeout(1)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender:
+                _send_test_pattern(
+                    sender,
+                    receiver.getsockname(),
+                    state,
+                    "/test",
+                    4,
+                    4,
+                )
+            messages = [
+                decode_message(receiver.recvfrom(65535)[0]) for _ in range(4)
+            ]
+
+        self.assertEqual(
+            [(address, atoms[0]) for address, atoms in messages],
+            [("/test/ring/map", ring) for ring in range(4)],
+        )
+        self.assertTrue(
+            all(atoms[1:] == (4,) * 64 for _, atoms in messages)
+        )
+
+    def test_padded_arc_identity_passes_expiry_lifecycle(self) -> None:
+        arc = Device(
+            "m1001113",
+            "monome arc                       ",
+            available_udp_port(),
+            rings=4,
+        )
+        with RunningSerialOSC((arc,)) as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            result = expiry_test(
+                callback,
+                (server.host, server.port),
+                arc.serial,
+                0.5,
+                1000,
+                4,
+                4,
+            )
+            endpoint = server.device_servers[arc.serial]
+
+        self.assertEqual(result.released.mode, "free")
+        self.assertTrue(endpoint.arc_all_dark())
+        self.assertTrue(endpoint.arc_messages)
+
+    def test_invalid_arc_request_fails_before_claiming_grid(self) -> None:
+        with RunningSerialOSC() as server, bind_callback(
+            "127.0.0.1", 0
+        ) as callback:
+            endpoint = server.device_servers["m100"]
+            with self.assertRaisesRegex(
+                ValueError, "arc_rings_supplied_for_grid"
+            ):
+                expiry_test(
+                    callback,
+                    (server.host, server.port),
+                    "m100",
+                    0.5,
+                    1000,
+                    4,
+                    4,
+                )
+
+            self.assertEqual(endpoint.destination_port, 0)
+            self.assertEqual(endpoint.lease_events, [])
 
 
 if __name__ == "__main__":

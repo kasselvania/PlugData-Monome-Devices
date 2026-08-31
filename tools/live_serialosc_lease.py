@@ -221,9 +221,9 @@ def _send_test_pattern(
     level: int,
     arc_rings: int | None,
 ) -> None:
-    if state.width is not None and state.height is not None:
-        if arc_rings is not None:
-            raise ValueError("arc_rings_supplied_for_grid")
+    capability = _test_pattern_capability(state, arc_rings)
+    if capability == "grid":
+        assert state.width is not None and state.height is not None
         for y_offset in range(0, state.height, 8):
             for x_offset in range(0, state.width, 8):
                 callback.sendto(
@@ -237,8 +237,7 @@ def _send_test_pattern(
                 )
         return
 
-    if arc_rings not in (2, 4):
-        raise ValueError("arc_requires_explicit_2_or_4_rings")
+    assert arc_rings in (2, 4)
     for ring in range(arc_rings):
         callback.sendto(
             encode_message(
@@ -246,6 +245,40 @@ def _send_test_pattern(
             ),
             endpoint,
         )
+
+
+def _test_pattern_capability(
+    state: DeviceState,
+    arc_rings: int | None,
+) -> str:
+    model_words = state.model.strip().lower().split()
+    arc_identity = "arc" in model_words
+    positive_grid = (
+        state.width is not None
+        and state.height is not None
+        and state.width > 0
+        and state.height > 0
+    )
+    arc_shape = (
+        (state.width is None and state.height is None)
+        or (state.width == 0 and state.height == 0)
+    )
+
+    if positive_grid:
+        if arc_identity:
+            raise ValueError("ambiguous_device_surface")
+        if arc_rings is not None:
+            raise ValueError("arc_rings_supplied_for_grid")
+        return "grid"
+
+    if arc_identity and arc_shape:
+        if arc_rings not in (2, 4):
+            raise ValueError("arc_requires_explicit_2_or_4_rings")
+        return "arc"
+
+    if arc_rings is not None:
+        raise ValueError("arc_identity_required")
+    raise ValueError("unsupported_device_surface")
 
 
 def _observe_expiry(
@@ -278,6 +311,7 @@ def _claim_test_lease(
     ttl_ms: int,
     takeover_legacy: bool,
     token_label: str,
+    arc_rings: int | None,
     report: Callable[[str], None] | None = None,
 ) -> _ClaimedTestLease:
     devices = discover(callback, serialosc_server, timeout_seconds)
@@ -288,6 +322,7 @@ def _claim_test_lease(
     device_state = probe(
         callback, device, serialosc_server[0], timeout_seconds
     )
+    _test_pattern_capability(device_state, arc_rings)
     token = token_label + "-" + secrets.token_hex(24)
     before = query_lease(
         callback, device, serialosc_server[0], timeout_seconds, token
@@ -367,6 +402,7 @@ def expiry_test(
         ttl_ms,
         takeover_legacy,
         "expiry",
+        arc_rings,
         report,
     )
 
@@ -427,6 +463,7 @@ def renew_release_test(
         ttl_ms,
         takeover_legacy,
         "renew-release",
+        arc_rings,
         report,
     )
     _send_test_pattern(
