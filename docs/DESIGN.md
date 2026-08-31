@@ -256,10 +256,12 @@ than overwrite the standalone owner. After standalone released to port `0`,
 Bitwig freshly probed, reclaimed, restored output, and received input. Final
 cleanup left all three devices dark at port `0`.
 
-One Step 5 gate fails: full Bitwig device deactivation terminates the isolated
-PlugData host before it can darken or release, leaving the callback and LEDs
-stale. Guarded manual recovery succeeded, but intentional plug-in-process
-restart is not accepted. See `docs/PLUGDATA-BITWIG-AB.md`.
+The pre-lease Step 5 run failed full Bitwig device deactivation because the
+isolated host died before it could darken or release. On 2026-08-31, lease
+candidate `7187832` closed that macOS gate: the daemon expired all three
+abandoned leases, auto-darkened every surface, returned every destination to
+port `0`, and a fresh host started fail-closed before explicit reclaim. See
+`docs/PLUGDATA-BITWIG-AB.md`.
 
 ### Step 5A — Preserve the pre-lease workbench
 
@@ -294,8 +296,9 @@ their existing behavior. See `docs/PROJECT-MAP.md`.
   user-facing archive that matches the accepted PlugData distribution format.
 
 End-user packaging starts only after Step 5B is accepted on macOS and
-SteamOS. The current full-device-deactivation failure blocks that claim; the
-Step 5A development bundle does not soften or bypass it.
+SteamOS. The macOS full-device-deactivation gate now passes; SteamOS remains
+the blocking physical platform. The Step 5A development bundle does not soften
+or bypass that remaining gate.
 
 ## Current workbench boundary
 
@@ -310,9 +313,10 @@ The physical standalone record was produced with the official 0.9.4 nightly
 from run `32892289806`, commit `6bb2b60c8`. The currently installed host
 candidate is the official 0.9.4 package from run `27418767000`, commit
 `98ae0f78`; it passes the standalone dynamic-menu smoke, the bounded Bitwig
-CLAP/VST3 editor-lifecycle preflight, and the Bitwig Monome hardware/contention
-surface listed in Step 5. Full device deactivation still leaves stale
-SerialOSC state and is not accepted. See `docs/PLUGDATA-MACOS.md` and
+CLAP/VST3 editor-lifecycle preflight, the Bitwig Monome hardware/contention
+surface listed in Step 5, and full host-death/restart acceptance against
+SerialOSC lease candidate `7187832`. Steam Deck lease acceptance remains open.
+See `docs/PLUGDATA-MACOS.md` and
 `docs/PLUGDATA-BITWIG-AB.md`.
 
 Fake-server acceptance remains the deterministic regression layer. It exposes

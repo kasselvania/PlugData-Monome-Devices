@@ -817,7 +817,7 @@ function Session:lease_renewed(token, ttl_ms)
         return self:_error("invalid_lease_renewal")
     end
     self.renew_pending = false
-    self:_emit("status", "lease", { "renewed", ttl_ms })
+    -- Successful heartbeats are internal liveness, not user-facing state.
     return true
 end
 

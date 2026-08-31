@@ -181,9 +181,10 @@ with PlugData 0.9.4 and SerialOSC candidate revision `7187832`:
   dark by themselves, and independent readback returned free port `0`.
 
 The candidate log independently recorded `lease granted by takeover`,
-`lease released`, a fresh `lease granted`, and `lease expired`. This accepts
-the Arc's isolated standalone lease lifecycle. It does not accept the
-simultaneous lease matrix, Bitwig process death, or Steam Deck behavior.
+`lease released`, a fresh `lease granted`, and `lease expired`. This accepted
+the Arc's isolated standalone lease lifecycle. At that point it did not yet
+accept the simultaneous lease matrix, Bitwig process death, or Steam Deck
+behavior.
 
 The Arc subsequently passed the 2026-08-29 lease-candidate matrix with both
 Grids in one PlugData process. Its lease, ring output, and encoder route stayed
@@ -192,3 +193,9 @@ same stable ID as free port `0`, required explicit reselection and reclaim, and
 did not disturb either Grid. A final shared-process `SIGKILL` left all three
 leases active briefly before SerialOSC expired and darkened each surface. See
 `docs/THREE-DEVICE-ACCEPTANCE.md`.
+
+The Arc then passed the macOS Bitwig host-death gate on 2026-08-31. Its
+`17782` lease expired when full device deactivation killed the shared PlugData
+host, all four rings auto-darkened, and fresh readback returned port `0`.
+Reactivation required explicit selection, probe, and claim; positive ring-`1`
+input remained isolated. Steam Deck acceptance remains open.

@@ -88,12 +88,15 @@ device, both Grids, all three devices, active hot-swap in every direction,
 survivor preservation, deliberate standalone displacement, safe refusal by the
 displaced Bitwig session, fresh reclaim, and final all-dark port-`0` cleanup.
 
-The accepted pre-lease Bitwig lifecycle has one explicit failure: fully deactivating the
-device terminates the isolated PlugData host before it can darken or release,
-leaving a stale SerialOSC callback and lit hardware. Guarded manual recovery
-passes; plug-in-process restart safety does not. The lease-enabled daemon and
-PlugData session are now implemented and deterministically tested, but this
-failure is not closed until the physical Bitwig process-death run passes.
+The accepted pre-lease Bitwig lifecycle had one explicit failure: fully
+deactivating the device terminated the isolated PlugData host before it could
+darken or release, leaving a stale SerialOSC callback and lit hardware. On
+2026-08-31, lease candidate `7187832` closed that exact physical gate. Full
+Bitwig deactivation killed the shared PlugData host without an orderly release;
+SerialOSC expired all three abandoned leases, visibly darkened both Grids and
+all four Arc rings, and returned every destination to free port `0`. A fresh
+host then started fail-closed, required explicit reselection/probe/claim, and
+renewed all three leases without routine heartbeat console spam.
 
 The pinned macOS lease candidate at SerialOSC revision `6701959e` has now
 passed its first direct-daemon physical gate with legacy 128 `m1000853`. After
@@ -103,8 +106,8 @@ expired the lease when the harness deliberately sent neither renewal nor
 release. The Grid visibly went completely dark, `/sys/lease/lost` arrived, the
 daemon recorded the expiry, and an independent probe reported `free` at
 `127.0.0.1:0` with no owner. This proves only the legacy-128 direct-daemon
-expiry lane; PlugData standalone, Bitwig, the other devices, and Steam Deck
-lease acceptance remain open.
+expiry lane; at that point PlugData standalone, Bitwig, the other devices, and
+Steam Deck lease acceptance remained open.
 
 An unattended standalone control-plane slice has also passed with the same
 candidate and Grid. Opening `monome-grid-live.pd` through LaunchServices bound
@@ -172,8 +175,8 @@ separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
 for both Grids and the four-ring Arc have passed, as has the full simultaneous
-standalone matrix. The Bitwig process-death run and every Steam Deck lease gate
-remain open. See
+standalone matrix and the full Bitwig plug-in-host-death/restart matrix. Every
+Steam Deck lease gate remains open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
 
@@ -192,8 +195,7 @@ The exact moving-nightly-versus-pinned-candidate record is in
 ## Requirements
 
 - PlugData official `0.9.4` candidate, commit `98ae0f78`, for the current
-  standalone-menu and bounded Bitwig hardware lane; full device deactivation
-  remains unsupported by the accepted lifecycle record
+  standalone-menu and accepted Bitwig hardware/process-death lane
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 
@@ -222,6 +224,7 @@ python3 -m unittest -v tests/live_serialosc_lease_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
 python3 -m unittest -v tests/macos_serialosc_spec.py
 python3 -m unittest -v tests/macos_lease_candidate_spec.py
+python3 -m unittest -v tests/workbench_bundle_spec.py
 luac -p monome_registry.lua monome-registry.pd_lua \
   monome_session.lua monome-session-core.pd_lua \
   monome_grid.lua monome-grid-core.pd_lua \

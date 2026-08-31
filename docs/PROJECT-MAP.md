@@ -86,8 +86,9 @@ libmonome's protocol-dependent success returns: series/40h report zero while
 mext/OSC report a positive byte count, and only negative values are failures.
 The current candidate pin is `7187832`, which adds correct per-device IOKit
 property-buffer handling so a short serial path cannot prevent a later, longer
-FTDI Arc path from being detected. It is not an upstream release or a physical
-acceptance claim.
+FTDI Arc path from being detected. It is not an upstream release. Its physical
+acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
+this repository; Steam Deck acceptance remains open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -108,6 +109,10 @@ distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
    hot-swap, multi-device, and process-death acceptance on the Steam Deck.
 8. Only then publish the end-user PlugData package and begin musical Grid and
    Arc example patches.
+
+Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
+three-device expiry after Bitwig plug-in-host termination and fail-closed
+restart. Step 7 is the next open platform gate.
 
 ## Release boundaries
 

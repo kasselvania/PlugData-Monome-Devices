@@ -24,6 +24,9 @@ probe. Missing lease capability fails closed; it never falls back to legacy.
 `claim` acquires only a `free` destination. A probed `legacy` destination
 requires the separate `takeover` command, and a different active lease is
 always refused. A verified lease uses a 6000 ms TTL renewed every 2000 ms.
+Successful renewal acknowledgements update internal liveness without emitting
+a routine status line. Rejection, timeout, lease loss, displacement, and other
+state changes remain visible.
 Release is complete only after `/sys/lease/released` (or `no_lease`) is
 followed by an independent `free`, port-`0` state readback.
 
@@ -263,10 +266,9 @@ Passed in the accepted PlugData nightly `0.9.4` across 2026-08-25 and
   releases, and automatic all-device darkening/free-state recovery after the
   shared PlugData process was killed.
 
-The remaining macOS host lifecycle gap is Bitwig process death, not standalone
-process death or displacement handling. In the accepted pre-lease Bitwig lane,
-full device deactivation terminates the plug-in host before it can darken or
-release, so stable SerialOSC retains a stale destination. The lease candidate
-has closed the equivalent physical standalone failure, but it has not yet
-passed the Bitwig process-death gate. See
-`docs/PLUGDATA-BITWIG-AB.md`.
+The pre-lease Bitwig lane retained a stale destination when full device
+deactivation killed the isolated host. On 2026-08-31, candidate `7187832`
+closed that macOS gap: all three abandoned leases expired, every surface
+auto-darkened, readback returned free port `0`, and a fresh Bitwig host started
+fail-closed before explicit reclaim. The corresponding Steam Deck lifecycle
+remains open. See `docs/PLUGDATA-BITWIG-AB.md`.

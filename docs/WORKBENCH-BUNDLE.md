@@ -44,9 +44,9 @@ It is not yet:
 - a one-click PlugData installation;
 - a PlugData Store submission;
 - a promise that arbitrary PlugData builds are compatible;
-- crash-safe for full Bitwig device deactivation; or
+- a cross-platform crash-safety claim before Steam Deck acceptance; or
 - the later collection of musical Grid and Arc examples.
 
-Those claims remain blocked by the opt-in SerialOSC lease work, cross-platform
-physical acceptance, an explicit project license, and the final PlugData
-package format decision. See [PROJECT-MAP.md](PROJECT-MAP.md).
+Those claims remain blocked by Steam Deck and cross-platform physical
+acceptance, an explicit project license, and the final PlugData package format
+decision. See [PROJECT-MAP.md](PROJECT-MAP.md).

@@ -275,7 +275,7 @@ restored output, and received `key 0 0 1/0`.
 See `docs/PLUGDATA-BITWIG-AB.md` for the full three-device record and host
 lifecycle boundary.
 
-## Remaining lifecycle gate
+## Lease closure of the Bitwig host lifecycle gate
 
 The earlier claimed-unplug attempt exposed an upstream SerialOSC null-port
 crash rather than a USB/dock failure. A valid `/sys/port 0` release left liblo
@@ -286,8 +286,10 @@ claimed hot-unplug, and physical held-key synthesis all passed on 2026-08-26.
 The held-key run used the installed production LaunchAgent, not the earlier
 instrumented build.
 
-Standalone-versus-Bitwig contention now passes. Full Bitwig device deactivation
-does not: terminating the isolated PlugData host leaves SerialOSC pointed at
-the dead callback and leaves the Grid lit. Guarded recovery worked, but the
-project must not claim crash-safe or plug-in-process-restart-safe cleanup until
-that host lifecycle gap is closed.
+Standalone-versus-Bitwig contention passes. The pre-lease full-deactivation
+run left SerialOSC pointed at the dead callback and left the Grid lit. The
+lease-candidate rerun on 2026-08-31 closed that macOS gap: terminating the
+isolated host caused daemon expiry, automatic darkness, and free port-`0`
+readback for both Grids and the Arc; a fresh host then started fail-closed.
+Steam Deck process-death acceptance remains required before any cross-platform
+claim. See `docs/PLUGDATA-BITWIG-AB.md`.

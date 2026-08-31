@@ -263,9 +263,9 @@ standalone lease lifecycle against corrected candidate `7187832`:
 
 The daemon log independently recorded the takeover grant, orderly release,
 fresh grant, and expiry. The candidate remained the sole healthy owner of UDP
-`12002`. This accepts the isolated Arc standalone lease lifecycle. The
-simultaneous-device matrix, Bitwig process death, and every Steam Deck lease
-gate remain open.
+`12002`. This accepted the isolated Arc standalone lease lifecycle. At that
+point the simultaneous-device matrix, Bitwig process death, and every Steam
+Deck lease gate remained open.
 
 ## Accepted simultaneous three-device slice
 
@@ -298,8 +298,32 @@ four-ring Arc `m1001113`:
 The candidate log independently recorded all grants, device-worker reconnects,
 orderly releases, and final expiries while the candidate remained the sole
 healthy owner of UDP `12002`. This accepts the macOS PlugData-standalone
-simultaneous-device and shared-process-death lifecycle. Bitwig process death and
-every Steam Deck lease gate remain open.
+simultaneous-device and shared-process-death lifecycle. At the end of that
+slice, Bitwig process death and every Steam Deck lease gate remained open.
 
-No crash-safe or cross-platform claim is earned until this Mac sequence and
-the corresponding Steam Deck sequence both pass physically.
+## Accepted Bitwig shared-host process-death slice
+
+On 2026-08-31, candidate `7187832` passed the remaining macOS Bitwig gate with
+the pinned PlugData CLAP candidate at commit `98ae0f78`:
+
+- one isolated Bitwig host loaded both live patches without auto-claiming;
+- explicit non-mutating probes established menu indices `0` legacy 128, `1`
+  Arc, and `2` zero before use;
+- legacy, zero, and Arc renewed simultaneous leases on `17780`, `17781`, and
+  `17782` beyond the six-second TTL;
+- the operator confirmed distinct visible output across both Grids and all
+  four Arc rings, and legacy input reached only its assigned session;
+- full Bitwig device deactivation terminated the exact shared PlugData host
+  without running an orderly release;
+- the daemon recorded three expiries, both Grids and every Arc ring visibly
+  auto-darkened, and independent readback found all three free on port `0`;
+- reactivation created a fresh host with empty selections and no claims;
+- explicit reprobe/reclaim restored all three leases, successful heartbeat
+  acknowledgements stayed silent in the console, and zero plus Arc input
+  remained isolated; and
+- final orderly release returned every device to free port `0`.
+
+This accepts macOS crash-safe Bitwig host termination for the pinned candidate
+pair. It does not transfer to arbitrary builds. Every Steam Deck lease gate
+remains open, so no cross-platform crash-safety or end-user packaging claim is
+earned yet.

@@ -120,7 +120,8 @@ passed. After a final `SIGKILL`, all three leases remained active briefly, then
 expired independently and visibly darkened every surface before free port-`0`
 readback.
 
-Bitwig plug-in-host termination and every Steam Deck lease gate remain open.
-Those layers gain no crash-safe claim until their own physical readback and
-process-death acceptance steps pass. See
-[MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).
+Bitwig plug-in-host termination passed on macOS on 2026-08-31: the shared host
+died without release, all three leases expired, every surface auto-darkened,
+and a fresh host started fail-closed before explicit reclaim. Every Steam Deck
+lease gate remains open, so no cross-platform crash-safe claim is earned yet.
+See [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md).

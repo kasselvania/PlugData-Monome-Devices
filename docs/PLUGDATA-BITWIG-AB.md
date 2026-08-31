@@ -14,10 +14,11 @@ standalone-contention run recorded below.
 
 This is a bounded host-compatibility decision. The hardware run is direct
 evidence for this candidate rather than an inference from the later standalone
-nightly. One lifecycle gate still fails: fully deactivating the Bitwig device
-terminates the isolated plug-in host without releasing its SerialOSC
-destination. Ordinary bypass is accepted; intentional plug-in-process restart
-is not.
+nightly. Under stable pre-lease SerialOSC, fully deactivating the Bitwig device
+terminated the isolated plug-in host without releasing its destination. The
+opt-in lease candidate subsequently closed that exact process-death gate on
+2026-08-31; ordinary bypass and intentional plug-in-process restart are both
+accepted within the pinned macOS lane described below.
 
 ## Why the moving nightly was rejected
 
@@ -166,7 +167,7 @@ independent `/sys/info` destination readback:
     Final direct readback reported destination port `0` for all three devices,
     and both Grids plus all four Arc rings were physically confirmed dark.
 
-## Known failing lifecycle gate
+## Historical pre-lease lifecycle failure
 
 Fully deactivating the Bitwig device terminated the isolated PlugData host.
 SerialOSC retained the legacy Grid's `17780` destination and the Grid retained
@@ -175,14 +176,55 @@ real stale-claim lifecycle failure, not a successful restart. Guarded manual
 recovery through exact readback, release to port `0`, and explicit reclaim
 worked, but it does not make unexpected or intentional process death safe.
 
-The accepted ordinary bypass and editor close/reopen paths do not terminate
-the plug-in host and must not be conflated with this failure.
+The accepted ordinary bypass and editor close/reopen paths did not terminate
+the plug-in host and must not be conflated with this historical failure.
+
+## Lease-candidate process-death acceptance on 2026-08-31
+
+The same pinned PlugData CLAP executable was loaded from
+`/Library/Audio/Plug-Ins/CLAP/plugdata.clap/Contents/MacOS/plugdata` against
+SerialOSC lease candidate `7187832`. Bitwig placed both live workbench patches
+in isolated plug-in host PID `77986`. Opening the patches did not claim any
+device. Non-mutating probes established the actual menu projection before use:
+index `0` was legacy 128, index `1` was Arc, and index `2` was zero.
+
+Explicit selection, probe, and claim produced these simultaneous routes:
+
+| Device | Callback |
+| --- | --- |
+| legacy 128 `m1000853` | `17780` |
+| zero `m23215901` | `17781` |
+| Arc `m1001113` | `17782` |
+
+Independent readback after more than one six-second TTL proved all three
+leases were renewing. The legacy Grid displayed a dim surface with a bright
+bottom-right position, the zero displayed a brighter surface with a bright
+top-left position, and all four Arc rings displayed distinct bright markers.
+The operator physically confirmed that exact layout. Legacy top-left input
+reached only Grid slot A.
+
+Bitwig's full device `Active` control then terminated PID `77986`; the process
+ran no darkening or release path. The candidate daemon recorded three
+`lease expired` events rather than releases. Independent readback found legacy,
+zero, and Arc free at `127.0.0.1:0`, and the operator confirmed both Grids and
+all four Arc rings went completely dark by themselves.
+
+Reactivation created fresh isolated host PID `13845`. Both patches restored,
+but every selection remained empty and all devices remained free: restart was
+fail-closed. After fresh explicit selection, probe, and claim, all three leases
+again renewed beyond the TTL. Successful heartbeat acknowledgements emitted no
+console status, so the console remained unchanged across the renewal window;
+state changes and failures remain visible. Zero bottom-right input reached only
+slot B as `key 15 15 1/0`, and clockwise motion on Arc ring `1` produced only
+positive ring-`1` deltas. Final orderly releases returned all three devices to
+free port `0`.
 
 ## Current boundary
 
-The pinned candidate is accepted for the Monome patch in Bitwig across stopped
-transport, ordinary bypass, save/reload, one device, two Grids, all three
-devices, active hot-swap in every direction, and deliberate displacement by
-standalone PlugData. The project is not yet accepted for full Bitwig device
-deactivation or plug-in-process restart. Packaging must not claim crash-safe
-or restart-safe SerialOSC cleanup until that lifecycle gap is closed.
+The pinned PlugData candidate plus SerialOSC lease candidate `7187832` is
+accepted on this Mac across stopped transport, ordinary bypass, save/reload,
+one device, two Grids, all three devices, active hot-swap in every direction,
+standalone displacement, full Bitwig device deactivation, daemon expiry, and
+fail-closed plug-in-host restart. This evidence does not transfer to arbitrary
+PlugData or SerialOSC builds, and it does not satisfy any Steam Deck lease
+gate. Cross-platform packaging remains blocked on the Steam Deck run.
