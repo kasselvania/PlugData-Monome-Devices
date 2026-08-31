@@ -117,8 +117,9 @@ Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
 three-device expiry after Bitwig plug-in-host termination and fail-closed
 restart. Step 7 is in progress: exact SteamOS single-device slices for the
 legacy 128, Zero/256, and four-ring Arc pass, including hotplug and host death,
-while the simultaneous matrix, Bitwig, and remaining lifecycle rows remain
-open.
+and the legacy-plus-Zero simultaneous lane now passes both hotplug directions
+and shared-host expiry. The Arc pairs, three-device matrix, Bitwig, and
+remaining lifecycle rows remain open.
 
 ## Release boundaries
 
@@ -128,7 +129,7 @@ open.
   lease candidate is experimental.
 - The PlugData package must not claim complete crash-safe cleanup until the
   macOS Bitwig gate and the full Steam Deck process-death matrix pass. The
-  bounded Deck single-device results are not that full matrix.
+  bounded Deck single-device and first pair results are not that full matrix.
 - Legacy SerialOSC clients must behave exactly as before unless they opt into
   the lease extension.
 - Public package publication also requires an explicit repository license and

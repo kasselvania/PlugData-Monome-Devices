@@ -135,8 +135,10 @@ device proved fail-closed startup, renewal beyond the first TTL, exact
 input/output, orderly dark release, automatic darkness and free port `0` after
 abrupt PlugData death, fresh fail-closed recovery, and active-lease
 unplug/reconnect followed by dark/free refusal before explicit reselection and
-reclaim. SerialOSC did not restart. The simultaneous-device matrix, Bitwig,
-and remaining Deck lifecycle rows remain open, so no complete cross-platform
-release claim is earned yet. See
+reclaim. The legacy-plus-Zero simultaneous lane then passed isolated routing,
+both hotplug directions, independent release, shared-host expiry, and fresh
+fail-closed recovery. SerialOSC did not restart. The Arc pairs, three-device
+matrix, Bitwig, and remaining Deck lifecycle rows remain open, so no complete
+cross-platform release claim is earned yet. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
 [STEAMOS-LEASE-CANDIDATE.md](STEAMOS-LEASE-CANDIDATE.md).

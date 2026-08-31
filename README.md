@@ -170,9 +170,21 @@ recovery after abrupt PlugData death, fresh fail-closed restart, and
 active-lease unplug/reconnect with same-ID/same-port dark/free recovery before
 explicit reclaim. The Arc lane captured signed ring-`0` and ring-`3` deltas;
 its hardware has no encoder switches. SteamOS stayed read-only and SerialOSC
-did not restart. Simultaneous devices, Bitwig, and the remaining Deck
-lifecycle rows remain open; see
+did not restart. See
 [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md).
+
+The same Deck candidate now also passes the legacy-128 plus Zero/256 pair.
+Their leases renewed independently on `17780` and `17781`; distinct surface
+patterns and exact A/B key events stayed isolated. Active unplug/reconnect in
+both directions preserved the survivor's output, input, and lease while the
+returning device stayed dark/free until explicit reclaim. Each slot released
+without disturbing the other. Killing the shared PlugData process left both
+leases briefly active, then SerialOSC expired both, visibly darkened both
+Grids, and returned both to free port `0`. A fresh host started fail-closed,
+recovered only after explicit selection/probe/claim, and completed final
+all-dark release. SteamOS stayed read-only and SerialOSC retained zero
+restarts. The Arc pairs, three-device, Bitwig, and remaining lifecycle rows
+remain open.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -191,8 +203,8 @@ for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
 Steam Deck's bounded single-device direct and PlugData standalone slices for
 the legacy 128, Zero/256, and four-ring Arc, including hotplug and host death,
-now pass; the simultaneous-device, Bitwig, and remaining lifecycle matrix stays
-open. See
+now pass. The legacy-plus-Zero simultaneous lane also passes; the Arc pairs,
+three-device, Bitwig, and remaining lifecycle matrix stays open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)

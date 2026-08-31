@@ -298,9 +298,11 @@ their existing behavior. See `docs/PROJECT-MAP.md`.
 End-user packaging starts only after Step 5B is accepted on macOS and
 SteamOS. The macOS full-device-deactivation gate now passes. SteamOS has passed
 bounded single-device standalone slices for the legacy 128, Zero/256, and
-four-ring Arc, including hotplug and host death, but its simultaneous matrix,
-Bitwig, and remaining lifecycle lanes still block packaging. The Step 5A
-development bundle does not soften or bypass those remaining gates.
+four-ring Arc, including hotplug and host death. Its legacy-plus-Zero pair also
+passes isolated routing, hotplug in both directions, and shared-host expiry.
+The Arc pairs, three-device matrix, Bitwig, and remaining lifecycle lanes still
+block packaging. The Step 5A development bundle does not soften or bypass
+those remaining gates.
 
 ## Current workbench boundary
 

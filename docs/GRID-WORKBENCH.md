@@ -314,6 +314,17 @@ darkened before orderly release, expired to visible darkness and free port `0`
 after abrupt PlugData death, started a fresh host fail-closed before explicit
 reclaim, and survived active-lease unplug/reconnect with same-ID/same-port
 return as dark/free before explicit reselection and reclaim. The Arc has also
-passed its separate isolated lane. Multi-device and Bitwig rows are still
-required before any complete cross-platform claim. See
+passed its separate isolated lane.
+
+The same Deck candidate then passed the legacy-plus-Zero simultaneous lane.
+Distinct patterns and exact A/B key events stayed isolated on callbacks
+`17780` and `17781`. Active removal and same-ID/same-port dark/free recovery
+passed in both directions; each survivor retained output, renewal, and a fresh
+key event. Pre-reselection output was blocked for each returning Grid,
+independent releases left the other device untouched, and shared PlugData host
+death expired and visibly darkened both leases. A fresh host started
+fail-closed, explicitly recovered both, and released both to free port `0`.
+
+The Arc pair, three-device, and Bitwig Deck rows are still required before any
+complete cross-platform claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.

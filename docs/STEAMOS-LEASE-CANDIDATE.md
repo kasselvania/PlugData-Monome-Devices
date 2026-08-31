@@ -205,12 +205,52 @@ being counted as acceptance. The corrected run ended with the Arc connected,
 dark, and free, PlugData active with zero restarts, and `serialoscd.service`
 still at its original PID with `NRestarts=0`.
 
+The legacy-128 plus Zero/256 pair then passed the first simultaneous-device
+lane against the same exact candidate:
+
+1. With no devices present, a fresh two-slot PlugData workbench started from
+   exact commit `4ad7d9c` and made no claim. A fresh discovery observer used
+   ephemeral callback port `56308`.
+2. Legacy `m1000853` returned on saved port `16874` and Zero `m2321590`
+   returned in `cafe:1110` SerialOSC mode on saved port `19536`. Both started
+   visibly dark and independently free at port `0`.
+3. Stable-ID ordering mapped legacy to slot A callback `17780` and Zero to
+   slot B callback `17781`. Selection and probe remained non-mutating;
+   explicit claims then renewed independently beyond the first TTL.
+4. Output remained isolated: legacy displayed a dim 16-by-8 surface with a
+   bright bottom-right marker, while Zero displayed a brighter 16-by-16
+   surface with a bright top-left marker. Input remained isolated as exact
+   `a_key 0 0 1/0` and `b_key 15 15 1/0` messages.
+5. Active-lease legacy unplug produced one remove, removed only its worker,
+   and freed port `16874`. Zero retained its pattern, lease, and exact
+   `b_key 15 0 1/0` input. Legacy reconnected with the same ID and port as
+   dark/free; output before reselection was blocked, explicit reclaim restored
+   its pattern, and independent legacy release darkened only legacy while Zero
+   remained lit and leased.
+6. The reverse direction also passed. Active-lease Zero unplug produced one
+   remove, removed only its worker, and freed port `19536`. Legacy retained
+   its pattern, lease, and exact `a_key 0 7 1/0` input. Zero reconnected with
+   the same ID and port as dark/free, rejected output before reselection,
+   reclaimed explicitly, and released without disturbing legacy.
+7. After both leases and patterns were restored, `SIGKILL` terminated only the
+   shared PlugData PID `216694`. Immediate readback still showed both leases;
+   SerialOSC then logged one expiry per device, both Grids visibly darkened by
+   themselves, and both independently returned to free port `0`.
+8. Fresh PlugData PID `221424` started with both devices dark/free, required
+   explicit rediscovery, selection, probe, and claim, restored both isolated
+   patterns, and completed a final orderly all-dark release to free port `0`.
+
+The run ended with both Grids connected, visibly dark, and free. SteamOS
+read-only mode remained enabled. PlugData and SerialOSC stayed healthy, and
+`serialoscd.service` retained its original PID and `NRestarts=0` across both
+hotplug directions and shared-host expiry.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- Grid/Grid, Grid/Arc, and three-device lease isolation and survivor recovery;
+- legacy/Arc, Zero/Arc, and three-device lease isolation and survivor recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
   fail-closed recovery; and
 - the remaining dock, suspend/resume, update, and reboot lifecycle rows called
