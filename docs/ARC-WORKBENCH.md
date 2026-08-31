@@ -89,6 +89,7 @@ control path is:
 
 ```sh
 python3 tools/live_arc_control.py discovery rescan
+python3 tools/live_arc_events.py --count 2 --timeout 30
 python3 tools/live_arc_control.py select INDEX
 python3 tools/live_arc_control.py session probe
 python3 tools/live_arc_control.py session claim
@@ -106,10 +107,18 @@ Ports are loopback-only:
 
 - `17778` discovery callback;
 - `17782` Arc session callback;
-- `17901` live Arc control.
+- `17901` live Arc control; and
+- `17911` machine-readable normalized Arc events.
 
 The dedicated ports allow this patch to run beside the existing two-Grid live
 workbench without callback collisions.
+
+`live_arc_events.py` binds only loopback and exits after the requested event
+count. Encoder movement is emitted as exact `arc_delta RING AMOUNT` messages;
+optional push-switch input is emitted as `arc_key RING STATE`. The accepted
+four-ring Arc has no push switches, so its physical gate captures signed delta
+messages only. The observer never discovers, selects, claims, lights, or
+releases hardware.
 
 ## Physical acceptance
 

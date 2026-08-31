@@ -100,6 +100,25 @@ class PdPatchTests(unittest.TestCase):
         self.assertIn("protocol lease", slot)
         self.assertIn("takeover", live)
 
+    def test_arc_live_workbench_has_machine_readable_event_output(self) -> None:
+        live = (PROJECT_ROOT / "monome-arc-live.pd").read_text()
+        self.assertIn("connect 127.0.0.1 17911", live)
+        self.assertIn("route delta key", live)
+        self.assertIn("list prepend arc_delta", live)
+        self.assertIn("list prepend arc_key", live)
+        self.assertIn("list prepend send", live)
+        for connection in (
+            "#X connect 0 0 40 0;",
+            "#X connect 40 0 39 0;",
+            "#X connect 5 0 32 0;",
+            "#X connect 32 0 33 0;",
+            "#X connect 34 0 37 0;",
+            "#X connect 32 1 35 0;",
+            "#X connect 36 0 37 0;",
+            "#X connect 38 0 39 0;",
+        ):
+            self.assertIn(connection, live)
+
     def test_capability_osc_enters_only_through_session_core(self) -> None:
         session_patch = (PROJECT_ROOT / "monome-session.pd").read_text()
         self.assertIn("list prepend device_osc", session_patch)

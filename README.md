@@ -238,6 +238,7 @@ lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
 python3 -m unittest -v tests/live_grid_control_spec.py
 python3 -m unittest -v tests/live_grid_events_spec.py
+python3 -m unittest -v tests/live_arc_events_spec.py
 python3 -m unittest -v tests/live_serialosc_state_spec.py
 python3 -m unittest -v tests/live_serialosc_lease_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py
@@ -300,4 +301,5 @@ For Step 4, start the simulator with `--with-arc 4` and open
 [`monome-arc-smoke.pd`](monome-arc-smoke.pd). Use
 [`monome-arc-live.pd`](monome-arc-live.pd) only for explicit four-ring Arc
 physical acceptance against the lease candidate. It uses separate loopback
-ports so it can later run beside the two-Grid workbench.
+ports so it can later run beside the two-Grid workbench, and mirrors normalized
+encoder events to the loopback-only `tools/live_arc_events.py` observer.
