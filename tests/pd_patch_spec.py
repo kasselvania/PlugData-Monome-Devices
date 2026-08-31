@@ -116,9 +116,17 @@ class PdPatchTests(unittest.TestCase):
     def test_live_workbench_has_machine_readable_key_output(self) -> None:
         live_patch = (PROJECT_ROOT / "monome-grid-live.pd").read_text()
         self.assertIn("netsend -u", live_patch)
-        self.assertIn("connect localhost 17910", live_patch)
+        self.assertIn("connect 127.0.0.1 17910", live_patch)
         self.assertIn("list prepend a_key", live_patch)
         self.assertIn("list prepend b_key", live_patch)
+        self.assertIn("list prepend send", live_patch)
+        for connection in (
+            "#X connect 55 0 58 0;",
+            "#X connect 57 0 58 0;",
+            "#X connect 58 0 59 0;",
+            "#X connect 59 0 60 0;",
+        ):
+            self.assertIn(connection, live_patch)
 
     def test_contender_workbench_uses_isolated_ports(self) -> None:
         contender = (PROJECT_ROOT / "monome-grid-contender-live.pd").read_text()

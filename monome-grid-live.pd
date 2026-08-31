@@ -57,8 +57,10 @@
 #X obj 220 635 list trim;
 #X obj 850 600 list prepend b_key;
 #X obj 850 635 list trim;
+#X obj 610 600 list prepend send;
+#X obj 610 635 list trim;
 #X obj 610 680 netsend -u;
-#X msg 610 640 connect localhost 17910;
+#X msg 610 720 connect 127.0.0.1 17910;
 #X text 30 650 LIVE SerialOSC Grid workbench. Load starts discovery and both callback transports only.;
 #X text 30 680 Slot A and B each require selection then probe then claim from free \, or explicit takeover from legacy.;
 #X text 30 710 Use one slot for sequential 128/256 tests or both slots for simultaneous Grids.;
@@ -129,11 +131,13 @@
 #X connect 50 0 3 0;
 #X connect 52 0 6 2;
 #X connect 53 0 7 2;
-#X connect 0 0 59 0;
-#X connect 59 0 58 0;
+#X connect 0 0 61 0;
+#X connect 61 0 60 0;
 #X connect 6 0 54 0;
 #X connect 54 0 55 0;
 #X connect 55 0 58 0;
 #X connect 7 0 56 0;
 #X connect 56 0 57 0;
 #X connect 57 0 58 0;
+#X connect 58 0 59 0;
+#X connect 59 0 60 0;
