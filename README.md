@@ -219,6 +219,7 @@ lua tests/grid_spec.lua
 lua tests/arc_spec.lua
 python3 -m unittest -v tests/fake_serialosc_spec.py
 python3 -m unittest -v tests/live_grid_control_spec.py
+python3 -m unittest -v tests/live_grid_events_spec.py
 python3 -m unittest -v tests/live_serialosc_state_spec.py
 python3 -m unittest -v tests/live_serialosc_lease_spec.py
 python3 -m unittest -v tests/pd_patch_spec.py

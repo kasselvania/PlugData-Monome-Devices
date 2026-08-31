@@ -76,6 +76,7 @@ Useful observation and control commands are:
 
 ```sh
 python3 tools/serialosc_monitor.py
+python3 tools/live_grid_events.py --count 2 --timeout 30
 python3 tools/live_grid_control.py discovery rescan
 python3 tools/live_grid_control.py a_select 0
 python3 tools/live_grid_control.py a_session probe
@@ -91,7 +92,14 @@ Ports are loopback-only:
 - `17779` discovery callback;
 - `17780` and `17781` slot callbacks;
 - `17850` read-only discovery monitor;
-- `17900` live workbench control.
+- `17900` live workbench control; and
+- `17910` machine-readable normalized A/B key events.
+
+`live_grid_events.py` binds only loopback and exits after the requested event
+count. Its default count of two captures one physical key press and release as
+exact `a_key X Y 1` and `a_key X Y 0` (or `b_key ...`) messages. It observes
+the patch's normalized output and never discovers, selects, claims, lights, or
+releases hardware.
 
 The command-line selector exists for repeatable automation. A person using the
 patch should select the visible stable-ID entry from the menu.

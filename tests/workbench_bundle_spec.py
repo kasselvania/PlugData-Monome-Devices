@@ -60,10 +60,12 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "tools/build_workbench_bundle.sh",
                 "tools/macos_serialosc_lease_candidate.sh",
                 "tools/live_serialosc_lease.py",
+                "tools/live_grid_events.py",
                 "tests/session_spec.lua",
                 "tests/lease_session_spec.lua",
                 "tests/macos_lease_candidate_spec.py",
                 "tests/live_serialosc_lease_spec.py",
+                "tests/live_grid_events_spec.py",
                 "tests/workbench_bundle_spec.py",
                 "patches/serialosc-null-port.patch",
             }
