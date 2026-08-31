@@ -21,13 +21,22 @@ def arm(callback: socket.socket, server: tuple[str, int]) -> None:
     callback.sendto(encode_message("/serialosc/list", host, port), server)
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--callback-port", type=int, default=17850)
+    parser.add_argument(
+        "--callback-port",
+        type=int,
+        default=0,
+        help="loopback callback port; 0 selects a fresh ephemeral port",
+    )
     parser.add_argument("--serialosc-host", default="127.0.0.1")
     parser.add_argument("--serialosc-port", type=int, default=12002)
-    arguments = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    arguments = build_parser().parse_args()
 
     server = (arguments.serialosc_host, arguments.serialosc_port)
     try:

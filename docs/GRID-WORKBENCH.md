@@ -91,9 +91,16 @@ Ports are loopback-only:
 
 - `17779` discovery callback;
 - `17780` and `17781` slot callbacks;
-- `17850` read-only discovery monitor;
+- a fresh ephemeral loopback port for each read-only discovery-monitor run;
 - `17900` live workbench control; and
 - `17910` machine-readable normalized A/B key events.
+
+The monitor deliberately asks the OS for a fresh callback port on every run.
+SerialOSC notifications are one-shot and have no unregister message. Reusing a
+fixed port while an earlier notification is still pending can deliver both the
+old and new notification to the later monitor and make one physical event look
+duplicated. `--callback-port` remains available for a deliberately isolated
+run, but routine acceptance should use the automatic default.
 
 `live_grid_events.py` binds only loopback and exits after the requested event
 count. Its default count of two captures one physical key press and release as

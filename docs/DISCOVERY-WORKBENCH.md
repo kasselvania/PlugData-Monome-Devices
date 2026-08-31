@@ -14,7 +14,8 @@ messages. A discovered device is not a claimed device.
 - `17001` and `17002` — fake per-device servers for Step 2 session work.
 - `17779` — local PlugData callback used by the examples.
 - `17780` and `17781` — session callbacks used by the Step 2 workbench.
-- `17850` — read-only live discovery monitor.
+- an ephemeral loopback port — read-only live discovery monitor; the OS picks
+  a fresh port for every run.
 - `17900` — loopback-only control inlet for the live Grid workbench.
 
 The fake server binds only to `127.0.0.1` by default. It cannot see or modify a
@@ -67,6 +68,10 @@ quit
 
 `/serialosc/notify` is one-shot, like the real protocol. After `add` or
 `remove`, `monome-discovery` immediately re-scans and re-arms notification.
+There is no notification-unregister message. The command-line monitor therefore
+uses a fresh ephemeral callback port each time, preventing an undelivered
+one-shot notification from an earlier stopped monitor from appearing in a
+later run that reused the same port.
 
 ## Automated PlugData smoke patch
 
