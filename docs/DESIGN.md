@@ -297,9 +297,10 @@ their existing behavior. See `docs/PROJECT-MAP.md`.
 
 End-user packaging starts only after Step 5B is accepted on macOS and
 SteamOS. The macOS full-device-deactivation gate now passes. SteamOS has passed
-the legacy standalone no-unplug/host-death slice, but its hotplug, remaining
-devices, simultaneous matrix, and Bitwig lanes still block packaging. The Step
-5A development bundle does not soften or bypass those remaining gates.
+the complete legacy single-device standalone slice, including hotplug and host
+death, but its remaining devices, simultaneous matrix, and Bitwig lanes still
+block packaging. The Step 5A development bundle does not soften or bypass
+those remaining gates.
 
 ## Current workbench boundary
 
@@ -317,8 +318,9 @@ candidate is the official 0.9.4 package from run `27418767000`, commit
 CLAP/VST3 editor-lifecycle preflight, the Bitwig Monome hardware/contention
 surface listed in Step 5, and full host-death/restart acceptance against
 SerialOSC lease candidate `7187832`. The bounded Steam Deck legacy standalone
-host-death slice now passes against the exact x86-64 candidate, while the rest
-of the Deck matrix remains open. See `docs/PLUGDATA-MACOS.md`,
+single-device slice now passes against the exact x86-64 candidate, including
+hotplug and host death, while the rest of the Deck matrix remains open. See
+`docs/PLUGDATA-MACOS.md`,
 `docs/PLUGDATA-BITWIG-AB.md`, and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.
 

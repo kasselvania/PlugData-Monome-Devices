@@ -74,12 +74,33 @@ The evidence session retained separate snapshots labeled:
 `serialoscd.service` remained active with `NRestarts=0` throughout these
 PlugData slices.
 
+The same live PlugData process then passed the legacy-Grid hotplug continuation:
+
+1. The Grid held a renewable lease and a distinct dim-surface/bright-corner
+   pattern before unplug.
+2. Removal produced the exact stable-ID notification, removed only the device
+   worker, and freed device port `16874`; PlugData and SerialOSC stayed active.
+3. Reconnect restored `m1000853` on the same device port, but its lease state
+   was free at port `0` and the surface stayed dark.
+4. An output command before reselection and claim left the device free and
+   physically dark.
+5. Explicit reselection, non-mutating probe, and claim restored callback
+   `17780` and the exact prior pattern.
+6. Orderly release again produced visible full darkness and independent free
+   port-`0` readback.
+
+That continuation retained snapshots labeled
+`legacy-plugdata-hotplug-preclaim-free`,
+`legacy-plugdata-hotplug-claimed-lit`,
+`legacy-plugdata-hotplug-disconnected`,
+`legacy-plugdata-hotplug-reclaimed-lit`, and
+`legacy-plugdata-hotplug-passed`.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- lease-aware legacy-Grid hot-unplug, reconnect, reselection, and reclaim;
 - the isolated Zero/256 lease lifecycle;
 - the isolated Arc lease lifecycle;
 - Grid/Grid, Grid/Arc, and three-device lease isolation and survivor recovery;

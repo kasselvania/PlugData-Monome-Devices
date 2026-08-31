@@ -326,7 +326,7 @@ the pinned PlugData CLAP candidate at commit `98ae0f78`:
 This accepts macOS crash-safe Bitwig host termination for the pinned candidate
 pair. It does not transfer to arbitrary builds. At the time of this macOS run,
 every Steam Deck lease gate remained open. The later exact x86-64 candidate run
-closed only the bounded legacy direct-protocol and standalone
-no-unplug/host-death slices; the remaining Deck matrix still prevents a
-complete cross-platform crash-safety or end-user packaging claim. See
-`docs/STEAMOS-LEASE-CANDIDATE.md`.
+closed only the bounded legacy direct-protocol and complete single-device
+standalone slice, including hotplug and host death; the remaining Deck matrix
+still prevents a complete cross-platform crash-safety or end-user packaging
+claim. See `docs/STEAMOS-LEASE-CANDIDATE.md`.

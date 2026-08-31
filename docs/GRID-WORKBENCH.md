@@ -301,10 +301,11 @@ isolated host caused daemon expiry, automatic darkness, and free port-`0`
 readback for both Grids and the Arc; a fresh host then started fail-closed.
 
 The exact Steam Deck x86-64 candidate has now passed the corresponding bounded
-legacy-128 standalone no-unplug/host-death slice. It renewed beyond the first
+legacy-128 complete single-device standalone slice. It renewed beyond the first
 TTL, routed full-surface output and exact top-left input, darkened before an
 orderly release, expired to visible darkness and free port `0` after abrupt
-PlugData death, and started a fresh host fail-closed before explicit reclaim.
-The remaining Deck Grid hotplug, Zero, multi-device, and Bitwig rows are still
-required before any complete cross-platform claim. See
+PlugData death, started a fresh host fail-closed before explicit reclaim, and
+survived active-lease unplug/reconnect with same-ID/same-port return as
+dark/free before explicit reselection and reclaim. The Zero, multi-device, and
+Bitwig rows are still required before any complete cross-platform claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.

@@ -166,9 +166,11 @@ first bounded Deck slices with legacy Grid `m1000853`. Direct protocol expiry
 and renew/release passed, followed by PlugData standalone fail-closed startup,
 explicit claim, renewal, full-surface output, exact top-left input, orderly
 dark release, automatic dark/free recovery after abrupt PlugData death, and
-fresh fail-closed restart plus explicit reclaim. SteamOS stayed read-only and
-SerialOSC did not restart. Legacy hotplug, Zero, Arc, multiple devices, and
-Bitwig on the Deck remain open; see
+fresh fail-closed restart plus explicit reclaim. Active-lease unplug then
+removed only that worker; reconnect restored the same stable ID and device port
+as dark/free, refused output before explicit reselection, and reclaimed cleanly.
+SteamOS stayed read-only and SerialOSC did not restart. Zero, Arc, multiple
+devices, and Bitwig on the Deck remain open; see
 [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md).
 
 The complete committed state can now be emitted as a checksum-addressed
@@ -186,8 +188,9 @@ beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
 for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
-Steam Deck legacy direct-protocol and standalone no-unplug/host-death slices
-now pass; the rest of the Deck matrix remains open. See
+Steam Deck legacy direct-protocol and complete single-device standalone slice,
+including hotplug and host death, now pass; the rest of the Deck matrix remains
+open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)

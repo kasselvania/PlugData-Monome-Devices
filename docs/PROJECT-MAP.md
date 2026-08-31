@@ -89,8 +89,8 @@ property-buffer handling so a short serial path cannot prevent a later, longer
 FTDI Arc path from being detected. It is not an upstream release. Its physical
 acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
 this repository plus the separately packaged SteamOS candidate record. The
-Deck legacy direct-protocol and standalone no-unplug/host-death slices pass;
-the remaining Deck matrix is open.
+Deck legacy direct-protocol and complete single-device standalone slice passes,
+including hotplug and host death; the remaining Deck matrix is open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -115,8 +115,8 @@ distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
 Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
 three-device expiry after Bitwig plug-in-host termination and fail-closed
 restart. Step 7 is in progress: its exact SteamOS legacy direct-protocol and
-standalone no-unplug/host-death slices pass, while hotplug, the other devices,
-the simultaneous matrix, and Bitwig remain open.
+complete single-device standalone slice passes, including hotplug and host
+death, while the other devices, simultaneous matrix, and Bitwig remain open.
 
 ## Release boundaries
 

@@ -130,11 +130,12 @@ died without release, all three leases expired, every surface auto-darkened,
 and a fresh host started fail-closed before explicit reclaim.
 
 The exact x86-64 SteamOS candidate then passed its direct legacy-128 protocol
-lanes and the PlugData standalone no-unplug/host-death slice. That Deck run
+lanes and complete single-device PlugData standalone slice. That Deck run
 proved fail-closed startup, explicit renewal beyond the first TTL, exact Grid
 input/output, orderly dark release, automatic darkness and free port `0` after
-abrupt PlugData death, and fresh fail-closed recovery without a SerialOSC
-restart. Legacy hotplug, the other devices, the simultaneous matrix, and
-Bitwig on SteamOS remain open, so no complete cross-platform release claim is
-earned yet. See [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
+abrupt PlugData death, fresh fail-closed recovery, and active-lease
+unplug/reconnect followed by dark/free refusal before explicit reselection and
+reclaim. SerialOSC did not restart. The other devices, simultaneous matrix,
+and Bitwig on SteamOS remain open, so no complete cross-platform release claim
+is earned yet. See [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
 [STEAMOS-LEASE-CANDIDATE.md](STEAMOS-LEASE-CANDIDATE.md).
