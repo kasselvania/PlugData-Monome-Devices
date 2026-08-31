@@ -270,5 +270,7 @@ The pre-lease Bitwig lane retained a stale destination when full device
 deactivation killed the isolated host. On 2026-08-31, candidate `7187832`
 closed that macOS gap: all three abandoned leases expired, every surface
 auto-darkened, readback returned free port `0`, and a fresh Bitwig host started
-fail-closed before explicit reclaim. The corresponding Steam Deck lifecycle
-remains open. See `docs/PLUGDATA-BITWIG-AB.md`.
+fail-closed before explicit reclaim. The Steam Deck legacy-128 standalone
+host-death and fresh-recovery slice now also passes, but the Deck Bitwig and
+multi-device lifecycles remain open. See `docs/PLUGDATA-BITWIG-AB.md` and
+`docs/STEAMOS-LEASE-CANDIDATE.md`.

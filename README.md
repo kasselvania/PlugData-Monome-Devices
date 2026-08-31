@@ -161,6 +161,16 @@ three lit and leased briefly; SerialOSC then expired all three leases, visibly
 darkened both Grids and every Arc ring, and returned every device to free port
 `0`.
 
+The exact x86-64 SteamOS candidate at revision `7187832` has now passed its
+first bounded Deck slices with legacy Grid `m1000853`. Direct protocol expiry
+and renew/release passed, followed by PlugData standalone fail-closed startup,
+explicit claim, renewal, full-surface output, exact top-left input, orderly
+dark release, automatic dark/free recovery after abrupt PlugData death, and
+fresh fail-closed restart plus explicit reclaim. SteamOS stayed read-only and
+SerialOSC did not restart. Legacy hotplug, Zero, Arc, multiple devices, and
+Bitwig on the Deck remain open; see
+[`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md).
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -175,10 +185,13 @@ separate, rollback-safe macOS candidate manager now runs the pinned candidate
 beside a fully preserved stable installation. Its first direct-daemon physical
 expiry gate and the complete isolated PlugData standalone physical lifecycles
 for both Grids and the four-ring Arc have passed, as has the full simultaneous
-standalone matrix and the full Bitwig plug-in-host-death/restart matrix. Every
-Steam Deck lease gate remains open. See
+standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
+Steam Deck legacy direct-protocol and standalone no-unplug/host-death slices
+now pass; the rest of the Deck matrix remains open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
-[`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md).
+[`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
+bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)
+record.
 
 See [`docs/DESIGN.md`](docs/DESIGN.md) for the stepped implementation and
 acceptance plan and [`docs/DISCOVERY-WORKBENCH.md`](docs/DISCOVERY-WORKBENCH.md)
@@ -196,6 +209,8 @@ The exact moving-nightly-versus-pinned-candidate record is in
 
 - PlugData official `0.9.4` candidate, commit `98ae0f78`, for the current
   standalone-menu and accepted Bitwig hardware/process-death lane
+- PlugData official Debian x64 `0.9.4` nightly identified by metadata commit
+  `1c83c0c0` for the bounded SteamOS lane
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 

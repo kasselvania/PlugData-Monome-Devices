@@ -88,7 +88,9 @@ The current candidate pin is `7187832`, which adds correct per-device IOKit
 property-buffer handling so a short serial path cannot prevent a later, longer
 FTDI Arc path from being detected. It is not an upstream release. Its physical
 acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
-this repository; Steam Deck acceptance remains open.
+this repository plus the separately packaged SteamOS candidate record. The
+Deck legacy direct-protocol and standalone no-unplug/host-death slices pass;
+the remaining Deck matrix is open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -112,7 +114,9 @@ distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
 
 Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
 three-device expiry after Bitwig plug-in-host termination and fail-closed
-restart. Step 7 is the next open platform gate.
+restart. Step 7 is in progress: its exact SteamOS legacy direct-protocol and
+standalone no-unplug/host-death slices pass, while hotplug, the other devices,
+the simultaneous matrix, and Bitwig remain open.
 
 ## Release boundaries
 
@@ -120,8 +124,9 @@ restart. Step 7 is the next open platform gate.
   installation acceptance.
 - Existing Steam Deck and macOS builds remain rollback evidence while the
   lease candidate is experimental.
-- The PlugData package must not claim crash-safe cleanup until both the macOS
-  Bitwig and Steam Deck process-death gates pass.
+- The PlugData package must not claim complete crash-safe cleanup until the
+  macOS Bitwig gate and the full Steam Deck process-death matrix pass. The
+  bounded Deck legacy-standalone result is not that full matrix.
 - Legacy SerialOSC clients must behave exactly as before unless they opt into
   the lease extension.
 - Public package publication also requires an explicit repository license and

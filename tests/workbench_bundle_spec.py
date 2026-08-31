@@ -46,6 +46,7 @@ class WorkbenchBundleSpec(unittest.TestCase):
                 "docs/LEASE-WORKBENCH.md",
                 "docs/PROJECT-MAP.md",
                 "docs/PLUGDATA-BITWIG-AB.md",
+                "docs/STEAMOS-LEASE-CANDIDATE.md",
                 "docs/WORKBENCH-BUNDLE.md",
                 "docs/MACOS-LEASE-CANDIDATE.md",
                 "monome-discovery.pd",
