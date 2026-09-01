@@ -279,7 +279,11 @@ two PlugData processes, it does not claim shared-host death. Zero-plus-Arc now
 passes functional routing, removal/recovery, independent release, and
 reciprocal process isolation. Reconnecting Zero physically reset Arc through
 the dock in both tested port orientations; both devices recovered dark/free,
-but uninterrupted Arc continuity is not claimed. Three-device, Bitwig, and
-remaining lifecycle rows remain open. See
+but uninterrupted Arc continuity was not claimed by that M3 run. A later M4
+Zero reconnect on the same dock was clean. The all-three single-shared-host
+lane now passes isolated routing, every hotplug direction, independent release,
+simultaneous three-lease expiry, fresh fail-closed recovery with exact input,
+and final all-dark/free release. Deck Bitwig and remaining lifecycle rows
+remain open. See
 `docs/PLUGDATA-BITWIG-AB.md` and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

@@ -93,8 +93,10 @@ Deck's bounded single-device slices for the legacy 128, Zero/256, and
 four-ring Arc pass, including hotplug and host death. The legacy-plus-Zero and
 legacy-plus-Arc pair lanes pass. Zero-plus-Arc has bounded functional
 acceptance with a documented Zero-boot dock reset; it does not claim
-uninterrupted Arc continuity during that insertion. Three-device, Bitwig, and
-the remaining lifecycle matrix are open.
+uninterrupted Arc continuity during that M3 insertion. A later M4 Zero
+reconnect was clean, so that reset is intermittent. The all-three
+single-shared-host lane now passes. Deck Bitwig and the remaining lifecycle
+matrix are open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -116,7 +118,7 @@ distinct LaunchAgents; it does not own or duplicate lease protocol behavior.
 8. Only then publish the end-user PlugData package and begin musical Grid and
    Arc example patches.
 
-Status on 2026-08-31: delivery steps 1 through 6 pass, including physical
+Status on 2026-09-01: delivery steps 1 through 6 pass, including physical
 three-device expiry after Bitwig plug-in-host termination and fail-closed
 restart. Step 7 is in progress: exact SteamOS single-device slices for the
 legacy 128, Zero/256, and four-ring Arc pass, including hotplug and host death,
@@ -124,8 +126,10 @@ and the legacy-plus-Zero simultaneous lane now passes both hotplug directions
 and shared-host expiry. The legacy-plus-Arc lane now passes both hotplug
 directions and reciprocal separate-process expiry. Zero-plus-Arc passes
 functional routing, removal/recovery, and reciprocal separate-process expiry,
-with fail-closed recovery after its documented Zero-boot dock reset.
-Three-device shared-host, Bitwig, and remaining lifecycle rows remain open.
+with fail-closed recovery after its documented intermittent Zero-boot dock
+reset. The all-three lane now passes every hotplug direction, independent
+release, one-shared-host expiry, and fresh fail-closed recovery. Deck Bitwig
+and remaining lifecycle rows remain open.
 
 ## Release boundaries
 
@@ -133,9 +137,9 @@ Three-device shared-host, Bitwig, and remaining lifecycle rows remain open.
   installation acceptance.
 - Existing Steam Deck and macOS builds remain rollback evidence while the
   lease candidate is experimental.
-- The PlugData package must not claim complete crash-safe cleanup until the
-  macOS Bitwig gate and the full Steam Deck process-death matrix pass. The
-  bounded Deck single-device and first pair results are not that full matrix.
+- The macOS Bitwig and full Steam Deck standalone process-death matrices pass
+  for the exact pinned candidates. This does not transfer to Deck Bitwig,
+  remaining lifecycle rows, arbitrary builds, or final end-user packaging.
 - Legacy SerialOSC clients must behave exactly as before unless they opt into
   the lease extension.
 - Public package publication also requires an explicit repository license and

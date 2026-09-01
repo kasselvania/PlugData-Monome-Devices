@@ -260,8 +260,17 @@ SerialOSC then returned both devices dark/free under their stable IDs and
 saved ports, blocked preselection output, and allowed explicit recovery. This
 is accepted as a documented Zero-boot dock/power boundary, not evidence of a
 SerialOSC routing failure, but uninterrupted Arc-survivor continuity is not
-claimed. Test Zero first and connect Arc afterward.
+claimed by that M3 run. A later M4 Zero reconnect on the same dock was clean,
+so the reset is intermittent; Zero-first remains conservative guidance.
 
-The three-device, Bitwig, and remaining Deck lifecycle gates are still open.
-The complete exact authority and failure-accounting record is in
+The all-three shared-host lane now passes with one PlugData PID. Arc renewed on
+`17782` beside both Grid leases; output and exact input stayed isolated. Each
+device hotplug preserved both survivors, including a clean Zero reconnect in
+this run. Arc independent release left both Grids unchanged. Killing the one
+shared host expired all three leases and visibly darkened every surface; a
+fresh shared host started fail-closed, explicitly restored Arc plus both
+Grids, and routed fresh input before final all-dark release.
+
+Deck Bitwig and remaining lifecycle gates are still open. The complete exact
+authority and failure-accounting record is in
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

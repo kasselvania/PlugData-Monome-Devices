@@ -147,8 +147,13 @@ Arc reconnect preserved Zero unchanged. Zero reconnect physically reset and
 re-enumerated Arc through the dock in both port orientations; SerialOSC
 returned both stable IDs dark/free and recovered them only after explicit
 action. That is a documented Zero-boot dock/power boundary, not an
-uninterrupted-survivor claim. SerialOSC did not restart. Three-device, Bitwig,
-and the remaining Deck lifecycle rows remain open, so no complete
+uninterrupted-survivor claim for M3. A later M4 Zero reconnect on the same dock
+left legacy and Arc uninterrupted, making the reset intermittent. The
+all-three lane then passed with both patches in one PlugData PID: three isolated
+renewable leases, exact input/output, every hotplug direction, independent
+release, simultaneous three-lease expiry after `SIGKILL`, fresh fail-closed
+recovery, and final all-dark/free release. SerialOSC did not restart. Deck
+Bitwig and the remaining lifecycle rows remain open, so no complete
 cross-platform release claim is earned yet. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
 [STEAMOS-LEASE-CANDIDATE.md](STEAMOS-LEASE-CANDIDATE.md).

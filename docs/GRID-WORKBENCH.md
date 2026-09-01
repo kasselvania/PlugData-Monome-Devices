@@ -341,8 +341,18 @@ removal preserved Arc, but reconnecting Zero physically reset and re-enumerated
 the Arc USB device in both tested dock-port orientations. Both devices then
 returned dark/free and required explicit reclaim. This documented Zero-boot
 dock/power boundary does not support a claim of uninterrupted Arc continuity;
-the supported setup order is Zero first, then Arc.
+the later M4 run did observe a clean Zero reconnect on the same dock, making
+the reset intermittent rather than inevitable.
 
-The three-device and Bitwig Deck rows are still required before any complete
-cross-platform claim. See
+The all-three shared-host lane now also passes. One PlugData PID owned both
+Grid slots and the Arc session. Legacy and Zero renewed on `17780` and `17781`,
+with Arc on `17782`; distinct output and exact input stayed isolated. Each
+hotplug preserved both survivors, returning devices stayed dark/free until
+explicit reclaim, and all three released independently. Killing the one host
+expired and visibly darkened both Grids and Arc together. A fresh shared host
+started fail-closed, explicitly recovered all three, routed fresh input, and
+completed final all-dark release.
+
+The Bitwig Deck row is still required before any complete cross-platform
+claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.

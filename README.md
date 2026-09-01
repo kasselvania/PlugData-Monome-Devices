@@ -215,8 +215,25 @@ dark/free, rejected preselection output, and recovered only after explicit
 selection, probe, and claim. The kernel recorded the Arc USB disconnect and no
 over-current warning. This accepts M3 routing and bounded fail-closed recovery;
 it does not claim uninterrupted Arc-survivor continuity during Zero boot
-insertion. The supported test order is Zero first, then Arc. Three-device,
-Bitwig, and remaining lifecycle rows remain open.
+insertion. A later all-three M4 run observed a clean Zero reconnect on the same
+dock with no survivor reset, so the earlier reset is intermittent rather than
+inevitable. Zero-first remains conservative setup guidance.
+
+The all-three shared-host lane now also passes. One PlugData PID opened both
+live patches and owned all Grid/Arc discovery, callback, and control ports.
+Legacy, Zero, and Arc renewed isolated leases on `17780`, `17781`, and `17782`,
+displayed distinct patterns, and produced exact routed input. Each device was
+unplugged and reconnected in turn; both survivors kept their leases, patterns,
+and fresh input. Each returning device used its same stable ID and saved port,
+stayed dark/free, blocked preselection output, and required explicit reclaim.
+The Zero reconnect in this M4 run produced only a Zero USB add and left legacy
+and Arc uninterrupted. Independent release passed for all three. Killing the
+one shared PlugData PID left all three leases briefly active; SerialOSC then
+logged three expiries, visibly darkened both Grids and every Arc ring, and
+returned every route to port `0`. A fresh shared host started fail-closed,
+explicitly recovered all three patterns and inputs, and completed final
+all-dark release. SteamOS stayed read-only and SerialOSC retained zero
+restarts. Deck Bitwig and remaining lifecycle rows remain open.
 
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
@@ -235,10 +252,11 @@ for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
 Steam Deck's bounded single-device direct and PlugData standalone slices for
 the legacy 128, Zero/256, and four-ring Arc, including hotplug and host death,
-now pass. The three pair lanes now have bounded evidence; Zero-plus-Arc carries
-the documented Zero-boot dock reset boundary and does not claim uninterrupted
-Arc continuity during that insertion. Three-device, Bitwig, and the remaining
-lifecycle matrix stay open. See
+now pass. All three pair lanes and the all-three single-shared-host lane now
+have bounded evidence, including hotplug, independent release, simultaneous
+expiry, and fresh fail-closed recovery. The earlier Zero-triggered Arc reset
+remains documented as intermittent dock behavior; a later M4 Zero reconnect
+was clean. Deck Bitwig and the remaining lifecycle matrix stay open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)

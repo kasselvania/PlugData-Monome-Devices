@@ -330,7 +330,9 @@ closed bounded single-device lanes for the legacy 128, Zero/256, and four-ring
 Arc, including hotplug and host death. Its legacy-plus-Zero and
 legacy-plus-Arc pair lanes also pass. Its Zero-plus-Arc functional lane passes
 with a documented Deck dock/power boundary: Zero boot insertion resets Arc's
-USB path, and recovery is fail-closed rather than uninterrupted. Three-device,
-Bitwig, and the remaining lifecycle matrix still prevent a complete
-cross-platform crash-safety or end-user packaging claim. See
+USB path in the M3 run, while a later M4 Zero reconnect on the same dock was
+clean. The Deck all-three single-shared-host lane now passes hotplug,
+independent release, simultaneous expiry, fresh fail-closed recovery, and final
+all-dark/free release. Deck Bitwig and the remaining lifecycle matrix still
+prevent a complete cross-platform crash-safety or end-user packaging claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

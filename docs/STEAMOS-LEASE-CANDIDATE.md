@@ -362,20 +362,88 @@ against the same exact candidate, with a bounded dock/power limitation:
 
 This accepts M3 lease routing, output/input isolation, removal, bounded
 fail-closed recovery, independent release, and reciprocal process isolation.
-It does not claim uninterrupted Arc-survivor continuity during Zero boot
-insertion. On this dock, connect Zero first and Arc afterward. A future claim
-of uninterrupted continuity would require a different powered topology and a
-new physical run; it cannot be inferred from the successful recovery.
+That M3 run did not claim uninterrupted Arc-survivor continuity during Zero
+boot insertion. The later M4 run below did observe a clean Zero reconnect on
+the same dock topology with both survivors uninterrupted. Taken together, the
+evidence makes the earlier reset intermittent dock behavior rather than an
+invariant. Zero-first remains conservative setup guidance, not proof that a
+later hot insertion must reset another device.
+
+On 2026-09-01, all three devices completed the M4 shared-host lane against the
+same exact candidate:
+
+1. Zero `m2321590` and Arc `m1001113` began connected, dark, and free. Legacy
+   `m1000853` then added once on saved device port `16874` without removing
+   either existing device. A fresh discovery observer used callback `42607`.
+2. One test-owned PlugData PID `432243` opened both `monome-grid-live.pd` and
+   `monome-arc-live.pd`. Socket readback showed that same PID owned Grid and
+   Arc discovery ports `17779` and `17778`, session callbacks `17780`, `17781`,
+   and `17782`, and control ports `17900` and `17901`. This was one shared host,
+   not two coordinated processes.
+3. Stable-ID ordering mapped legacy to Grid slot A/index `0`, Zero to Grid
+   slot B/index `2`, and Arc to index `1`. Selection and capability probes left
+   all three visibly dark and independently free at port `0`.
+4. Explicit claims established renewable callbacks `17780` for legacy,
+   `17781` for Zero, and `17782` for Arc. All three renewed beyond their first
+   TTL. Distinct output remained isolated: a dim legacy 16-by-8 surface with a
+   bright bottom-right marker, a brighter Zero 16-by-16 surface with a bright
+   top-left marker, and four medium Arc rings with one independent bright
+   marker each. Initial input was exact and isolated as legacy
+   `a_key 0 0 1/0`, Zero `b_key 15 15 1/0`, and Arc `arc_delta 2 1`.
+5. Active legacy unplug produced one remove and freed only device port `16874`.
+   Zero and Arc retained their leases and patterns and emitted fresh survivor
+   input `b_key 15 0 1/0` and `arc_delta 3 -1`. Legacy returned once with the
+   same ID and saved port as dark/free. Preselection output was blocked;
+   explicit rediscovery, selection, probe, and claim restored its lease and
+   pattern without disturbing either survivor.
+6. Active Arc unplug produced one remove and freed only device port `11564`.
+   Both Grids retained their leases and patterns and emitted fresh survivor
+   input `a_key 0 7 1/0` and `b_key 0 15 1/0`. Arc returned once with the same
+   ID and saved port as dark/free. Preselection output was blocked; explicit
+   reclaim restored all four rings without disturbing either Grid.
+7. Active Zero unplug produced one remove and freed only device port `19536`.
+   Legacy and Arc retained their leases and patterns and emitted fresh survivor
+   input `a_key 15 0 1/0` and `arc_delta 0 1`.
+8. Zero reconnect was clean in this run. The discovery observer recorded only
+   the Zero add. The kernel logged only `cafe:1110` enumeration on USB path
+   `1-1.1`; neither legacy nor Arc disconnected. Both survivor patterns and
+   leases remained uninterrupted. Zero returned with the same ID and saved
+   port as dark/free, rejected preselection output, and recovered only after
+   explicit rediscovery, selection, probe, and claim. This passes the observed
+   M4 Zero-reconnect survivor check without erasing the earlier intermittent
+   Arc reset recorded in M3.
+9. Independent orderly release passed for legacy, Arc, and Zero in turn. Each
+   released surface visibly darkened and returned to port `0` while the other
+   two devices remained leased and patterned; each device was explicitly
+   reclaimed before the next release.
+10. With all three patterns and renewable leases restored, `SIGKILL` terminated
+    the one shared PlugData PID `432243` without release. Immediate readback
+    still showed all three leased. SerialOSC then logged three `lease expired`
+    transitions at the same second, visibly darkened both Grids and all four
+    Arc rings, and independently returned every destination to free port `0`.
+11. Fresh shared PlugData PID `436448` again opened both live patches and owned
+    every workbench callback/control port, but started with all three devices
+    dark/free and made no claim. Explicit rediscovery, selection, probe, and
+    claim restored all three patterns and renewed beyond the first TTL. Fresh
+    post-restart input was exact as `a_key 0 0 1/0`, `b_key 15 15 1/0`, and
+    `arc_delta 1 1`.
+12. Final orderly release visibly darkened every surface and left all three
+    independently free at `127.0.0.1:0`. The temporary observer stopped.
+    Fresh shared PID `436448` remained active with `NRestarts=0`; user
+    `serialoscd.service` retained PID `16328` with `NRestarts=0`; and SteamOS
+    read-only mode remained enabled.
+
+This accepts the SteamOS M4 three-device routing, input/output isolation,
+three hotplug directions, fail-closed reconnects, independent release,
+single-shared-host expiry, and fresh-host recovery row for the exact pinned
+candidate. It does not transfer to other builds or erase the earlier
+intermittent dock reset.
 
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- three-device lease isolation and survivor recovery, accounting explicitly
-  for the Zero-first connection order and the documented boot-insertion reset;
-- shared PlugData host death while all three devices are leased, followed by
-  automatic all-dark/free expiry and fresh fail-closed recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
   fail-closed recovery; and
 - the remaining dock, suspend/resume, update, and reboot lifecycle rows called
