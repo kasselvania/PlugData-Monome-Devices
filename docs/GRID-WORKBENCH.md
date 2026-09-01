@@ -334,6 +334,15 @@ Arc workbench processes expired and darkened only the dead process's device
 while the survivor continued. Those checks prove process isolation, not the
 still-open all-device shared-host-death row.
 
-The Zero-plus-Arc, three-device, and Bitwig Deck rows are still required before
-any complete cross-platform claim. See
+The Zero-plus-Arc functional lane now also passes isolated output/input,
+renewal, removal, explicit recovery, independent release, and reciprocal
+separate-process expiry. Arc removal/reconnect preserved Zero unchanged. Zero
+removal preserved Arc, but reconnecting Zero physically reset and re-enumerated
+the Arc USB device in both tested dock-port orientations. Both devices then
+returned dark/free and required explicit reclaim. This documented Zero-boot
+dock/power boundary does not support a claim of uninterrupted Arc continuity;
+the supported setup order is Zero first, then Arc.
+
+The three-device and Bitwig Deck rows are still required before any complete
+cross-platform claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.

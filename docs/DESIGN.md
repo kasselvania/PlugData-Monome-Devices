@@ -302,9 +302,13 @@ four-ring Arc, including hotplug and host death. Its legacy-plus-Zero pair also
 passes isolated routing, hotplug in both directions, and shared-host expiry.
 Its legacy-plus-Arc pair now passes isolated Grid/ring routing, hotplug in both
 directions, independent release, and reciprocal separate-process expiry. That
-is not shared-host-death evidence. Zero-plus-Arc, three-device shared-host,
-Bitwig, and remaining lifecycle lanes still block packaging. The Step 5A
-development bundle does not soften or bypass those remaining gates.
+is not shared-host-death evidence. Zero-plus-Arc now passes functional routing,
+removal/recovery, independent release, and reciprocal process isolation, with
+a documented hardware boundary: Zero boot insertion resets the Arc's dock USB
+path in both tested port orientations. Both devices recover fail-closed, but
+uninterrupted Arc continuity is not claimed. Three-device shared-host, Bitwig,
+and remaining lifecycle lanes still block packaging. The Step 5A development
+bundle does not soften or bypass those remaining gates.
 
 ## Current workbench boundary
 
@@ -324,8 +328,9 @@ surface listed in Step 5, and full host-death/restart acceptance against
 SerialOSC lease candidate `7187832`. Bounded Steam Deck single-device slices
 for the legacy 128, Zero/256, and four-ring Arc now pass against the exact
 x86-64 candidate, including hotplug and host death. The legacy-plus-Zero and
-legacy-plus-Arc pair lanes also pass, while Zero-plus-Arc, three-device,
-Bitwig, and the remaining lifecycle matrix stay open. See
+legacy-plus-Arc pair lanes also pass. The Zero-plus-Arc functional lane passes
+with the documented Zero-boot dock reset boundary above. Three-device, Bitwig,
+and the remaining lifecycle matrix stay open. See
 `docs/PLUGDATA-MACOS.md`,
 `docs/PLUGDATA-BITWIG-AB.md`, and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

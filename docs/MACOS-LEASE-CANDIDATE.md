@@ -328,7 +328,9 @@ pair. It does not transfer to arbitrary builds. At the time of this macOS run,
 every Steam Deck lease gate remained open. The later exact x86-64 candidate run
 closed bounded single-device lanes for the legacy 128, Zero/256, and four-ring
 Arc, including hotplug and host death. Its legacy-plus-Zero and
-legacy-plus-Arc pair lanes also pass; Zero-plus-Arc, three-device, Bitwig, and
-the remaining lifecycle matrix still prevent a complete cross-platform
-crash-safety or end-user packaging claim. See
+legacy-plus-Arc pair lanes also pass. Its Zero-plus-Arc functional lane passes
+with a documented Deck dock/power boundary: Zero boot insertion resets Arc's
+USB path, and recovery is fail-closed rather than uninterrupted. Three-device,
+Bitwig, and the remaining lifecycle matrix still prevent a complete
+cross-platform crash-safety or end-user packaging claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

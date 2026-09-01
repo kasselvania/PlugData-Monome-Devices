@@ -141,8 +141,14 @@ fail-closed recovery. The legacy-plus-Arc lane then passed isolated Grid/ring
 output and input, both hotplug directions, independent release, and reciprocal
 process-isolation expiry/recovery. Because that lane used separate Grid and
 Arc PlugData processes, it does not satisfy the all-device shared-host-death
-gate. SerialOSC did not restart. Zero-plus-Arc, three-device, Bitwig, and the
-remaining Deck lifecycle rows remain open, so no complete cross-platform
-release claim is earned yet. See
+gate. The Zero-plus-Arc functional lane then passed isolated routing, both
+removal directions, independent release, and reciprocal process isolation.
+Arc reconnect preserved Zero unchanged. Zero reconnect physically reset and
+re-enumerated Arc through the dock in both port orientations; SerialOSC
+returned both stable IDs dark/free and recovered them only after explicit
+action. That is a documented Zero-boot dock/power boundary, not an
+uninterrupted-survivor claim. SerialOSC did not restart. Three-device, Bitwig,
+and the remaining Deck lifecycle rows remain open, so no complete
+cross-platform release claim is earned yet. See
 [MACOS-LEASE-CANDIDATE.md](MACOS-LEASE-CANDIDATE.md) and
 [STEAMOS-LEASE-CANDIDATE.md](STEAMOS-LEASE-CANDIDATE.md).

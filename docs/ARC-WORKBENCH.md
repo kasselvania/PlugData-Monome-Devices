@@ -251,6 +251,17 @@ at a time expired and darkened only the corresponding device; fresh processes
 started fail-closed. This proves reciprocal process isolation, not shared-host
 death.
 
-The Zero-plus-Arc, three-device, Bitwig, and remaining Deck lifecycle gates
-are still open. The complete exact authority and failure-accounting record is
-in `docs/STEAMOS-LEASE-CANDIDATE.md`.
+The Zero-plus-Arc functional lane now also passes routing, exact input,
+renewal, Arc removal/recovery with an unchanged Zero survivor, independent
+release, and reciprocal separate-process expiry/recovery. Zero removal left
+the Arc unchanged. Zero reconnect did not: its boot insertion physically
+removed and re-added the Arc USB device in both tested dock-port orientations.
+SerialOSC then returned both devices dark/free under their stable IDs and
+saved ports, blocked preselection output, and allowed explicit recovery. This
+is accepted as a documented Zero-boot dock/power boundary, not evidence of a
+SerialOSC routing failure, but uninterrupted Arc-survivor continuity is not
+claimed. Test Zero first and connect Arc afterward.
+
+The three-device, Bitwig, and remaining Deck lifecycle gates are still open.
+The complete exact authority and failure-accounting record is in
+`docs/STEAMOS-LEASE-CANDIDATE.md`.

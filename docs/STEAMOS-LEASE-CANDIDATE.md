@@ -303,12 +303,77 @@ This accepts the SteamOS legacy-plus-Arc M2 routing, hotplug, survivor,
 independent-release, and reciprocal process-isolation row. It does not accept
 the all-device shared-host-death gate.
 
+The Zero/256 plus four-ring Arc pair then completed the M3 functional lane
+against the same exact candidate, with a bounded dock/power limitation:
+
+1. Fresh Grid PID `269226` and Arc PID `269229` started without claiming a
+   destination. Arc `m1001113` was initially connected and dark/free. Zero
+   `m2321590` then enumerated in `cafe:1110` SerialOSC mode. Its insertion
+   physically reset the Arc once; both devices subsequently appeared under
+   their stable IDs and saved ports as dark/free.
+2. Stable-ID ordering mapped Arc to index `0` and Zero to index `1`.
+   Selection and capability probes were non-mutating. Explicit claims
+   established renewable Zero callback `17780` and Arc callback `17782`, and
+   both renewed beyond their first TTL.
+3. Output stayed isolated. Zero displayed a medium 16-by-16 surface with a
+   bright top-left marker. All four Arc rings displayed a medium level, with
+   bright markers on rings `1` and `2`. Input stayed isolated as exact Zero
+   bottom-right `a_key 15 15 1/0` and clockwise Arc ring-`1`
+   `arc_delta 1 1` events.
+4. Active-lease Zero unplug produced one remove and freed only device port
+   `19536`. Arc retained callback `17782`, its pattern, and fresh survivor
+   input `arc_delta 2 -1`.
+5. Reconnecting Zero on the initial dock topology physically removed and
+   re-added Arc before adding Zero. Both returned with their stable IDs and
+   saved ports as dark/free. Output before selection remained blocked.
+   Explicit rediscovery, settled probes, selection, and claim restored both
+   leases and both prior patterns.
+6. Active-lease Arc unplug produced one remove and freed only device port
+   `11564`. Zero retained callback `17780`, its pattern, and exact survivor
+   input `a_key 0 15 1/0`. Arc reconnect did not disturb Zero; Arc returned
+   with the same ID and saved port as dark/free, blocked preselection output,
+   and recovered only after explicit reclaim.
+7. Independent release passed in both directions. Releasing Zero darkened and
+   freed only Zero while Arc stayed leased and patterned; after reclaim,
+   releasing Arc darkened and freed only Arc while Zero stayed unchanged.
+8. The patches were separate processes. Killing Grid PID `269226` left Zero
+   briefly leased; it then expired to visible darkness and free port `0` while
+   Arc PID `269229`, its lease, and its pattern survived. Fresh Grid PID
+   `275289` started dark/free and recovered only after explicit selection,
+   probe, and claim.
+9. Killing Arc PID `269229` likewise expired and darkened only Arc while Grid
+   PID `275289`, the Zero lease, and its pattern survived. Fresh Arc PID
+   `275810` started dark/free and recovered only after explicit action. This
+   is reciprocal process-isolation evidence, not shared-host-death evidence.
+10. A bounded dock diagnostic moved Arc from USB path `1-1.1` to `1-1.3.4`
+    and moved Zero insertion from the nested path to `1-1.1`. Zero boot
+    insertion again caused the kernel to record an Arc USB disconnect followed
+    by Arc and Zero re-enumeration. No kernel over-current warning appeared.
+    The operator reports equivalent Zero boot behavior on Norns hardware. The
+    evidence therefore characterizes a Zero boot-inrush/shared-dock boundary;
+    it does not prove an electrical cause and does not attribute the physical
+    USB loss to SerialOSC.
+11. Explicit recovery restored both patterns. Final orderly release visibly
+    darkened the Zero and all four Arc rings, and independent readback found
+    both free at `127.0.0.1:0`. The temporary observer stopped cleanly.
+    SteamOS read-only mode remained enabled; fresh workbench PIDs `275289` and
+    `275810` were active with `NRestarts=0`; and user `serialoscd.service`
+    retained PID `16328` with `NRestarts=0` throughout.
+
+This accepts M3 lease routing, output/input isolation, removal, bounded
+fail-closed recovery, independent release, and reciprocal process isolation.
+It does not claim uninterrupted Arc-survivor continuity during Zero boot
+insertion. On this dock, connect Zero first and Arc afterward. A future claim
+of uninterrupted continuity would require a different powered topology and a
+new physical run; it cannot be inferred from the successful recovery.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- Zero/Arc and three-device lease isolation and survivor recovery;
+- three-device lease isolation and survivor recovery, accounting explicitly
+  for the Zero-first connection order and the documented boot-insertion reset;
 - shared PlugData host death while all three devices are leased, followed by
   automatic all-dark/free expiry and fresh fail-closed recovery;
 - PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh

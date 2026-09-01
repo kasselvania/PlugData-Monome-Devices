@@ -275,7 +275,11 @@ fresh-recovery slices now also pass for the legacy 128, Zero/256, and four-ring
 Arc. The Deck legacy-plus-Zero shared-host expiry and fresh recovery also pass,
 and the Deck legacy-plus-Arc routing, hotplug, independent release, and
 reciprocal separate-process expiry/recovery now pass. Because the latter used
-two PlugData processes, it does not claim shared-host death. Zero-plus-Arc,
-three-device, Bitwig, and remaining lifecycle rows remain open. See
+two PlugData processes, it does not claim shared-host death. Zero-plus-Arc now
+passes functional routing, removal/recovery, independent release, and
+reciprocal process isolation. Reconnecting Zero physically reset Arc through
+the dock in both tested port orientations; both devices recovered dark/free,
+but uninterrupted Arc continuity is not claimed. Three-device, Bitwig, and
+remaining lifecycle rows remain open. See
 `docs/PLUGDATA-BITWIG-AB.md` and
 `docs/STEAMOS-LEASE-CANDIDATE.md`.

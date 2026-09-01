@@ -91,8 +91,10 @@ acceptance is bounded to the macOS standalone and Bitwig evidence recorded in
 this repository plus the separately packaged SteamOS candidate record. The
 Deck's bounded single-device slices for the legacy 128, Zero/256, and
 four-ring Arc pass, including hotplug and host death. The legacy-plus-Zero and
-legacy-plus-Arc pair lanes pass; Zero-plus-Arc, three-device, Bitwig, and the
-remaining lifecycle matrix are open.
+legacy-plus-Arc pair lanes pass. Zero-plus-Arc has bounded functional
+acceptance with a documented Zero-boot dock reset; it does not claim
+uninterrupted Arc continuity during that insertion. Three-device, Bitwig, and
+the remaining lifecycle matrix are open.
 
 The PlugData repository carries the macOS acceptance wrapper because that
 wrapper owns the known-good local rollback and PlugData/Bitwig test sequence.
@@ -120,8 +122,10 @@ restart. Step 7 is in progress: exact SteamOS single-device slices for the
 legacy 128, Zero/256, and four-ring Arc pass, including hotplug and host death,
 and the legacy-plus-Zero simultaneous lane now passes both hotplug directions
 and shared-host expiry. The legacy-plus-Arc lane now passes both hotplug
-directions and reciprocal separate-process expiry. Zero-plus-Arc,
-three-device shared-host, Bitwig, and remaining lifecycle rows remain open.
+directions and reciprocal separate-process expiry. Zero-plus-Arc passes
+functional routing, removal/recovery, and reciprocal separate-process expiry,
+with fail-closed recovery after its documented Zero-boot dock reset.
+Three-device shared-host, Bitwig, and remaining lifecycle rows remain open.
 
 ## Release boundaries
 

@@ -198,6 +198,24 @@ started fail-closed before explicit recovery. Because the Grid and Arc ran in
 separate PlugData processes, that reciprocal evidence is process isolation,
 not the still-required all-device shared-host-death row. SteamOS stayed
 read-only and SerialOSC retained zero restarts. Zero-plus-Arc, three-device,
+Bitwig, and remaining lifecycle rows remained open at that point.
+
+The Zero/256 plus Arc functional lane now also passes, with one explicit
+dock/power boundary. Separate Grid and Arc workbenches held renewable
+callbacks `17780` and `17782`; distinct surface/ring patterns, exact Zero key
+input, and signed Arc delta input stayed isolated. Removing Zero preserved the
+Arc lease, pattern, and fresh input. Removing and reconnecting Arc preserved
+the Zero unchanged, and the Arc returned with the same ID and saved port as
+dark/free before explicit reclaim. Independent release and reciprocal
+separate-process expiry/recovery also passed. Reconnecting the Zero, however,
+physically removed and re-added the Arc USB device before the Zero enumerated,
+in both tested dock-port orientations. SerialOSC handled that event
+fail-closed: both devices returned under their stable IDs and saved ports as
+dark/free, rejected preselection output, and recovered only after explicit
+selection, probe, and claim. The kernel recorded the Arc USB disconnect and no
+over-current warning. This accepts M3 routing and bounded fail-closed recovery;
+it does not claim uninterrupted Arc-survivor continuity during Zero boot
+insertion. The supported test order is Zero first, then Arc. Three-device,
 Bitwig, and remaining lifecycle rows remain open.
 
 The complete committed state can now be emitted as a checksum-addressed
@@ -217,9 +235,10 @@ for both Grids and the four-ring Arc have passed, as has the full simultaneous
 standalone matrix and the full Bitwig plug-in-host-death/restart matrix. The
 Steam Deck's bounded single-device direct and PlugData standalone slices for
 the legacy 128, Zero/256, and four-ring Arc, including hotplug and host death,
-now pass. The legacy-plus-Zero and legacy-plus-Arc simultaneous lanes also
-pass; Zero-plus-Arc, three-device, Bitwig, and the remaining lifecycle matrix
-stay open. See
+now pass. The three pair lanes now have bounded evidence; Zero-plus-Arc carries
+the documented Zero-boot dock reset boundary and does not claim uninterrupted
+Arc continuity during that insertion. Three-device, Bitwig, and the remaining
+lifecycle matrix stay open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)
