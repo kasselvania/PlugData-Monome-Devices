@@ -235,6 +235,19 @@ explicitly recovered all three patterns and inputs, and completed final
 all-dark release. SteamOS stayed read-only and SerialOSC retained zero
 restarts. Deck Bitwig and remaining lifecycle rows remain open.
 
+A bounded Deck Bitwig A/B now rejects the moving Debian x64 PlugData build at
+commit `1c83c0c0`: both installed CLAP copies were identical and each aborted
+the isolated host with `pure virtual method called` and exit code `134`. The
+pinned `98ae0f78` Debian x64 artifact instead retained one plug-in-host PID
+through five editor cycles, both live patches, and independent Arc, legacy
+Grid, and Zero claim/renew/output/input/release lanes. It is the stable Linux
+host/runtime reference, not a user-ready build: all three visible device menus
+changed labels but failed to deliver the selection to the session layer, so
+the successful device lanes required the loopback-only terminal selection
+bypass. The full simultaneous and plug-in lifecycle matrix remains open until
+that graphical boundary is resolved. See
+[`docs/PLUGDATA-BITWIG-AB.md`](docs/PLUGDATA-BITWIG-AB.md).
+
 The complete committed state can now be emitted as a checksum-addressed
 development workbench bundle with `./tools/build_workbench_bundle.sh`. This is
 a reproducible continuation baseline, not the final end-user PlugData package;
@@ -256,7 +269,9 @@ now pass. All three pair lanes and the all-three single-shared-host lane now
 have bounded evidence, including hotplug, independent release, simultaneous
 expiry, and fresh fail-closed recovery. The earlier Zero-triggered Arc reset
 remains documented as intermittent dock behavior; a later M4 Zero reconnect
-was clean. Deck Bitwig and the remaining lifecycle matrix stay open. See
+was clean. The bounded Deck Bitwig A/B has a stable pinned runtime reference
+and passing single-device I/O, but graphical device selection and the full
+simultaneous/process lifecycle matrix stay open. See
 [`docs/LEASE-WORKBENCH.md`](docs/LEASE-WORKBENCH.md) and
 [`docs/MACOS-LEASE-CANDIDATE.md`](docs/MACOS-LEASE-CANDIDATE.md), plus the
 bounded [`docs/STEAMOS-LEASE-CANDIDATE.md`](docs/STEAMOS-LEASE-CANDIDATE.md)
@@ -276,10 +291,11 @@ The exact moving-nightly-versus-pinned-candidate record is in
 
 ## Requirements
 
-- PlugData official `0.9.4` candidate, commit `98ae0f78`, for the current
-  standalone-menu and accepted Bitwig hardware/process-death lane
+- PlugData official `0.9.4` candidate, commit `98ae0f78`, for the accepted
+  macOS lane and bounded stable Steam Deck Bitwig host/runtime reference
 - PlugData official Debian x64 `0.9.4` nightly identified by metadata commit
-  `1c83c0c0` for the bounded SteamOS lane
+  `1c83c0c0` only for the accepted SteamOS standalone record; its CLAP is
+  rejected for the Bitwig lane
 - SerialOSC
 - Monome Grid and/or Arc hardware for physical acceptance
 

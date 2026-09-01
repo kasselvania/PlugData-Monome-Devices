@@ -44,6 +44,11 @@ The PlugData build was the compatible Debian artifact. The contemporaneous
 Arch nightly required newer glibc symbols than both the SteamOS host and
 Bitwig Flatpak runtime and was not installed.
 
+That `1c83c0c0` Debian build remains the authority for the standalone evidence
+below. It is not the accepted Bitwig CLAP: the later isolated A/B rejected it
+after reproducible plug-in-host aborts and staged `98ae0f78` separately as the
+bounded stable Bitwig host/runtime reference.
+
 ## Passed slices
 
 The rootless candidate installation, its exact build receipt, its binary
@@ -439,13 +444,32 @@ single-shared-host expiry, and fresh-host recovery row for the exact pinned
 candidate. It does not transfer to other builds or erase the earlier
 intermittent dock reset.
 
+## Bounded PlugData CLAP A/B
+
+On 2026-09-01, Bitwig Studio `6.0.11` loaded both exact Linux candidates in an
+isolated host. The `1c83c0c0` CLAP aborted with `pure virtual method called`
+and exit code `134`. The official Debian x64 `98ae0f78` artifact instead kept
+one plug-in-host PID through five editor close/reopen cycles, both live
+patches, and independent physical Arc, legacy Grid, and Zero lanes. Each lane
+passed lease renewal, distinct output, exact input, orderly darkness, and
+port-`0` release without restarting Bitwig or SerialOSC.
+
+That B side still has a hard UI gap. All three graphical device menus visibly
+changed labels but did not deliver their selected item to the session layer;
+the physical lanes succeeded only after injecting the same exact indexes
+through the loopback-only test control inlet. Therefore this is stable-runtime
+evidence, not user-facing or full Bitwig acceptance. See
+[`PLUGDATA-BITWIG-AB.md`](PLUGDATA-BITWIG-AB.md) for exact artifact hashes,
+routes, events, preserved-log hashes, and exclusions.
+
 ## Still open on SteamOS
 
 This evidence does not accept the candidate package. The remaining Deck gates
 include:
 
-- PlugData CLAP inside Bitwig, including abrupt plug-in-host death and fresh
-  fail-closed recovery; and
+- resolve or replace graphical device selection, then run PlugData CLAP inside
+  Bitwig without the terminal selection bypass, including simultaneous devices,
+  hotplug, abrupt plug-in-host death, and fresh fail-closed recovery; and
 - the remaining dock, suspend/resume, update, and reboot lifecycle rows called
   for by the Steam Deck hardware protocol.
 

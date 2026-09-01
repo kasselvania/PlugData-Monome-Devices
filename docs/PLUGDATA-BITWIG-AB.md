@@ -1,4 +1,4 @@
-# PlugData macOS and Bitwig A/B record
+# PlugData macOS and Steam Deck Bitwig A/B record
 
 ## Decision
 
@@ -19,6 +19,12 @@ terminated the isolated plug-in host without releasing its destination. The
 opt-in lease candidate subsequently closed that exact process-death gate on
 2026-08-31; ordinary bypass and intentional plug-in-process restart are both
 accepted within the pinned macOS lane described below.
+
+The same source revision is also the bounded Steam Deck x64 host/runtime
+reference after the 2026-09-01 Linux A/B below. That Linux result does not make
+the build user-ready: the real Grid and Arc paths work through the machine
+control inlet, but visible `else/popmenu` selections do not reach the session
+layer.
 
 ## Why the moving nightly was rejected
 
@@ -228,3 +234,111 @@ standalone displacement, full Bitwig device deactivation, daemon expiry, and
 fail-closed plug-in-host restart. This evidence does not transfer to arbitrary
 PlugData or SerialOSC builds, and it does not satisfy any Steam Deck lease
 gate. Cross-platform packaging remains blocked on the Steam Deck run.
+
+## Steam Deck Linux A/B benchmark on 2026-09-01
+
+### Scope and custody
+
+This was an isolated compatibility benchmark before the full Steam Deck
+SerialOSC/Bitwig acceptance gate. SteamOS stayed read-only. The host was an
+x86_64 Steam Deck in Desktop Mode running Bitwig Studio `6.0.11` from Flatpak:
+
+- Bitwig app commit
+  `7b66aed37386ffff99e40bbd486f90ceee7ac1d5c59508c7952094122cebf50e`;
+- runtime `org.freedesktop.Platform/x86_64/25.08`.
+
+The rejected A side was the then-current official Debian x64 PlugData `0.9.4`
+nightly from Actions run `33424892153`, source commit
+`1c83c0c08c5a3d8d33f27b632e9772726ef56098`. Its installed CLAP and resource
+hashes were:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| CLAP | `5fd30fc64eeea1c5b2ea9cf37b73975600a3a6da67daed4e46b32ab913b3362b` |
+| `plugdata-resources.bin` | `4781125eb3d421adb35e906e404e78a3e29283dbc496387ce4fa3acf31facce6` |
+
+The two Bitwig browser entries were duplicate copies of those same bytes, not
+two builds. Each exact path loaded and then aborted its isolated plug-in host
+with `pure virtual method called`, `terminate called without an active
+exception`, and exit code `134`. Bitwig itself restarted the isolated host.
+
+The B side was the official Debian x64 artifact from successful Actions run
+[`27418767000`](https://github.com/plugdata-team/plugdata/actions/runs/27418767000),
+source commit `98ae0f78ba43d17f4aa6d5409eca3bbf818b4e74`. It was downloaded and
+expanded beside the installed build without replacing it:
+
+- archive SHA-256:
+  `963b078e52ad5a181fc46c3edefc574f19f3ffb02fd6c21c3dd331ab0f77abf2`;
+- CLAP SHA-256:
+  `ac564454f57f5944549ab5c37035dccd1acf9f8339d4b0c13be42a99beddfa15`;
+- resource SHA-256:
+  `ea250c71886d61a96aad2189b8227b6dd98bddd897f3270d5384b66104cc32c2`;
+- staged CLAP:
+  `/home/deck/Plug-ins/plugdata-ab/98ae0f78/plugdata/CLAP/plugdata.clap`.
+
+Host and Flatpak dependency checks found no missing libraries before launch.
+
+### Bounded stability and hardware result
+
+Bitwig loaded the exact staged CLAP into isolated host PID `484843`; the module
+path was verified from the live process. Instance creation printed one JUCE
+assertion at `clap-juce-wrapper.cpp:1801`, which remains a warning, but it did
+not terminate the host. The same PID survived five editor close/reopen cycles,
+both live patch loads, and the complete bounded device run. No `pure virtual`,
+plug-in-crash, abort, host-death, or exit-code-134 marker appeared in the
+preserved B-side logs.
+
+`monome-grid-live.pd` and `monome-arc-live.pd` opened in that one host. It alone
+owned all seven expected local sockets: `17778`, `17779`, `17780`, `17781`,
+`17782`, `17900`, and `17901`. Opening the patches did not claim hardware;
+independent readback found all three devices free at destination port `0`.
+
+All three graphical device menus exposed a Linux-specific acceptance blocker:
+
+1. Arc `m1001113` was the second item, legacy Grid `m1000853` the first, and
+   zero Grid `m2321590` the third.
+2. Selecting each visible entry changed its menu label.
+3. The Arc session reported `error no_device_selected`; Grid probe/claim
+   attempts likewise left both routes independently verified free at port `0`.
+4. Sending the same exact zero-based indexes through the patches' loopback-only
+   machine control inlet (`select 1`, `a_select 0`, and `b_select 2`) made probe
+   and claim work immediately.
+
+This is not a SerialOSC or lease failure. It is a gap at the graphical
+`else/popmenu`-to-session selection boundary on this exact Linux build.
+
+With that boundary explicitly bypassed, every single-device lane passed:
+
+| Device | Verified callback | Physical output | Exact input | Cleanup |
+| --- | --- | --- | --- | --- |
+| Arc `m1001113` | `17782` | all four rings level `4`; bright ring `0` position `0` and ring `3` position `63` | `arc_delta 0 1` | all four rings dark; port `0` |
+| legacy Grid `m1000853` | `17780` | full 16-by-8 surface level `4`; bright `(15,7)` | `a_key 0 0 1/0` | full surface dark; port `0` |
+| zero Grid `m2321590` | `17781` | full 16-by-16 surface level `6`; bright `(0,0)` | `b_key 15 15 1/0` | full surface dark; port `0` |
+
+Each lease was independently observed renewing beyond its initial six-second
+TTL. The two non-target devices stayed free and dark in every lane. After the
+final release, all three devices independently reported destination port `0`,
+the operator confirmed every surface dark, Bitwig remained alive, and the same
+plug-in host still owned all seven patch sockets.
+
+The preserved successful-run logs are:
+
+| File | SHA-256 |
+| --- | --- |
+| `/home/deck/.local/state/serialosc-acceptance/2026-09-01-bitwig-98ae0f78-benchmark/engine.log` | `91fd1d43968688524e989f6f4810b05314bd4ec2466726e84e19d551fb7f00b3` |
+| `/home/deck/.local/state/serialosc-acceptance/2026-09-01-bitwig-98ae0f78-benchmark/BitwigStudio.log` | `f36f81f8c6e46ddf00f797bc96a3e620eb1ba261fa8d07188361c217ff235339` |
+
+### Linux eligibility decision
+
+The pinned `98ae0f78` Debian x64 build is accepted as the stable Linux
+host/runtime reference for continued workbench and transport investigation. It
+is **not** accepted as a user-facing Steam Deck PlugData build because every
+graphical device selection required a test-only terminal injection. The moving
+`1c83c0c0` build is rejected for this lane because it aborts the isolated
+plug-in host.
+
+This benchmark did not run simultaneous three-device claims, bypass,
+save/reload, hot-unplug, full Bitwig device deactivation, or plug-in-host death.
+Those remain separate gates. Resolve or replace the graphical selection
+boundary first; then run the full Steam Deck SerialOSC/Bitwig matrix without
+using the terminal selection bypass.
