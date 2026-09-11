@@ -35,6 +35,12 @@ UNESCAPED_COMMA = re.compile(r"(?<!\\),")
 
 
 class PdPatchTests(unittest.TestCase):
+    def test_menu_label_does_not_consume_receive_argument(self) -> None:
+        for filename in ("monome-grid-live.pd", "monome-grid-contender-live.pd", "monome-arc-live.pd"):
+            for line in (PROJECT_ROOT / filename).read_text().splitlines():
+                if "else/popmenu" in line:
+                    self.assertIn("black Select-device empty ", line)
+
     def test_patch_connections_reference_existing_nodes(self) -> None:
         for filename in PATCHES:
             with self.subTest(filename=filename):

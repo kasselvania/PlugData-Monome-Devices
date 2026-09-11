@@ -356,3 +356,35 @@ completed final all-dark release.
 The Bitwig Deck row is still required before any complete cross-platform
 claim. See
 `docs/STEAMOS-LEASE-CANDIDATE.md` and `docs/PLUGDATA-BITWIG-AB.md`.
+
+## 2026-09-11 menu recovery and Mac restart check
+
+The live Grid A/B, contender and Arc menus had a malformed escaped blank
+label: `\\ empty` became one atom, shifting the remaining saved arguments.
+Use the explicit `Select-device` label. This preserves the intended receive,
+send and output-mode slots. A patch regression checks this argument boundary.
+
+Native plugdata 0.9.4 (application executable SHA-256
+`86179a37e58e7a0f0436fc555f56ce41892e3f32ed19b4a3ba8f1cfe3c17476e`)
+selected simulated m100 through the visible menu. Its actual session then
+probed, claimed a lease, delivered key 3/2 press and release, and sent levels
+15 and 10 to opposite corners. Simulator readback showed the two values;
+release readback showed port 0 and all 128 LEDs zero. This is simulated
+hardware evidence through the native patch, not a physical LED observation.
+
+Physical m1000853 was discovered at port 18360. Its initial ownership was
+legacy at callback 12289, belonging to the still-open MLR connector. The first
+claim correctly refused with takeover_required and LED requests reported
+grid_not_attached. The user's report that no LEDs appeared is retained as a
+failed attempt; an earlier assistant claim of successful attachment was wrong.
+After the user authorized closing MLR and forced release, MLR was saved and
+closed. Explicit takeover followed by release reached verified_lease_free.
+The workbench was closed and reopened: native menu selection, Probe and Claim
+then reached connected/verified_lease at callback 17780 with size 16 by 8.
+Physical visual/key acceptance remains pending the user's follow-up.
+
+Native message clicks require the window to be foreground; explicitly raising
+the window resolved the automation's inactive-window clicks. This was distinct
+from the malformed menu arguments. The source patch tests (17) and simulator
+tests (28) pass; the latter require permission to bind local UDP sockets.
+No installed service or daemon binary changed.

@@ -5,7 +5,7 @@
 #X obj 30 165 monome-discovery 17778 12002 180;
 #X obj 330 205 print live-arc-discovery;
 #X obj 330 350 monome-arc-live-slot 17782 4;
-#X obj 330 165 else/popmenu 430 30 12 #dfdfdf black \ empty \$0-arc-menu empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 330 165 else/popmenu 430 30 12 #dfdfdf black Select-device empty \$0-arc-menu empty empty 1 0 -1 0 0 1 0 0 0 0 0;
 #X obj 330 205 list prepend select_index;
 #X obj 330 240 list trim;
 #X msg 530 290 probe;

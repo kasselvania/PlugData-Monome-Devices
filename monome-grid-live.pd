@@ -7,8 +7,8 @@
 #X obj 300 205 print live-discovery;
 #X obj 220 350 monome-grid-live-slot 17780;
 #X obj 850 350 monome-grid-live-slot 17781;
-#X obj 220 165 else/popmenu 400 30 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
-#X obj 850 165 else/popmenu 400 30 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 220 165 else/popmenu 400 30 12 #dfdfdf black Select-device empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 850 165 else/popmenu 400 30 12 #dfdfdf black Select-device empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
 #X obj 220 205 list prepend select_index;
 #X obj 220 240 list trim;
 #X obj 850 205 list prepend select_index;
