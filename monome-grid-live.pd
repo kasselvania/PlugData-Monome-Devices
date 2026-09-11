@@ -7,8 +7,8 @@
 #X obj 300 205 print live-discovery;
 #X obj 220 350 monome-grid-live-slot 17780;
 #X obj 850 350 monome-grid-live-slot 17781;
-#X obj 220 165 else/popmenu 400 30 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
-#X obj 850 165 else/popmenu 400 30 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 220 165 else/popmenu 400 30 12 #dfdfdf black Select-device empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 850 165 else/popmenu 400 30 12 #dfdfdf black Select-device empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
 #X obj 220 205 list prepend select_index;
 #X obj 220 240 list trim;
 #X obj 850 205 list prepend select_index;
@@ -70,6 +70,8 @@
 #X text 30 770 Device menus are populated dynamically from each slot's identity-based registry.;
 #X text 30 800 This patch uses live SerialOSC discovery port 12002 and does not alter SerialOSC preferences except explicit claims.;
 #X text 30 830 Normalized A/B key events are mirrored to the loopback-only machine monitor on port 17910.;
+#X obj 470 245 t a b;
+#X obj 1100 245 t a b;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
@@ -95,11 +97,15 @@
 #X connect 11 0 6 1;
 #X connect 12 0 13 0;
 #X connect 13 0 7 1;
-#X connect 14 0 6 2;
+#X connect 14 0 71 0;
+#X connect 71 1 8 0;
+#X connect 71 0 6 2;
 #X connect 15 0 6 2;
 #X connect 16 0 6 2;
 #X connect 17 0 6 2;
-#X connect 18 0 7 2;
+#X connect 18 0 72 0;
+#X connect 72 1 9 0;
+#X connect 72 0 7 2;
 #X connect 19 0 7 2;
 #X connect 20 0 7 2;
 #X connect 21 0 7 2;
