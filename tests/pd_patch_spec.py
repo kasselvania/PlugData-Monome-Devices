@@ -169,6 +169,44 @@ class PdPatchTests(unittest.TestCase):
         self.assertIn("protocol lease", live_slot)
         self.assertIn("takeover", live_patch)
 
+    def test_live_probe_replays_visible_menu_selection_before_probe(self) -> None:
+        grid = (PROJECT_ROOT / "monome-grid-live.pd").read_text()
+        self.assertEqual(grid.count("t a b"), 2)
+        for connection in (
+            "#X connect 14 0 71 0;",
+            "#X connect 71 1 8 0;",
+            "#X connect 71 0 6 2;",
+            "#X connect 18 0 72 0;",
+            "#X connect 72 1 9 0;",
+            "#X connect 72 0 7 2;",
+        ):
+            self.assertIn(connection, grid)
+
+        arc = (PROJECT_ROOT / "monome-arc-live.pd").read_text()
+        self.assertEqual(arc.count("t a b"), 1)
+        for connection in (
+            "#X connect 9 0 44 0;",
+            "#X connect 44 1 6 0;",
+            "#X connect 44 0 5 2;",
+        ):
+            self.assertIn(connection, arc)
+
+        contender = (PROJECT_ROOT / "monome-grid-contender-live.pd").read_text()
+        self.assertEqual(contender.count("t a b"), 1)
+        for connection in (
+            "#X connect 9 0 32 0;",
+            "#X connect 32 1 6 0;",
+            "#X connect 32 0 5 2;",
+        ):
+            self.assertIn(connection, contender)
+
+    def test_arc_menu_uses_a_patch_local_send_bridge(self) -> None:
+        arc = (PROJECT_ROOT / "monome-arc-live.pd").read_text()
+        self.assertIn("\\$0-arc-menu", arc)
+        self.assertIn("r \\$0-arc-menu", arc)
+        self.assertNotIn("#X connect 6 0 7 0;", arc)
+        self.assertIn("#X connect 45 0 7 0;", arc)
+
     def test_session_transport_routes_lease_protocol_and_renewal_timer(self) -> None:
         session_patch = (PROJECT_ROOT / "monome-session.pd").read_text()
         for path in (

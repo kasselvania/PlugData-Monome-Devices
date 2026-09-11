@@ -31,6 +31,7 @@
 #X obj 760 720 print contender-control;
 #X text 30 590 TEST-ONLY standalone contender. Ports are isolated from the Bitwig live workbench.;
 #X text 30 615 Selection probe claim and release stay explicit so displacement is observable.;
+#X obj 530 325 t a b;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
@@ -45,7 +46,9 @@
 #X connect 6 0 7 0;
 #X connect 7 0 8 0;
 #X connect 8 0 5 1;
-#X connect 9 0 5 2;
+#X connect 9 0 32 0;
+#X connect 32 1 6 0;
+#X connect 32 0 5 2;
 #X connect 10 0 5 2;
 #X connect 11 0 5 2;
 #X connect 12 0 5 2;

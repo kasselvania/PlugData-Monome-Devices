@@ -5,7 +5,7 @@
 #X obj 30 165 monome-discovery 17778 12002 180;
 #X obj 330 205 print live-arc-discovery;
 #X obj 330 350 monome-arc-live-slot 17782 4;
-#X obj 330 165 else/popmenu 430 30 12 #dfdfdf black \ empty empty empty empty 1 0 -1 0 0 1 0 0 0 0 0;
+#X obj 330 165 else/popmenu 430 30 12 #dfdfdf black \ empty \$0-arc-menu empty empty 1 0 -1 0 0 1 0 0 0 0 0;
 #X obj 330 205 list prepend select_index;
 #X obj 330 240 list trim;
 #X msg 530 290 probe;
@@ -43,6 +43,8 @@
 #X text 30 600 LIVE SerialOSC four-ring Arc workbench. Loading starts discovery and callback transport only.;
 #X text 30 625 Select the stable-ID entry then probe then claim from free or explicitly take over legacy. Ring count is four.;
 #X text 30 650 release sends four all-dark maps before verified /sys/port 0.;
+#X obj 530 325 t a b;
+#X obj 330 275 r \$0-arc-menu;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
@@ -54,10 +56,12 @@
 #X connect 5 2 21 0;
 #X connect 5 3 22 0;
 #X connect 5 4 6 0;
-#X connect 6 0 7 0;
+#X connect 45 0 7 0;
 #X connect 7 0 8 0;
 #X connect 8 0 5 1;
-#X connect 9 0 5 2;
+#X connect 9 0 44 0;
+#X connect 44 1 6 0;
+#X connect 44 0 5 2;
 #X connect 10 0 5 2;
 #X connect 11 0 5 2;
 #X connect 12 0 5 2;
