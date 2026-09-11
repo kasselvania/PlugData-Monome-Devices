@@ -381,7 +381,11 @@ After the user authorized closing MLR and forced release, MLR was saved and
 closed. Explicit takeover followed by release reached verified_lease_free.
 The workbench was closed and reopened: native menu selection, Probe and Claim
 then reached connected/verified_lease at callback 17780 with size 16 by 8.
-Physical visual/key acceptance remains pending the user's follow-up.
+The user then confirmed both corner lights and pressed keys. Native console
+showed matching press/release pairs at (11,6), (7,3), (5,4), and (15,7).
+Final release reported darkened, detached and verified_lease_free; workbench
+was closed before connector migration. This accepts this bounded Mac check,
+not hotplug, host-death, Arc or DAW behavior in this run.
 
 Native message clicks require the window to be foreground; explicitly raising
 the window resolved the automation's inactive-window clicks. This was distinct
