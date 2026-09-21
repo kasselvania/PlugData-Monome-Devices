@@ -142,8 +142,9 @@ and remaining lifecycle rows remain open.
   remaining lifecycle rows, arbitrary builds, or final end-user packaging.
 - Legacy SerialOSC clients must behave exactly as before unless they opt into
   the lease extension.
-- Public package publication also requires an explicit repository license and
-  a final decision about PlugData package/store layout.
+- Project-owned source is available under the root MIT License. Public package
+  publication still requires complete notices for the exact payload and a final
+  decision about PlugData package/store layout.
 
 ## Later creative layer
 

@@ -385,3 +385,10 @@ For Step 4, start the simulator with `--with-arc 4` and open
 physical acceptance against the lease candidate. It uses separate loopback
 ports so it can later run beside the two-Grid workbench, and mirrors normalized
 encoder events to the loopback-only `tools/live_arc_events.py` observer.
+
+## License
+
+Project-owned PlugData Monome Devices source is licensed under the
+[MIT License](LICENSE), copyright 2025-2026 Peter Kassel. SerialOSC, PlugData,
+runtime libraries, and other third-party components retain their own terms; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
